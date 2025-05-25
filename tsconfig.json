@@ -1,0 +1,41 @@
+{
+    "compilerOptions": {
+        "jsx": "react-jsx",
+        "target": "ESNext",
+        "module": "ESNext",
+        "lib": [
+            "ESNext",
+            "DOM"
+        ],
+        "moduleResolution": "Node",
+        "strict": true,
+        "esModuleInterop": true,
+        "skipLibCheck": true,
+        "forceConsistentCasingInFileNames": true,
+        "baseUrl": ".",
+        "paths": {
+            "@myorg/dto": [
+                "packages/dto/src"
+            ]
+        },
+        "resolveJsonModule": true,
+        "isolatedModules": true,
+        "noEmit": true
+    },
+    "exclude": [
+        "node_modules",
+        "dist",
+        "build"
+    ],
+    "references": [
+        {
+            "path": "packages/dto/tsconfig.json"
+        },
+        {
+            "path": "apps/frontend/tsconfig.json"
+        },
+        {
+            "path": "apps/backend/tsconfig.json"
+        }
+    ]
+}
