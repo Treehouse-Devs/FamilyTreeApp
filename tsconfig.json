@@ -22,6 +22,10 @@
         "isolatedModules": true,
         "noEmit": true
     },
+    "include": [
+        "scripts",
+        "utils"
+    ],
     "exclude": [
         "node_modules",
         "dist",
