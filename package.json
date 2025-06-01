@@ -10,7 +10,8 @@
     "dev": "turbo run dev",
     "build": "turbo run build",
     "lint": "eslint . --ext .ts,.tsx,.js,.jsx",
-    "lint:fix": "eslint . --ext .ts,.tsx,.js,.jsx --fix"
+    "lint:fix": "eslint . --ext .ts,.tsx,.js,.jsx --fix",
+    "tsc": "tsc"
   },
   "license": "MIT",
   "devDependencies": {
@@ -28,6 +29,7 @@
     "eslint-plugin-unused-imports": "^4.1.4",
     "gpt-tokenizer": "^2.9.0",
     "openai": "^4.10.0",
+    "ts-node": "^10.9.2",
     "turbo": "^2.5.3"
   },
   "private": true

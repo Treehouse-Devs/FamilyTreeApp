@@ -20,17 +20,8 @@
         },
         "resolveJsonModule": true,
         "isolatedModules": true,
-        "noEmit": true
+        "outDir": "dist"
     },
-    "include": [
-        "scripts",
-        "utils"
-    ],
-    "exclude": [
-        "node_modules",
-        "dist",
-        "build"
-    ],
     "references": [
         {
             "path": "packages/dto/tsconfig.json"

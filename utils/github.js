@@ -14,7 +14,7 @@ export async function getChangedFiles() {
   }));
 }
 
-export async function postReviewComment(body: string) {
+export async function postReviewComment(body) {
   const { owner, repo } = getRepoInfo();
   const prNumber = getPrNumber();
   await octokit.issues.createComment({ owner, repo, issue_number: prNumber, body });
@@ -27,7 +27,7 @@ function getRepoInfo() {
   return { owner, repo };
 }
 
-function getPrNumber(): number {
+function getPrNumber() {
   const ref = process.env['GITHUB_REF'];
   const match = ref?.match(/refs\/pull\/(\d+)\//);
   if (!match) throw new Error('Could not determine PR number from GITHUB_REF');

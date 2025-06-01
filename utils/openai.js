@@ -9,7 +9,7 @@ const openai = new OpenAI({
   apiKey,
 });
 
-export async function reviewBatch(prompt: string): Promise<string> {
+export async function reviewBatch(prompt) {
   const model = process.env['OPENAI_MODEL'] || 'gpt-4o-mini'; // Note: Correct model name for GPT-4 mini
   const response = await openai.chat.completions.create({
     model,

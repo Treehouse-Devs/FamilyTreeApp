@@ -6,7 +6,10 @@
     "composite": true
   },
   "include": [
-    "src"
+    "app",
+    "components",
+    "hooks",
+    "utils"
   ],
   "exclude": [
     "node_modules"

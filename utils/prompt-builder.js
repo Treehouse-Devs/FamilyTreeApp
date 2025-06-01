@@ -2,14 +2,9 @@ import { encode } from 'gpt-tokenizer';
 
 const MAX_TOKENS_PER_BATCH = 3000;
 
-interface Batch {
-  filenames: string[];
-  prompt: string;
-}
-
-export function buildPrompts(files: { filename: string; patch: string }[]): Batch[] {
-  const batches: Batch[] = [];
-  let current: Batch = { filenames: [], prompt: '' };
+export function buildPrompts(files) {
+  const batches = [];
+  let current = { filenames: [], prompt: '' };
   let currentTokens = 0;
 
   for (const file of files) {

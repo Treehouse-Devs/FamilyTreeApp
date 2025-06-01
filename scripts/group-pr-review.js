@@ -1,12 +1,12 @@
-import { getChangedFiles, postReviewComment } from 'utils/github';
-import { reviewBatch } from 'utils/openai';
-import { buildPrompts } from '../utils/prompt-builder';
-import * as core from '@actions/core';
+const { getChangedFiles, postReviewComment } = require('../utils/github.js');
+const { reviewBatch } = require('../utils/openai.js');
+const { buildPrompts } = require('../utils/prompt-builder.js');
+const core = require('@actions/core');
 
 async function run() {
   try {
     const prNumber = process.env['GITHUB_REF_NAME'] || process.env['GITHUB_HEAD_REF'];
-    if (!prNumber) throw new Error('PR number not fWound');
+    if (!prNumber) throw new Error('PR number not found');
 
     const files = await getChangedFiles();
     if (files.length === 0) {
@@ -25,7 +25,7 @@ async function run() {
 
     await postReviewComment(aggregatedReview);
     core.info('AI review posted.');
-  } catch (error: any) {
+  } catch (error) {
     core.setFailed(error.message);
   }
 }
