@@ -3,13 +3,18 @@
   "compilerOptions": {
     "jsx": "react-native",
     "noEmit": false,
-    "composite": true
+    "composite": true,
+    "paths": {
+      "@/*": [
+        "./*"
+      ],
+      "tailwind.config": [
+        "./tailwind.config.js"
+      ]
+    }
   },
   "include": [
-    "app",
-    "components",
-    "hooks",
-    "utils"
+    "./**/*"
   ],
   "exclude": [
     "node_modules"

@@ -4,20 +4,34 @@
   "main": "index.ts",
   "scripts": {
     "start": "expo start",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
-    "web": "expo start --web"
+    "android": "DARK_MODE=media expo start --android",
+    "ios": "DARK_MODE=media expo start --ios",
+    "web": "DARK_MODE=media expo start --web"
   },
   "dependencies": {
+    "@gluestack-ui/icon": "^0.1.27",
+    "@gluestack-ui/nativewind-utils": "^1.0.26",
+    "@gluestack-ui/overlay": "^0.1.22",
+    "@gluestack-ui/toast": "^1.0.9",
     "@myorg/dto": "*",
+    "babel-plugin-module-resolver": "^5.0.2",
     "expo": "~53.0.9",
     "expo-status-bar": "~2.2.3",
+    "gluestack-ui": "^0.7.22",
+    "nativewind": "^4.1.23",
     "react": "19.0.0",
-    "react-native": "0.79.2"
+    "react-native": "0.79.2",
+    "react-native-css-interop": "^0.1.22",
+    "react-native-reanimated": "^3.18.0",
+    "react-native-safe-area-context": "^5.4.1",
+    "react-native-svg": "15.2.0",
+    "tailwindcss": "3.4.17"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
+    "@gluestack-ui/nativewind-utils": "^1.0.26",
     "@types/react": "~19.0.10",
+    "jscodeshift": "0.15.2",
     "typescript": "~5.8.3"
   },
   "private": true
