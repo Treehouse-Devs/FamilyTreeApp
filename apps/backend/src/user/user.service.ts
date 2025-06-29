@@ -8,6 +8,7 @@ import {
 import { RegisterUserDto } from "./dtos/register-user.dto";
 import * as firebaseAdmin from "firebase-admin";
 import { LoginUserDto } from "./dtos/login-user.dto";
+import { GoogleAuthDto } from "./dtos/google-auth.dto";
 import { HttpRequestService } from "@app/http-request";
 
 @Injectable()
@@ -44,6 +45,55 @@ export class UserService {
         throw new UnauthorizedException("Invalid credentials.");
       } else {
         throw new InternalServerErrorException(error.message);
+      }
+    }
+  }
+
+  async googleAuth(googleAuthDto: GoogleAuthDto) {
+    const { idToken } = googleAuthDto;
+
+    try {
+      const decodedToken = await firebaseAdmin.auth().verifyIdToken(idToken);
+    
+      let userRecord;
+      try {
+        if (!decodedToken.email) {
+          throw new UnauthorizedException("Email not found in Google token");
+        }
+        userRecord = await firebaseAdmin.auth().getUserByEmail(decodedToken.email);
+      } catch (error: any) {
+        if (error.code === 'auth/user-not-found') {
+          if (!decodedToken.email) {
+            throw new UnauthorizedException("Email not found in Google token");
+          }
+          userRecord = await firebaseAdmin.auth().createUser({
+            email: decodedToken.email,
+            displayName: decodedToken.name,
+            photoURL: decodedToken.picture,
+            emailVerified: decodedToken.email_verified,
+          });
+        } else {
+          throw error;
+        }
+      }
+
+      const customToken = await firebaseAdmin.auth().createCustomToken(userRecord.uid);
+
+      return {
+        user: {
+          uid: userRecord.uid,
+          email: userRecord.email,
+          displayName: userRecord.displayName,
+          photoURL: userRecord.photoURL,
+        },
+        customToken,
+        message: "Google authentication successful",
+      };
+    } catch (error: any) {
+      if (error.code === 'auth/invalid-id-token') {
+        throw new UnauthorizedException("Invalid Google ID token");
+      } else {
+        throw new InternalServerErrorException("Google authentication failed");
       }
     }
   }

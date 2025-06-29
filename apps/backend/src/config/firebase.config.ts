@@ -1,8 +1,15 @@
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
+import { getAuth } from "firebase/auth";
+import * as admin from "firebase-admin";
 import * as dotenv from "dotenv";
+import * as fs from "fs";
+import * as path from "path";
 
 dotenv.config();
+
+const firebaseServiceAccountPath = path.join(__dirname, '../../firebase.json');
+const firebaseServiceAccount = JSON.parse(fs.readFileSync(firebaseServiceAccountPath, 'utf8'));
 
 const firebaseConfig = {
   apiKey: process.env.FB_API_KEY,
@@ -16,3 +23,16 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
+const auth = getAuth(app);
+
+if (!admin.apps.length) {
+  admin.initializeApp({
+    credential: admin.credential.cert({
+      projectId: firebaseServiceAccount.project_id,
+      clientEmail: firebaseServiceAccount.client_email,
+      privateKey: firebaseServiceAccount.private_key,
+    }),
+  });
+}
+
+export { app, analytics, auth, admin };
