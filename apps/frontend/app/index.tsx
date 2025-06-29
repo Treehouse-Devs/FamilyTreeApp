@@ -1,16 +1,24 @@
-import { router } from 'expo-router'
+import { Redirect, router } from 'expo-router'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { StyleSheet, View, Text, TouchableOpacity } from 'react-native'
+import { useApp } from '@/hooks/useApp'
 
 export default function WelcomeScreen() {
   const { t } = useTranslation()
+  const { setHasSeenWelcome, hasSeenWelcome } = useApp()
+
+  if (hasSeenWelcome) {
+    return <Redirect href="/signin" />
+  }
 
   const handleSignIn = () => {
+    setHasSeenWelcome(true)
     router.push('/signin')
   }
 
   const handleSignUp = () => {
+    setHasSeenWelcome(true)
     router.push('/signup')
   }
 
