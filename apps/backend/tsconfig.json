@@ -17,10 +17,19 @@
     "skipLibCheck": true,
     "strictBindCallApply": false,
     "forceConsistentCasingInFileNames": false,
-    "noFallthroughCasesInSwitch": false
+    "noFallthroughCasesInSwitch": false,
+    "paths": {
+      "@app/http-request": [
+        "libs/http-request/src"
+      ],
+      "@app/http-request/*": [
+        "libs/http-request/src/*"
+      ]
+    }
   },
   "include": [
-    "src"
+    "src",
+    "libs"
   ],
   "exclude": [
     "node_modules",
