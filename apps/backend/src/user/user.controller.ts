@@ -8,6 +8,7 @@ import {
 import { UserService } from "./user.service";
 import { RegisterUserDto } from "./dtos/register-user.dto";
 import { LoginUserDto } from "./dtos/login-user.dto";
+import { GoogleAuthDto } from "./dtos/google-auth.dto";
 
 @Controller("user")
 @UsePipes(new ValidationPipe({ transform: true }))
@@ -22,5 +23,10 @@ export class UserController {
   @Post("/login")
   async login(@Body() loginUserDto: LoginUserDto) {
     return this.userService.login(loginUserDto);
+  }
+
+  @Post("/google-auth")
+  async googleAuth(@Body() googleAuthDto: GoogleAuthDto) {
+    return this.userService.googleAuth(googleAuthDto);
   }
 }
