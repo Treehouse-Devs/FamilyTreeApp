@@ -4,17 +4,27 @@
     "jsx": "react-native",
     "noEmit": false,
     "composite": true,
+    "baseUrl": ".",
     "paths": {
-      "@/*": [
-        "./*"
-      ],
+      "@/assets/*": ["./assets/*"],
+      "@/components/*": ["./components/*"],
+      "@/hooks/*": ["./hooks/*"],
+      "@/i18n/*": ["./i18n/*"],
+      "@/lib/*": ["./lib/*"],
+      "@/navigation/*": ["./navigation/*"],
+      "@/screens/*": ["./screens/*"],
+      "@/services/*": ["./services/*"],
+      "@/store/*": ["./store/*"],
+      "@/tests/*": ["./tests/*"],
+      "@/utils/*": ["./utils/*"],
       "tailwind.config": [
         "./tailwind.config.js"
       ]
-    }
+    },
   },
   "include": [
-    "./**/*"
+    "./**/*",
+    "./i18n/resources/**/*.json"
   ],
   "exclude": [
     "node_modules"

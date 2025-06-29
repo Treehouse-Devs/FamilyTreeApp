@@ -1,9 +1,10 @@
 {
   "expo": {
-    "name": "frontend",
-    "slug": "frontend",
+    "name": "Family Tree",
+    "slug": "family-tree",
     "version": "1.0.0",
     "orientation": "portrait",
+    "scheme": "familytree",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
@@ -24,6 +25,10 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "plugins": [
+      "expo-localization",
+      "expo-router"
+    ]
   }
 }
