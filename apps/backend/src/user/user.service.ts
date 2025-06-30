@@ -11,10 +11,19 @@ import { LoginUserDto } from "./dtos/login-user.dto";
 import { GoogleAuthDto } from "./dtos/google-auth.dto";
 import { HttpRequestService } from "@app/http-request";
 import { ResetPasswordDto } from "./dtos/reset-password.dto";
+import { v4 as uuidv4 } from "uuid";
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class UserService {
-  constructor(private httpRequestService: HttpRequestService) {}
+  private refreshTokensStore: {
+    [userId: string]: { token: string; expiredAt: number }
+  } = {};
+
+  constructor(
+    private httpRequestService: HttpRequestService,
+    private jwtService: JwtService,
+  ) {}
   async signUp(registerUserDto: RegisterUserDto) {
     const { name, email, password } = registerUserDto;
     try {
@@ -34,15 +43,47 @@ export class UserService {
     }
   }
 
+  private createAndStoreRefreshToken(userRecord: any) {
+    const refreshToken = uuidv4();
+    const refreshTokenExpiredAt = Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7; // 7 days
+    this.refreshTokensStore[userRecord.uid] = { token: refreshToken, expiredAt: refreshTokenExpiredAt };
+    return { refreshToken, refreshTokenExpiredAt };
+  }
+
+  private createJwtTokens(userRecord: any) {
+    const payload = {
+      uid: userRecord.uid,
+      email: userRecord.email,
+      displayName: userRecord.displayName,
+    };
+    const accessToken = this.jwtService.sign(payload);
+    const expiredAt = Math.floor(Date.now() / 1000) + 3600;
+    const { refreshToken, refreshTokenExpiredAt } = this.createAndStoreRefreshToken(userRecord);
+    return { accessToken, expiredAt, refreshToken, refreshTokenExpiredAt };
+  }
+
   async login(loginUserDto: LoginUserDto) {
     const { email, password } = loginUserDto;
 
     try {
-      const { idToken, refreshToken, expiresIn } =
-        await this.signInWithEmailAndPassword(email, password);
-      return { idToken, refreshToken, expiresIn };
+      await this.signInWithEmailAndPassword(email, password);
+      const userRecord = await firebaseAdmin.auth().getUserByEmail(email);
+      const { accessToken, expiredAt, refreshToken, refreshTokenExpiredAt } = this.createJwtTokens(userRecord);
+      return {
+        user: {
+          uid: userRecord.uid,
+          email: userRecord.email,
+          displayName: userRecord.displayName,
+          providerData: userRecord.providerData,
+        },
+        accessToken,
+        refreshToken,
+        refreshTokenExpiredAt,
+        expiredAt,
+        message: "Login successful",
+      };
     } catch (error: any) {
-      if (error.message.includes("INVALID_LOGIN_CREDENTIALS")) {
+      if (error.message && error.message.includes("INVALID_LOGIN_CREDENTIALS")) {
         throw new UnauthorizedException("Invalid credentials.");
       } else {
         throw new InternalServerErrorException(error.message);
@@ -70,24 +111,24 @@ export class UserService {
           userRecord = await firebaseAdmin.auth().createUser({
             email: decodedToken.email,
             displayName: decodedToken.name,
-            photoURL: decodedToken.picture,
-            emailVerified: decodedToken.email_verified,
           });
         } else {
           throw error;
         }
       }
 
-      const customToken = await firebaseAdmin.auth().createCustomToken(userRecord.uid);
-
+      const { accessToken, expiredAt, refreshToken, refreshTokenExpiredAt } = this.createJwtTokens(userRecord);
       return {
         user: {
           uid: userRecord.uid,
           email: userRecord.email,
           displayName: userRecord.displayName,
-          photoURL: userRecord.photoURL,
+          providerData: userRecord.providerData,
         },
-        customToken,
+        accessToken,
+        refreshToken,
+        refreshTokenExpiredAt,
+        expiredAt,
         message: "Google authentication successful",
       };
     } catch (error: any) {
@@ -125,5 +166,34 @@ export class UserService {
         throw new InternalServerErrorException("Failed to reset password");
       }
     }
+  }
+
+  async refreshToken(uid: string, refreshToken: string) {
+    const stored = this.refreshTokensStore[uid];
+    const now = Math.floor(Date.now() / 1000);
+
+    if (!stored || stored.token !== refreshToken) {
+      throw new UnauthorizedException('Invalid refresh token');
+    }
+
+    if (stored.expiredAt < now) {
+      delete this.refreshTokensStore[uid];
+      throw new UnauthorizedException('Refresh token expired');
+    }
+
+    const userRecord = await firebaseAdmin.auth().getUser(uid);
+    const { accessToken, expiredAt } = this.createJwtTokens(userRecord);
+    return {
+      accessToken,
+      expiredAt,
+      refreshTokenExpiredAt: stored.expiredAt,
+      user: {
+        uid: userRecord.uid,
+        email: userRecord.email,
+        displayName: userRecord.displayName,
+        providerData: userRecord.providerData,
+      },
+      message: 'Token refreshed successfully',
+    };
   }
 }
