@@ -1,5 +1,4 @@
 import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
 import { getAuth } from "firebase/auth";
 import * as admin from "firebase-admin";
 import * as dotenv from "dotenv";
@@ -8,7 +7,7 @@ import * as path from "path";
 
 dotenv.config();
 
-const firebaseServiceAccountPath = path.join(__dirname, '../../firebase.json');
+const firebaseServiceAccountPath = path.join(__dirname, '../firebase.json');
 const firebaseServiceAccount = JSON.parse(fs.readFileSync(firebaseServiceAccountPath, 'utf8'));
 
 const firebaseConfig = {
@@ -22,7 +21,6 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
 const auth = getAuth(app);
 
 if (!admin.apps.length) {
@@ -35,4 +33,4 @@ if (!admin.apps.length) {
   });
 }
 
-export { app, analytics, auth, admin };
+export { app, auth, admin };

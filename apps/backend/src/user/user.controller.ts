@@ -4,12 +4,15 @@ import {
   Post,
   UsePipes,
   ValidationPipe,
+  UseGuards,
 } from "@nestjs/common";
 import { UserService } from "./user.service";
 import { RegisterUserDto } from "./dtos/register-user.dto";
 import { LoginUserDto } from "./dtos/login-user.dto";
 import { GoogleAuthDto } from "./dtos/google-auth.dto";
 import { ResetPasswordDto } from "./dtos/reset-password.dto";
+import { JwtAuthGuard } from "./jwt-auth.guard";
+import { GetUser } from "./get-user.decorator";
 
 @Controller("user")
 @UsePipes(new ValidationPipe({ transform: true }))
@@ -32,8 +35,9 @@ export class UserController {
   }
 
   @Post("/reset-password")
-  async resetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
-    return this.userService.resetPassword(resetPasswordDto);
+  @UseGuards(JwtAuthGuard)
+  async resetPassword(@Body() resetPasswordDto: ResetPasswordDto, @GetUser() user: any) {
+    return this.userService.resetPassword({ ...resetPasswordDto, email: user.email });
   }
 
   @Post("/refresh-token")
