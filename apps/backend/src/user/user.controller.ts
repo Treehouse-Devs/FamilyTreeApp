@@ -35,4 +35,9 @@ export class UserController {
   async resetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
     return this.userService.resetPassword(resetPasswordDto);
   }
+
+  @Post("/refresh-token")
+  async refreshToken(@Body() body: { uid: string; refreshToken: string }) {
+    return this.userService.refreshToken(body.uid, body.refreshToken);
+  }
 }
