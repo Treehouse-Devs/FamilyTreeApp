@@ -4,6 +4,8 @@ import { UserController } from "./user.controller";
 import { HttpRequestModule } from "@app/http-request";
 import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from './jwt-auth.guard';
+import { FirebaseService } from './firebase.service';
+import { TokenService } from './token.service';
 
 @Module({
   imports: [
@@ -14,6 +16,7 @@ import { JwtStrategy } from './jwt-auth.guard';
     }),
   ],
   controllers: [UserController],
-  providers: [UserService, JwtStrategy],
+  providers: [UserService, JwtStrategy, FirebaseService, TokenService],
+  exports: [UserService],
 })
 export class UserModule {}
