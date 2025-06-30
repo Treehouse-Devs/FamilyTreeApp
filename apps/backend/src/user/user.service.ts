@@ -10,7 +10,6 @@ import * as firebaseAdmin from "firebase-admin";
 import { LoginUserDto } from "./dtos/login-user.dto";
 import { GoogleAuthDto } from "./dtos/google-auth.dto";
 import { HttpRequestService } from "@app/http-request";
-import { ResetPasswordDto } from "./dtos/reset-password.dto";
 import { v4 as uuidv4 } from "uuid";
 import { JwtService } from '@nestjs/jwt';
 
@@ -153,8 +152,7 @@ export class UserService {
     }
   }
 
-  async resetPassword(resetPasswordDto: ResetPasswordDto) {
-    const { email, newPassword } = resetPasswordDto;
+  async resetPassword({ email, newPassword }: { email: string; newPassword: string }) {
     try {
       const userRecord = await firebaseAdmin.auth().getUserByEmail(email);
       await firebaseAdmin.auth().updateUser(userRecord.uid, { password: newPassword });
