@@ -5,6 +5,7 @@ import {
   UsePipes,
   ValidationPipe,
   UseGuards,
+  Delete,
 } from "@nestjs/common";
 import { UserService } from "./user.service";
 import { RegisterUserDto } from "./dtos/register-user.dto";
@@ -43,5 +44,11 @@ export class UserController {
   @Post("/refresh-token")
   async refreshToken(@Body() body: { uid: string; refreshToken: string }) {
     return this.userService.refreshToken(body.uid, body.refreshToken);
+  }
+
+  @Delete()
+  @UseGuards(JwtAuthGuard)
+  async deleteUser(@GetUser() user: any) {
+    return this.userService.deleteUser(user.uid);
   }
 }

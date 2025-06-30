@@ -194,4 +194,18 @@ export class UserService {
       message: 'Token refreshed successfully',
     };
   }
+
+  async deleteUser(uid: string) {
+    try {
+      await firebaseAdmin.auth().deleteUser(uid);
+      delete this.refreshTokensStore[uid];
+      return { message: 'User deleted successfully' };
+    } catch (error: any) {
+      if (error.code === 'auth/user-not-found') {
+        throw new NotFoundException('User not found');
+      } else {
+        throw new InternalServerErrorException('Failed to delete user');
+      }
+    }
+  }
 }
