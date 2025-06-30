@@ -10,6 +10,7 @@ import * as firebaseAdmin from "firebase-admin";
 import { LoginUserDto } from "./dtos/login-user.dto";
 import { GoogleAuthDto } from "./dtos/google-auth.dto";
 import { HttpRequestService } from "@app/http-request";
+import { ResetPasswordDto } from "./dtos/reset-password.dto";
 
 @Injectable()
 export class UserService {
@@ -108,6 +109,21 @@ export class UserService {
       });
     } catch (error: any) {
       throw error?.data?.error;
+    }
+  }
+
+  async resetPassword(resetPasswordDto: ResetPasswordDto) {
+    const { email, newPassword } = resetPasswordDto;
+    try {
+      const userRecord = await firebaseAdmin.auth().getUserByEmail(email);
+      await firebaseAdmin.auth().updateUser(userRecord.uid, { password: newPassword });
+      return { message: "Password reset successful" };
+    } catch (error: any) {
+      if (error.code === "auth/user-not-found") {
+        throw new NotFoundException("User not found");
+      } else {
+        throw new InternalServerErrorException("Failed to reset password");
+      }
     }
   }
 }
