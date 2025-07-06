@@ -12,7 +12,8 @@
     "experimentalDecorators": true,
     "allowSyntheticDefaultImports": true,
     "sourceMap": true,
-    "baseUrl": "./",
+    "baseUrl": ".",
+    "rootDir": "../../",
     "incremental": true,
     "skipLibCheck": true,
     "strictBindCallApply": false,
@@ -24,13 +25,20 @@
       ],
       "@app/http-request/*": [
         "libs/http-request/src/*"
-      ]
+      ],
+      "@myorg/dto/*": [
+        "../../packages/dto/src/*"
+      ] 
     }
   },
   "include": [
     "src",
-    "libs"
-, "../../packages/dto/src/user/google-auth.dto.ts", "../../packages/dto/src/user/login-user.dto.ts", "../../packages/dto/src/user/register-user.dto.ts", "../../packages/dto/src/user/reset-password.dto.ts"  ],
+    "libs", 
+    "../../packages/dto/src/user/google-auth.dto.ts", 
+    "../../packages/dto/src/user/login-user.dto.ts", 
+    "../../packages/dto/src/user/register-user.dto.ts", 
+    "../../packages/dto/src/user/reset-password.dto.ts"  
+  ],
   "exclude": [
     "node_modules",
     "dist"
