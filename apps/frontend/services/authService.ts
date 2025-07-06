@@ -7,4 +7,18 @@ export class AuthService extends BaseService {
       { email, password },
     )
   }
+
+  static async register(email: string, password: string, name: string) {
+    return this.post(
+      '/auth/register',
+      { email, password, name },
+    )
+  }
+
+  static async resetPassword(email: string) {
+    return this.post(
+      '/auth/reset-password',
+      { email },
+    )
+  }
 }
