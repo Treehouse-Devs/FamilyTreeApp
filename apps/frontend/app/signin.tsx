@@ -1,14 +1,14 @@
 import React from 'react'
-import { View, Button, Alert, Text } from 'react-native'
+import { View, Button, Alert, Text, StyleSheet } from 'react-native'
 import { Controller, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { loginSchema, LoginSchema } from '../validator/auth/authValidation'
-import { Input } from '@/components/Input'
 import { useTranslation } from 'react-i18next'
 import { AuthService } from '@/services/authService'
 import { useApi } from '@/hooks/useApi'
 import { router } from 'expo-router'
 import { useAuth } from '@/hooks/useAuth'
+import { Input, InputField } from '@/components/ui/input'
 
 export default function LoginScreen() {
   const { t } = useTranslation()
@@ -49,35 +49,53 @@ export default function LoginScreen() {
   }
 
   return (
-    <View style={{ padding: 20 }}>
-      {error && <Text style={{ color: 'red' }}>{error.message}</Text>}
+    <View style={styles.container}>
+      {error && <Text style={styles.errorText}>{error.message}</Text>}
 
       <Controller
         control={control}
         name="email"
-        render={({ field: { onChange, value } }) => (
-          <Input
-            label={t('email')}
-            value={value}
-            onChangeText={onChange}
-            placeholder={t('emailPlaceholder')}
-            error={errors.email?.message}
-          />
+        render={({ field: { onChange, value, onBlur } }) => (
+          <View style={styles.inputContainer}>
+            <Input>
+              <InputField
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+                placeholder={t('emailPlaceholder')}
+                autoCapitalize="none"
+                keyboardType="email-address"
+                returnKeyType="next"
+                accessibilityLabel={t('email')}
+              />
+            </Input>
+            {errors.email?.message && (
+              <Text style={styles.errorTextField}>{errors.email.message}</Text>
+            )}
+          </View>
         )}
       />
 
       <Controller
         control={control}
         name="password"
-        render={({ field: { onChange, value } }) => (
-          <Input
-            label={t('password')}
-            value={value}
-            onChangeText={onChange}
-            secureTextEntry
-            placeholder={t('passwordPlaceholder')}
-            error={errors.password?.message}
-          />
+        render={({ field: { onChange, value, onBlur } }) => (
+          <View style={styles.inputContainer}>
+            <Input>
+              <InputField
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+                placeholder={t('passwordPlaceholder')}
+                secureTextEntry
+                returnKeyType="done"
+                accessibilityLabel={t('password')}
+              />
+            </Input>
+            {errors.password?.message && (
+              <Text style={styles.errorTextField}>{errors.password.message}</Text>
+            )}
+          </View>
         )}
       />
 
@@ -89,7 +107,7 @@ export default function LoginScreen() {
 
       <Text
         onPress={handleSignUp}
-        style={{ color: 'blue', marginTop: 10, textAlign: 'center' }}
+        style={styles.signupText}
         disabled={loading}
       >
         {t('signup')}
@@ -97,3 +115,32 @@ export default function LoginScreen() {
     </View>
   )
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+    backgroundColor: '#fff',
+  },
+  errorText: {
+    color: 'red',
+    marginBottom: 10,
+    textAlign: 'center',
+  },
+  errorTextField: {
+    color: 'red',
+    marginTop: 4,
+    alignSelf: 'flex-start',
+  },
+  signupText: {
+    color: 'blue',
+    marginTop: 10,
+    textAlign: 'center',
+  },
+  inputContainer: {
+    width: '100%',
+    marginBottom: 10,
+  },
+})
