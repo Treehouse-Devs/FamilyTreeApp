@@ -8,10 +8,10 @@ import {
   Delete,
 } from "@nestjs/common";
 import { UserService } from "./user.service";
-import { RegisterUserDto } from "./dtos/register-user.dto";
-import { LoginUserDto } from "./dtos/login-user.dto";
-import { GoogleAuthDto } from "./dtos/google-auth.dto";
-import { ResetPasswordDto } from "./dtos/reset-password.dto";
+import { RegisterUserDto } from "@myorg/dto/src/user/register-user.dto";
+import { LoginUserDto } from "@myorg/dto/src/user/login-user.dto";
+import { GoogleAuthDto } from "@myorg/dto/src/user/google-auth.dto";
+import { ResetPasswordDto } from "@myorg/dto/src/user/reset-password.dto";
 import { JwtAuthGuard } from "./jwt-auth.guard";
 import { GetUser } from "./get-user.decorator";
 

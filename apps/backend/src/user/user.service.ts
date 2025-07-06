@@ -4,9 +4,9 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from "@nestjs/common";
-import { RegisterUserDto } from "./dtos/register-user.dto";
-import { LoginUserDto } from "./dtos/login-user.dto";
-import { GoogleAuthDto } from "./dtos/google-auth.dto";
+import { RegisterUserDto } from "@myorg/dto/src/user/register-user.dto";
+import { LoginUserDto } from "@myorg/dto/src/user/login-user.dto";
+import { GoogleAuthDto } from "@myorg/dto/src/user/google-auth.dto";
 import { HttpRequestService } from "@app/http-request";
 import { FirebaseService } from './firebase.service';
 import { TokenService } from './token.service';
@@ -57,7 +57,7 @@ export class UserService {
 
     try {
       const decodedToken = await this.firebaseService.verifyIdToken(idToken);
-    
+
       let userRecord;
       try {
         if (!decodedToken.email) {

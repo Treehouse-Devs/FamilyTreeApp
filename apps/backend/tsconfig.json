@@ -30,7 +30,7 @@
   "include": [
     "src",
     "libs"
-  ],
+, "../../packages/dto/src/user/google-auth.dto.ts", "../../packages/dto/src/user/login-user.dto.ts", "../../packages/dto/src/user/register-user.dto.ts", "../../packages/dto/src/user/reset-password.dto.ts"  ],
   "exclude": [
     "node_modules",
     "dist"
