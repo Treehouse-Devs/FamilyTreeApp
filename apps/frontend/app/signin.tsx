@@ -10,7 +10,7 @@ import { router } from 'expo-router'
 import { useAuth } from '@/hooks/useAuth'
 import { Input, InputField } from '@/components/ui/input'
 
-export default function LoginScreen() {
+export default function SignInScreen() {
   const { t } = useTranslation()
   const {
     control,
