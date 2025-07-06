@@ -14,13 +14,13 @@ export type StoreState = HydrationState & AppSlice & AuthSlice
 
 export const useStore = create<StoreState>()(
   persist(
-    (...a) => ({
-      ...createAuthSlice(...a),
-      ...createAppSlice(...a),
+    (set, ...a) => ({
+      ...createAuthSlice(set, ...a),
+      ...createAppSlice(set, ...a),
       // Hydration state
       hydrated: false,
       setHydrated: (state: boolean) => {
-        a[0]({ hydrated: state })
+        set(prevState => ({ ...prevState, hydrated: state }))
       },
     }),
     {

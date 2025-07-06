@@ -8,6 +8,10 @@ const api = axios.create({
   timeout: TIMEOUT,
 })
 
+const handleError = (error: unknown) => {
+  return error instanceof Error ? error : new Error(typeof error === 'string' ? error : JSON.stringify(error))
+}
+
 // Optional: Interceptors (auth, error logging, etc.)
 api.interceptors.request.use(
   (config) => {
@@ -16,18 +20,14 @@ api.interceptors.request.use(
     // if (token) config.headers.Authorization = `Bearer ${token}`;
     return config
   },
-  error => Promise.reject(
-    error instanceof Error ? error : new Error(typeof error === 'string' ? error : JSON.stringify(error)),
-  ),
+  error => Promise.reject(handleError(error)),
 )
 
 api.interceptors.response.use(
   response => response,
   (error) => {
     // handle global error messages here
-    return Promise.reject(
-      error instanceof Error ? error : new Error(typeof error === 'string' ? error : JSON.stringify(error)),
-    )
+    return Promise.reject(handleError(error))
   },
 )
 

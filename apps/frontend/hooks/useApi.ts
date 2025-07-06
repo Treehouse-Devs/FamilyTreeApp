@@ -14,6 +14,7 @@ export function useApi<TService extends BaseService, TResult = unknown>(serviceC
   const api = useMemo(() => {
     const handler: ProxyHandler<TService> = {
       get(target, prop, receiver) {
+        console.log(`[useApi.${String(prop)}] processing API...`)
         const orig = target[prop as keyof TService]
         if (typeof orig !== 'function') return orig
         return async (...args: unknown[]): Promise<TResult> => {
@@ -26,6 +27,7 @@ export function useApi<TService extends BaseService, TResult = unknown>(serviceC
             return data
           }
           catch (err: unknown) {
+            console.error(`[useApi.${String(prop)}] API Error:`, err)
             setError(err instanceof Error ? err : new Error(String(err)))
             setLoading(false)
             return null as unknown as TResult
