@@ -10,6 +10,7 @@ import { GoogleAuthDto } from "@myorg/dto/src/user/google-auth.dto";
 import { HttpRequestService } from "@app/http-request";
 import { FirebaseService } from './firebase.service';
 import { TokenService } from './token.service';
+import { UserFromToken } from "./user.types";
 
 @Injectable()
 export class UserService {
@@ -29,7 +30,13 @@ export class UserService {
     try {
       await this.signInWithEmailAndPassword(email, password);
       const userRecord = await this.firebaseService.getUserByEmail(email);
-      const { accessToken, expiredAt, refreshToken, refreshTokenExpiredAt } = this.tokenService.createJwtTokens(userRecord);
+      const tokenPayload: UserFromToken = {
+        email: userRecord.email || '',
+        uid: userRecord.uid,
+        displayName: userRecord.displayName
+      }
+
+      const { accessToken, expiredAt, refreshToken, refreshTokenExpiredAt } = this.tokenService.createJwtTokens(tokenPayload);
       return {
         user: {
           uid: userRecord.uid,
@@ -78,7 +85,13 @@ export class UserService {
         }
       }
 
-      const { accessToken, expiredAt, refreshToken, refreshTokenExpiredAt } = this.tokenService.createJwtTokens(userRecord);
+      const tokenPayload: UserFromToken = {
+        email: userRecord.email || '',
+        uid: userRecord.uid,
+        displayName: userRecord.displayName
+      }
+
+      const { accessToken, expiredAt, refreshToken, refreshTokenExpiredAt } = this.tokenService.createJwtTokens(tokenPayload);
       return {
         user: {
           uid: userRecord.uid,
@@ -131,7 +144,13 @@ export class UserService {
   async refreshToken(uid: string, refreshToken: string) {
     const stored = this.tokenService.validateRefreshToken(uid, refreshToken);
     const userRecord = await this.firebaseService.getUser(uid);
-    const { accessToken, expiredAt } = this.tokenService.createJwtTokens(userRecord);
+    const tokenPayload: UserFromToken = {
+      email: userRecord.email || '',
+      uid: userRecord.uid,
+      displayName: userRecord.displayName
+    }
+
+    const { accessToken, expiredAt } = this.tokenService.createJwtTokens(tokenPayload);
     return {
       accessToken,
       expiredAt,

@@ -1,6 +1,7 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { v4 as uuidv4 } from 'uuid';
+import { UserFromToken } from './user.types';
 
 @Injectable()
 export class TokenService {
@@ -17,7 +18,7 @@ export class TokenService {
     return { refreshToken, refreshTokenExpiredAt };
   }
 
-  createJwtTokens(userRecord: any) {
+  createJwtTokens(userRecord: UserFromToken) {
     const payload = {
       uid: userRecord.uid,
       email: userRecord.email,

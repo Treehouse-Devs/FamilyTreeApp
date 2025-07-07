@@ -1,11 +1,17 @@
 import { Injectable, UnauthorizedException, NotFoundException, InternalServerErrorException, ConflictException } from '@nestjs/common';
 import * as admin from 'firebase-admin';
 
+interface FirebaseUserData {
+  displayName: string;
+  email: string;
+  password?: string;
+}
+
 @Injectable()
 export class FirebaseService {
   async createUser({ displayName, email, password }: { displayName: string; email: string; password?: string }) {
     try {
-      const userData: any = { displayName, email };
+      const userData: FirebaseUserData = { displayName, email };
       if (password) userData.password = password;
       return await admin.auth().createUser(userData);
     } catch (error: unknown) {

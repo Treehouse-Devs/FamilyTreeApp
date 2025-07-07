@@ -4,6 +4,12 @@ import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import * as firebaseAdmin from "firebase-admin";
 
+interface JwtPayload {
+  email: string;
+  uid: string;
+  displayName?: string;
+}
+
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {}
 
@@ -16,7 +22,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  async validate(payload: any) {
+  async validate(payload: JwtPayload) {
     try {
       await firebaseAdmin.auth().getUserByEmail(payload.email);
       return payload;

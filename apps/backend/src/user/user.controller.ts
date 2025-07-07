@@ -14,6 +14,7 @@ import { GoogleAuthDto } from "@myorg/dto/src/user/google-auth.dto";
 import { ResetPasswordDto } from "@myorg/dto/src/user/reset-password.dto";
 import { JwtAuthGuard } from "./jwt-auth.guard";
 import { GetUser } from "./get-user.decorator";
+import { UserFromToken } from "./user.types";
 
 @Controller("user")
 @UsePipes(new ValidationPipe({ transform: true }))
@@ -37,7 +38,7 @@ export class UserController {
 
   @Post("/reset-password")
   @UseGuards(JwtAuthGuard)
-  async resetPassword(@Body() resetPasswordDto: ResetPasswordDto, @GetUser() user: any) {
+  async resetPassword(@Body() resetPasswordDto: ResetPasswordDto, @GetUser() user: UserFromToken) {
     return this.userService.resetPassword({ ...resetPasswordDto, email: user.email });
   }
 
@@ -48,7 +49,7 @@ export class UserController {
 
   @Delete()
   @UseGuards(JwtAuthGuard)
-  async deleteUser(@GetUser() user: any) {
+  async deleteUser(@GetUser() user: UserFromToken) {
     return this.userService.deleteUser(user.uid);
   }
 }
