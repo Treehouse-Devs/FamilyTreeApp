@@ -9,7 +9,7 @@ export class HttpRequestService {
         headers: { "Content-Type": "application/json" },
       });
       return response.data;
-    } catch (error: any) {
+    } catch (error: unknown) {
       // console.log("error", error);
       throw error.response;
     }
