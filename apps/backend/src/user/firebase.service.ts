@@ -8,7 +8,7 @@ export class FirebaseService {
       const userData: any = { displayName, email };
       if (password) userData.password = password;
       return await admin.auth().createUser(userData);
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error.errorInfo?.code === 'auth/email-already-exists') {
         throw new ConflictException(error.errorInfo.message);
       }
@@ -19,7 +19,7 @@ export class FirebaseService {
   async getUserByEmail(email: string) {
     try {
       return await admin.auth().getUserByEmail(email);
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error.code === 'auth/user-not-found') {
         throw new NotFoundException('User not found');
       }
@@ -30,7 +30,7 @@ export class FirebaseService {
   async getUser(uid: string) {
     try {
       return await admin.auth().getUser(uid);
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error.code === 'auth/user-not-found') {
         throw new NotFoundException('User not found');
       }
@@ -41,7 +41,7 @@ export class FirebaseService {
   async updateUserPassword(uid: string, password: string) {
     try {
       return await admin.auth().updateUser(uid, { password });
-    } catch (error: any) {
+    } catch (error: unknown) {
       throw new InternalServerErrorException('Failed to reset password');
     }
   }
@@ -49,7 +49,7 @@ export class FirebaseService {
   async deleteUser(uid: string) {
     try {
       await admin.auth().deleteUser(uid);
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error.code === 'auth/user-not-found') {
         throw new NotFoundException('User not found');
       }
@@ -60,7 +60,7 @@ export class FirebaseService {
   async verifyIdToken(idToken: string) {
     try {
       return await admin.auth().verifyIdToken(idToken);
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error.code === 'auth/invalid-id-token') {
         throw new UnauthorizedException('Invalid Google ID token');
       }

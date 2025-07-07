@@ -43,7 +43,7 @@ export class UserService {
         expiredAt,
         message: "Login successful",
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error.message && error.message.includes("INVALID_LOGIN_CREDENTIALS")) {
         throw new UnauthorizedException("Invalid credentials.");
       } else {
@@ -64,7 +64,7 @@ export class UserService {
           throw new UnauthorizedException("Email not found in Google token");
         }
         userRecord = await this.firebaseService.getUserByEmail(decodedToken.email);
-      } catch (error: any) {
+      } catch (error: unknown) {
         if (error.code === 'auth/user-not-found') {
           if (!decodedToken.email) {
             throw new UnauthorizedException("Email not found in Google token");
@@ -92,7 +92,7 @@ export class UserService {
         expiredAt,
         message: "Google authentication successful",
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error.code === 'auth/invalid-id-token') {
         throw new UnauthorizedException("Invalid Google ID token");
       } else {
@@ -109,7 +109,7 @@ export class UserService {
         password,
         returnSecureToken: true,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       throw error?.data?.error;
     }
   }
@@ -119,7 +119,7 @@ export class UserService {
       const userRecord = await this.firebaseService.getUserByEmail(email);
       await this.firebaseService.updateUserPassword(userRecord.uid, newPassword);
       return { message: "Password reset successful" };
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error.code === "auth/user-not-found") {
         throw new NotFoundException("User not found");
       } else {
@@ -151,7 +151,7 @@ export class UserService {
       await this.firebaseService.deleteUser(uid);
       this.tokenService.deleteRefreshToken(uid);
       return { message: 'User deleted successfully' };
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error.code === 'auth/user-not-found') {
         throw new NotFoundException('User not found');
       } else {
