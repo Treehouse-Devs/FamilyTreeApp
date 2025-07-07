@@ -3,7 +3,7 @@ import axios from "axios";
 
 @Injectable()
 export class HttpRequestService {
-  async sendPostRequest(url: string, data: any) {
+  async sendPostRequest<T = unknown>(url: string, data: T) {
     try {
       const response = await axios.post(url, data, {
         headers: { "Content-Type": "application/json" },
