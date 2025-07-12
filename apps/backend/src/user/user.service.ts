@@ -6,8 +6,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common'
 import { RegisterUserDto } from '@myorg/dto/src/user/register-user.dto'
-import { LoginUserDto } from '@myorg/dto/src/user/login-user.dto'
-import { LoginResponseDto } from '@myorg/dto/src/user/response/login-response.dto'
+import { LoginResponseDto, LoginUserDto } from '@myorg/dto/src/user/login-user.dto'
 import { GoogleAuthDto } from '@myorg/dto/src/user/google-auth.dto'
 import { HttpRequestService } from '@app/http-request'
 import { FirebaseService } from './firebase.service'
@@ -16,6 +15,7 @@ import { UserFromToken } from './user.types'
 import { FirebaseError } from 'firebase/app'
 import { UserRecord } from 'firebase-admin/lib/auth/user-record'
 import { AxiosResponse } from 'axios'
+import { MailerService } from 'src/mailer/mailer.service'
 
 @Injectable()
 export class UserService {
@@ -23,11 +23,32 @@ export class UserService {
     private httpRequestService: HttpRequestService,
     private firebaseService: FirebaseService,
     private tokenService: TokenService,
+    private mailerService: MailerService,
   ) {}
 
-  async signUp(registerUserDto: RegisterUserDto): Promise<UserRecord> {
+  async signUp(registerUserDto: RegisterUserDto): Promise<UserRecord | undefined> {
     const { name, email, password } = registerUserDto
-    return await this.firebaseService.createUser({ displayName: name, email, password })
+    let userRecord: UserRecord | null = null
+    try {
+      userRecord = await this.firebaseService.createUser({ displayName: name, email, password })
+      const link = await this.firebaseService.generateEmailVerificationLink(userRecord.email || '')
+      await this.mailerService.sendTemplateEmail(userRecord.email || '', 'Treely Email Verification', 'verify-email', {
+        displayName: userRecord.displayName || '',
+        link,
+      })
+      return userRecord
+    }
+    catch (error) {
+      if (userRecord?.uid) {
+        try {
+          await this.firebaseService.deleteUser(userRecord.uid)
+        }
+        catch (deleteError) {
+          console.error('Rollback failed:', deleteError)
+          throw error
+        }
+      }
+    }
   }
 
   async login(loginUserDto: LoginUserDto): Promise<LoginResponseDto> {

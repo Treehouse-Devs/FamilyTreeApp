@@ -7,6 +7,7 @@ import { typeOrmConfig } from "./config/database.config";
 import { UserModule } from "./user/user.module";
 import configuration from "./config/configuration";
 import { LoggerMiddleware } from "./logger/logger.middleware";
+import { MailerModule } from './mailer/mailer.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { LoggerMiddleware } from "./logger/logger.middleware";
     FamiliesModule,
     MembersModule,
     UserModule,
+    MailerModule,
   ],
   controllers: [],
   providers: [],

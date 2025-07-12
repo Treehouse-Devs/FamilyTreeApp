@@ -88,4 +88,40 @@ export class FirebaseService {
       throw new InternalServerErrorException('Google authentication failed')
     }
   }
+
+  async generateEmailVerificationLink(email: string): Promise<string> {
+    try {
+      // TODO: need to setup actionCodeSettings for deeplink
+      return admin.auth().generateEmailVerificationLink(email)
+    }
+    catch (error) {
+      if (error instanceof FirebaseError) {
+        throw new InternalServerErrorException(error.message)
+      }
+      else if (error instanceof Error) {
+        throw new InternalServerErrorException(error)
+      }
+      else {
+        throw new InternalServerErrorException('Unexpected error occured')
+      }
+    }
+  }
+
+  async generateResetPasswordLink(email: string): Promise<string> {
+    try {
+      // TODO: need to setup actionCodeSettings for deeplink
+      return admin.auth().generatePasswordResetLink(email)
+    }
+    catch (error) {
+      if (error instanceof FirebaseError) {
+        throw new InternalServerErrorException(error.message)
+      }
+      else if (error instanceof Error) {
+        throw new InternalServerErrorException(error)
+      }
+      else {
+        throw new InternalServerErrorException('Unexpected error occured')
+      }
+    }
+  }
 }
