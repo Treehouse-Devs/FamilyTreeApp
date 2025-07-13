@@ -1,21 +1,115 @@
-import { authMocks } from './data/auth'
+import { HttpMethod, MockConfig, RequestCondition } from '../types/mockDevTool'
+import { useMockDevToolStore } from '../store/mockDevToolStore'
 
-const DELAY_MS = 500 // Default delay for mock responses
+export class MockApi {
+  private static evaluateCondition(condition: RequestCondition, payload: object): boolean {
+    const value = this.getValueFromPath(payload, condition.field)
 
-const delay = (ms: number) =>
-  new Promise(resolve => setTimeout(resolve, ms))
-
-const mockResponseMap: Record<string, unknown> = {
-  ...authMocks,
-}
-
-export const mockApi = async (url: string, method: string): Promise<unknown> => {
-  await delay(DELAY_MS) // Simulate network delay
-  const mockKey = url.replace(/^\//, '') // remove leading slash
-  const response = mockResponseMap[mockKey]
-  if (!response) {
-    throw new Error(`No mock data found for ${method} ${url}`)
+    switch (condition.operator) {
+      case 'equals':
+        return String(value) === condition.value
+      case 'contains':
+        return String(value).includes(condition.value)
+      case 'startsWith':
+        return String(value).startsWith(condition.value)
+      case 'regex':
+        return new RegExp(condition.value).test(String(value))
+      default:
+        return false
+    }
   }
 
-  return response
+  private static getValueFromPath(obj: object, path: string): unknown {
+    const keys = path.split('.')
+    let current
+
+    for (const key of keys) {
+      if (current == null) return undefined
+      current = current[key]
+    }
+
+    return current
+  }
+
+  private static findMatchingConfig(
+    url: string,
+    method: HttpMethod,
+    payload?: object,
+  ): MockConfig | null {
+    const store = useMockDevToolStore.getState()
+    const endpoint = url.replace(/^\//, '') // remove leading slash
+    const candidates = store.mockConfigurations.filter(config =>
+      config.enabled
+      && config.endpoint === endpoint
+      && config.method === method,
+    )
+
+    if (candidates.length === 0) {
+      return null
+    }
+
+    // Find the first config with matching conditions, or the first without conditions
+    const configWithConditions = candidates.find((config) => {
+      if (!config.conditions || config.conditions.length === 0) {
+        return false
+      }
+
+      return config.conditions.some(condition => payload
+        && this.evaluateCondition(condition, payload),
+      )
+    })
+
+    if (configWithConditions) {
+      return configWithConditions
+    }
+
+    // Return the first config without conditions
+    return candidates.find(config => !config.conditions || config.conditions.length === 0) || candidates[0]
+  }
+
+  private static async simulateDelay(ms: number): Promise<void> {
+    if (ms > 0) {
+      return new Promise(resolve => setTimeout(resolve, ms))
+    }
+  }
+
+  static async handleRequest<T>(
+    url: string,
+    method: HttpMethod,
+    payload?: object,
+  ): Promise<T> {
+    const config = this.findMatchingConfig(url, method, payload)
+
+    if (!config) {
+      throw new Error(`No mock configuration found for ${method.toUpperCase()} ${url}`)
+    }
+
+    // Simulate network delay
+    await this.simulateDelay(config.delay)
+
+    // Handle error responses
+    if (config.responseType === 'error') {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      const errorMessage = config.responseData.message || 'Mock error'
+      const error = new Error(String(errorMessage))
+      // Simulate HTTP status codes by adding status to error
+
+      Object.assign(error, { status: config.statusCode, data: config.responseData })
+      throw error
+    }
+
+    // For conditional responses, check if we should use a specific condition's response
+    if (config.conditions && config.conditions.length > 0) {
+      const matchingCondition = config.conditions.find(condition => payload
+        && this.evaluateCondition(condition, payload),
+      )
+
+      if (matchingCondition) {
+        return matchingCondition.response as T
+      }
+    }
+
+    // Return the default response
+    return config.responseData as T
+  }
 }

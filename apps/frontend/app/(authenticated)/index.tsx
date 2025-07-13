@@ -1,28 +1,42 @@
-import { useTranslation } from 'react-i18next'
-import { StyleSheet, Text, View, TouchableOpacity } from 'react-native'
-import { useAuth } from '@/hooks/useAuth'
-import { router } from 'expo-router'
+import { StyleSheet, RefreshControl, View } from 'react-native'
+import FamilyList from '@/components/list'
+import { FamilyService } from '@/services/familiyService'
+import { useApi } from '@/hooks/useApi'
+import { useState } from 'react'
+import { FamilyNode } from '@/components/list.type'
 
 export default function App() {
-  const { t } = useTranslation()
-  const { logout } = useAuth()
+  const {
+    loading,
+    result,
+    api,
+  } = useApi<FamilyService, { families: FamilyNode[] }>(new FamilyService())
 
-  const handleLogout = () => {
+  const [refreshing, setRefreshing] = useState(false)
+
+  const onRefresh = async () => {
+    setRefreshing(true)
     try {
-      logout()
-      router.replace('/signin')
+      await api.fetchFamiliesList()
     }
     catch (error) {
-      console.error('Logout failed:', error)
+      console.error('Refresh failed:', error)
+    }
+    finally {
+      setRefreshing(false)
     }
   }
 
   return (
     <View style={styles.container}>
-      <Text style={styles.welcomeText}>{t('welcomeMessage')}</Text>
-      <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-        <Text style={styles.logoutButtonText}>Logout</Text>
-      </TouchableOpacity>
+      <FamilyList
+        data={result?.families || []}
+        onSelect={family => console.log('Selected family:', family)}
+        loading={loading}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={() => void onRefresh()} />
+        }
+      />
     </View>
   )
 }
@@ -30,23 +44,11 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
+    paddingInline: 16,
+    paddingTop: 20,
   },
   welcomeText: {
     fontSize: 18,
     marginBottom: 10,
-  },
-  logoutButton: {
-    backgroundColor: '#ff4444',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 5,
-  },
-  logoutButtonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: 'bold',
   },
 })
