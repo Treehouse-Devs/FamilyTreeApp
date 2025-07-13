@@ -7,7 +7,7 @@ import { loginSchema, LoginSchema } from '../../validator/auth/authValidation'
 import { useTranslation } from 'react-i18next'
 import { AuthService } from '@/services/authService'
 import { useApi } from '@/hooks/useApi'
-import { router } from 'expo-router'
+import { Redirect, router } from 'expo-router'
 import { useAuth } from '@/hooks/useAuth'
 import { FormControlErrorText, FormControlLabel, FormControlLabelText } from '@/components/ui/form-control'
 import { Input, InputField, InputIcon, InputSlot } from '@/components/ui/input'
@@ -34,15 +34,19 @@ export default function SignInScreen() {
     error,
     api,
   } = useApi(AuthService)
-  const { login } = useAuth()
+  const { login, isLoggedIn } = useAuth()
 
   const [showPassword, setShowPassword] = useState(false)
+
+  if (isLoggedIn) {
+    return <Redirect href="/(authenticated)" />
+  }
 
   const onSubmitSignIn = async (data: LoginSchema) => {
     const res = await api.login(data.email, data.password)
     if (res) {
       console.log('Login successful:', res)
-      login(res.user, res.token)
+      login(res.data.user, res.data.token)
       router.replace('/(authenticated)')
     } else if (error) {
       console.error('Login failed:', error)

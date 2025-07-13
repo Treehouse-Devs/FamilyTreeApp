@@ -1,4 +1,4 @@
-import { router } from 'expo-router'
+import { Redirect, router } from 'expo-router'
 import React, { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useApp } from '@/hooks/useApp'
@@ -12,9 +12,9 @@ export default function WelcomeScreen() {
   const { t } = useTranslation()
   const { setHasSeenWelcome, hasSeenWelcome } = useApp()
 
-  // if (hasSeenWelcome) {
-  //   return <Redirect href="/auth/signin" />
-  // }
+  if (hasSeenWelcome) {
+    return <Redirect href="/auth/signin" />
+  }
 
   useEffect(() => {
     console.log('WelcomeScreen mounted')

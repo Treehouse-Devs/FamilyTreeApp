@@ -39,5 +39,17 @@
   "loginErrorMessage": "Ada masalah saat proses masuk. Coba lagi ya!",
   "resetPasswordSuccess": "Berhasil mengatur ulang kata sandi",
   "resetPasswordFailed": "Gagal mengatur ulang kata sandi",
-  "resetPasswordErrorMessage": "Ada masalah saat mengatur ulang kata sandi. Coba lagi ya!"
+  "resetPasswordErrorMessage": "Ada masalah saat mengatur ulang kata sandi. Coba lagi ya!",
+  "search": "Cari",
+  "error": "Error",
+  "success": "Berhasil",
+  "addNewFamily": "Tambah Keluarga Baru",
+  "familyName": "Nama Keluarga",
+  "familyNamePlaceholder": "Masukkan nama keluarga",
+  "familyNameRequired": "Jangan lupa isi nama keluarganya ya",
+  "familyNameTooLong": "Nama keluarga terlalu panjang (maksimal 100 karakter)",
+  "createFamily": "Buat Keluarga",
+  "creating": "Sedang membuat...",
+  "familyCreatedSuccess": "Keluarga berhasil dibuat!",
+  "familyCreatedFailed": "Gagal membuat keluarga"
 }

@@ -22,6 +22,7 @@ export function useApi<TService extends BaseService, TResult = unknown>(serviceC
           setError(null)
           try {
             const data = await (orig as (...args: unknown[]) => Promise<TResult>).apply(target, args)
+            console.log(`[useApi.${String(prop)}] API response:`, data)
             setResult(data)
             setLoading(false)
             return data

@@ -39,5 +39,19 @@
   "loginErrorMessage": "There is something wrong when logging you in. Please try again.",
   "resetPasswordSuccess": "Password reset successful",
   "resetPasswordFailed": "Reset password failed",
-  "resetPasswordErrorMessage": "There was an error resetting your password. Please try again."
+  "resetPasswordErrorMessage": "There was an error resetting your password. Please try again.",
+  "search": "Search",
+  "error": "Error",
+  "success": "Success",
+  "addNewFamily": "Add New Family",
+  "familyName": "Family Name",
+  "familyNamePlaceholder": "Enter family name",
+  "familyNameRequired": "Please enter a family name",
+  "familyNameTooLong": "Family name is too long (maximum 100 characters)",
+  "createFamily": "Create Family",
+  "creating": "Creating...",
+  "save": "Save",
+  "cancel": "Cancel",
+  "familyCreatedSuccess": "Family created successfully!",
+  "familyCreatedFailed": "Failed to create family"
 }
