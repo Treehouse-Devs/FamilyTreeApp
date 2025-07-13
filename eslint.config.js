@@ -31,7 +31,7 @@ const rules = {
 
 export default [
   {
-    ignores: ['**/node_modules/**', '**/dist/**', '**/build/**', 'eslint.config.js'],
+    ignores: ['**/node_modules/**', '**/dist/**', '**/build/**', 'eslint.config.js', 'apps/frontend/components/ui/**'],
   },
 
   js.configs.recommended,
