@@ -25,3 +25,13 @@ export const forgotPasswordSchema = z.object({
 })
 
 export type ForgotPasswordSchema = z.infer<typeof forgotPasswordSchema>
+
+export const resetPasswordSchema = z.object({
+  password: z.string().min(8, { message: i18n.t('passwordResetMinLength') }),
+  confirmPassword: z.string(),
+}).refine(data => data.password === data.confirmPassword, {
+  message: i18n.t('passwordsDoNotMatch'),
+  path: ['confirmPassword'],
+})
+
+export type ResetPasswordSchema = z.infer<typeof resetPasswordSchema>

@@ -1,20 +1,77 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { EyeIcon, EyeOffIcon } from 'lucide-react-native'
-import { Alert } from 'react-native'
 import { Controller, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { registerSchema, RegisterSchema } from '../../validator/auth/authValidation'
 import { useTranslation } from 'react-i18next'
 import { AuthService } from '@/services/authService'
 import { useApi } from '@/hooks/useApi'
-import { router } from 'expo-router'
 import { FormControlErrorText, FormControlLabel, FormControlLabelText } from '@/components/ui/form-control'
-import { Input, InputField, InputIcon, InputSlot } from '@/components/ui/input'
+import { InputField, InputIcon, InputSlot } from '@/components/ui/input'
+import FormInput from '@/components/custom/auth-form/form-input'
 import { Pressable } from '@/components/ui/pressable'
-import { Button, ButtonText } from '@/components/ui/button'
+import congratulation from '@/assets/images/congratulation.webp'
+import { VStack } from '@/components/ui/vstack'
+import HeadingText from '@/components/custom/heading-text/heading-text'
+import FormControl from '@/components/custom/auth-form/form-control'
+import FormActionButton from '@/components/custom/auth-form/form-action-button'
+import Link from '@/components/custom/link/link'
+import ImageInfo from '@/components/custom/auth-form/image-info'
+import { useAuth } from '@/hooks/useAuth'
+import { useAlert } from 'contexts/alert/alert'
 
-export default function SignUpScreen() {
+const SignUpScreen = () => {
   const { t } = useTranslation()
+  const [text, setText] = useState(t('signupTitle'))
+  const [isSignUpSuccess, setIsSignUpSuccess] = useState(false)
+  const [links, setLinks] = useState<{ href: string, text: string }[]>([])
+
+  useEffect(() => {
+    setText(t('signupTitle'))
+  }, [])
+
+  useEffect(() => {
+    setText(isSignUpSuccess ? t('signupSuccess') : t('signupTitle'))
+
+    if (isSignUpSuccess) {
+      setLinks([])
+    }
+    else {
+      setLinks([
+        {
+          text: t('signinDescription'),
+          href: '/auth/signin',
+        },
+        {
+          text: t('forgetPasswordDescription'),
+          href: '/auth/forget-password',
+        },
+      ])
+    }
+  }, [isSignUpSuccess])
+
+  return (
+    <>
+      <HeadingText text={text} />
+      <FormControl>
+        {!isSignUpSuccess ? <SignUpFormSlot setIsSignUpSuccess={setIsSignUpSuccess} /> : <SignUpSuccessSlot />}
+      </FormControl>
+      <VStack className="w-full mt-4 gap-2">
+        {links.map(link => (
+          <Link
+            key={link.href}
+            href={link.href}
+            text={link.text}
+          />
+        ))}
+      </VStack>
+    </>
+  )
+}
+
+const SignUpFormSlot = ({ setIsSignUpSuccess }: { setIsSignUpSuccess: (value: boolean) => void }) => {
+  const { t } = useTranslation()
+
   const {
     control,
     handleSubmit,
@@ -36,17 +93,27 @@ export default function SignUpScreen() {
     api,
   } = useApi(AuthService)
 
+  const { setVerifyEmailData, verifyEmailData } = useAuth()
+
   const [showPassword, setShowPassword] = useState(false)
 
+  const showAlert = useAlert()
+
   const onSubmitSignUp = async (data: RegisterSchema) => {
+    if (data.email === verifyEmailData?.email) {
+      showAlert(t('signupError'), t('signupAlreadyExists'))
+      return
+    }
+
     const res = await api.register(data.name, data.email, data.password)
     if (res) {
       console.log('Register successful:', res)
-      router.replace({ pathname: '/auth/signin', params: { from: 'signup' } })
+      setIsSignUpSuccess(true)
+      setVerifyEmailData({ email: data.email, token: res.token })
     }
     else if (error) {
       console.error('Register failed:', error)
-      Alert.alert(t('signupFailed'), t('signupErrorMessage'))
+      showAlert(t('signupFailed'), t('signupErrorMessage'))
     }
   }
 
@@ -58,7 +125,7 @@ export default function SignUpScreen() {
         render={({ field: { onChange, onBlur, value } }) => (
           <>
             <FormControlLabel><FormControlLabelText>{t('name')}</FormControlLabelText></FormControlLabel>
-            <Input className={`w-4/5 d-flex max-w-80 rounded-md ${errors.name ? 'border-red-500' : 'border-primary-50'}`}>
+            <FormInput isError={!!errors.name}>
               <InputField
                 value={value}
                 onChangeText={onChange}
@@ -68,7 +135,7 @@ export default function SignUpScreen() {
                 autoCapitalize="words"
                 className="font-sans"
               />
-            </Input>
+            </FormInput>
             {errors.name && <FormControlErrorText className="mt-1">{errors.name.message}</FormControlErrorText>}
           </>
         )}
@@ -80,7 +147,7 @@ export default function SignUpScreen() {
         render={({ field: { onChange, onBlur, value } }) => (
           <>
             <FormControlLabel className="mt-4"><FormControlLabelText>{t('email')}</FormControlLabelText></FormControlLabel>
-            <Input className={`w-4/5 d-flex max-w-80 rounded-md ${errors.email ? 'border-red-500' : 'border-primary-50'}`}>
+            <FormInput isError={!!errors.email}>
               <InputField
                 value={value}
                 onChangeText={onChange}
@@ -90,7 +157,7 @@ export default function SignUpScreen() {
                 autoCapitalize="none"
                 className="font-sans"
               />
-            </Input>
+            </FormInput>
             {errors.email && <FormControlErrorText className="mt-1">{errors.email.message}</FormControlErrorText>}
           </>
         )}
@@ -103,7 +170,7 @@ export default function SignUpScreen() {
         render={({ field: { onChange, onBlur, value } }) => (
           <>
             <FormControlLabel className="mt-4"><FormControlLabelText>{t('password')}</FormControlLabelText></FormControlLabel>
-            <Input className={`w-4/5 d-flex max-w-80 rounded-md ${errors.password ? 'border-red-500' : 'border-primary-50'}`}>
+            <FormInput isError={!!errors.password}>
               <InputField
                 value={value}
                 onChangeText={onChange}
@@ -118,7 +185,7 @@ export default function SignUpScreen() {
                   <InputIcon as={showPassword ? EyeOffIcon : EyeIcon} />
                 </Pressable>
               </InputSlot>
-            </Input>
+            </FormInput>
             {errors.password && <FormControlErrorText className="mt-1">{errors.password.message}</FormControlErrorText>}
           </>
         )}
@@ -131,7 +198,7 @@ export default function SignUpScreen() {
         render={({ field: { onChange, onBlur, value } }) => (
           <>
             <FormControlLabel className="mt-4"><FormControlLabelText>{t('confirmPassword')}</FormControlLabelText></FormControlLabel>
-            <Input className={`w-4/5 d-flex max-w-80 rounded-md ${errors.confirmPassword ? 'border-red-500' : 'border-primary-50'}`}>
+            <FormInput isError={!!errors.confirmPassword}>
               <InputField
                 value={value}
                 onChangeText={onChange}
@@ -146,15 +213,31 @@ export default function SignUpScreen() {
                   <InputIcon as={showPassword ? EyeOffIcon : EyeIcon} />
                 </Pressable>
               </InputSlot>
-            </Input>
+            </FormInput>
             {errors.confirmPassword && <FormControlErrorText className="mt-1">{errors.confirmPassword.message}</FormControlErrorText>}
           </>
         )}
       >
       </Controller>
-      <Button onPress={() => void handleSubmit(onSubmitSignUp)()} isDisabled={loading || !!Object.keys(errors).length} className="mt-8 w-fit py-2 px-6 mx-auto rounded-md">
-        <ButtonText>{t('signup')}</ButtonText>
-      </Button>
+      <FormActionButton
+        onPress={() => void handleSubmit(onSubmitSignUp)()}
+        text={loading ? t('signingup') : t('signup')}
+        isDisabled={loading || !!Object.keys(errors).length}
+        isLoading={loading}
+      />
     </>
   )
 }
+
+const SignUpSuccessSlot = () => {
+  const { t } = useTranslation()
+
+  return (
+    <ImageInfo
+      image={congratulation}
+      text={t('signupConfirmationMessage')}
+    />
+  )
+}
+
+export default SignUpScreen

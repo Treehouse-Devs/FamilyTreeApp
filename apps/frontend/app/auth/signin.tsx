@@ -1,21 +1,30 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { EyeIcon, EyeOffIcon } from 'lucide-react-native'
-import { Alert } from 'react-native'
 import { Controller, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { loginSchema, LoginSchema } from '../../validator/auth/authValidation'
 import { useTranslation } from 'react-i18next'
 import { AuthService } from '@/services/authService'
 import { useApi } from '@/hooks/useApi'
-import { router } from 'expo-router'
+import { router, useLocalSearchParams } from 'expo-router'
 import { useAuth } from '@/hooks/useAuth'
 import { FormControlErrorText, FormControlLabel, FormControlLabelText } from '@/components/ui/form-control'
-import { Input, InputField, InputIcon, InputSlot } from '@/components/ui/input'
+import { InputField, InputIcon, InputSlot } from '@/components/ui/input'
+import FormInput from '@/components/custom/auth-form/form-input'
 import { Pressable } from '@/components/ui/pressable'
-import { Button, ButtonText } from '@/components/ui/button'
+import HeadingText from '@/components/custom/heading-text/heading-text'
+import FormControl from '@/components/custom/auth-form/form-control'
+import { VStack } from '@/components/ui/vstack'
+import Link from '@/components/custom/link/link'
+import FormActionButton from '@/components/custom/auth-form/form-action-button'
+import { useAlert } from 'contexts/alert/alert'
 
 export default function SignInScreen() {
   const { t } = useTranslation()
+  const { from } = useLocalSearchParams()
+  const { login } = useAuth()
+  const [text, setText] = useState(t('signinTitle'))
+
   const {
     control,
     handleSubmit,
@@ -34,9 +43,29 @@ export default function SignInScreen() {
     error,
     api,
   } = useApi(AuthService)
-  const { login } = useAuth()
+
+  const links: { href: string, text: string }[] = [
+    {
+      text: t('signupDescription'),
+      href: '/auth/signup',
+    },
+    {
+      text: t('forgetPasswordDescription'),
+      href: '/auth/forget-password',
+    },
+  ]
+
+  useEffect(() => {
+    const text = from === 'signup'
+      ? t('signinAfterSignup')
+      : from === 'resetPassword' ? t('signinAfterResetPasswordTitle') : t('signinTitle')
+
+    setText(text)
+  }, [from])
 
   const [showPassword, setShowPassword] = useState(false)
+
+  const showAlert = useAlert()
 
   const onSubmitSignIn = async (data: LoginSchema) => {
     const res = await api.login(data.email, data.password)
@@ -47,64 +76,73 @@ export default function SignInScreen() {
     }
     else if (error) {
       console.error('Login failed:', error)
-      Alert.alert(t('loginFailed'), t('loginErrorMessage'))
+      showAlert(t('loginFailed'), t('loginErrorMessage'))
     }
   }
 
   return (
     <>
-      <Controller
-        control={control}
-        name="email"
-        render={({ field: { onChange, onBlur, value } }) => (
-          <>
-            <FormControlLabel><FormControlLabelText>{t('email')}</FormControlLabelText></FormControlLabel>
-            <Input className={`w-4/5 d-flex max-w-80 rounded-md ${errors.email ? 'border-red-500' : 'border-primary-50'}`}>
-              <InputField
-                value={value}
-                onChangeText={onChange}
-                onBlur={onBlur}
-                placeholder={t('emailPlaceholder')}
-                keyboardType="email-address"
-                autoCapitalize="none"
-                className="font-sans"
-              />
-            </Input>
-            {errors.email && <FormControlErrorText className="mt-1">{errors.email.message}</FormControlErrorText>}
-          </>
-        )}
-      />
+      <HeadingText text={text} />
+      <FormControl>
+        <Controller
+          control={control}
+          name="email"
+          render={({ field: { onChange, onBlur, value } }) => (
+            <>
+              <FormControlLabel><FormControlLabelText>{t('email')}</FormControlLabelText></FormControlLabel>
+              <FormInput isError={!!errors.email}>
+                <InputField
+                  value={value}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  placeholder={t('emailPlaceholder')}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  className="font-sans"
+                />
+              </FormInput>
+              {errors.email && <FormControlErrorText className="mt-1">{errors.email.message}</FormControlErrorText>}
+            </>
+          )}
+        />
 
-      <Controller
-        control={control}
-        name="password"
-        render={({ field: { onChange, onBlur, value } }) => (
-          <>
-            <FormControlLabel className="mt-4"><FormControlLabelText>{t('password')}</FormControlLabelText></FormControlLabel>
-            <Input className={`w-4/5d-flex max-w-80 rounded-md ${errors.password ? 'border-red-500' : 'border-primary-50'}`}>
-              <InputField
-                value={value}
-                onChangeText={onChange}
-                onBlur={onBlur}
-                placeholder={t('passwordPlaceholder')}
-                type={showPassword ? 'text' : 'password'}
-                className="font-sans"
-              />
-              <InputSlot className="pe-3">
-                <Pressable onPress={() => setShowPassword(!showPassword)}>
-                  <InputIcon as={showPassword ? EyeOffIcon : EyeIcon} />
-                </Pressable>
-              </InputSlot>
-            </Input>
-            {errors.password && <FormControlErrorText className="mt-1">{errors.password.message}</FormControlErrorText>}
-          </>
-        )}
-      >
-      </Controller>
-
-      <Button onPress={() => void handleSubmit(onSubmitSignIn)()} isDisabled={loading || !!Object.keys(errors).length} className="mt-6 w-fit py-2 px-6 mx-auto rounded-md">
-        <ButtonText>{t('signin')}</ButtonText>
-      </Button>
+        <Controller
+          control={control}
+          name="password"
+          render={({ field: { onChange, onBlur, value } }) => (
+            <>
+              <FormControlLabel className="mt-4"><FormControlLabelText>{t('password')}</FormControlLabelText></FormControlLabel>
+              <FormInput isError={!!errors.password}>
+                <InputField
+                  value={value}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  placeholder={t('passwordPlaceholder')}
+                  type={showPassword ? 'text' : 'password'}
+                  className="font-sans"
+                />
+                <InputSlot className="pe-3">
+                  <Pressable onPress={() => setShowPassword(!showPassword)}>
+                    <InputIcon as={showPassword ? EyeOffIcon : EyeIcon} />
+                  </Pressable>
+                </InputSlot>
+              </FormInput>
+              {errors.password && <FormControlErrorText className="mt-1">{errors.password.message}</FormControlErrorText>}
+            </>
+          )}
+        >
+        </Controller>
+        <FormActionButton onPress={() => void handleSubmit(onSubmitSignIn)()} isDisabled={loading || !!Object.keys(errors).length} text={t('signin')} />
+      </FormControl>
+      <VStack className="w-full mt-4 gap-2">
+        {links.map(link => (
+          <Link
+            key={link.href}
+            href={link.href}
+            text={link.text}
+          />
+        ))}
+      </VStack>
     </>
   )
 }

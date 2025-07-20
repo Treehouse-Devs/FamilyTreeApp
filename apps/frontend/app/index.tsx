@@ -1,4 +1,4 @@
-import { router } from 'expo-router'
+import { Redirect, router } from 'expo-router'
 import React, { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useApp } from '@/hooks/useApp'
@@ -7,14 +7,48 @@ import { Text } from '@/components/ui/text'
 import { Button, ButtonText } from '@/components/ui/button'
 import { Image } from '@/components/ui/image'
 import welcomeImage from '@/assets/images/welcome.webp'
+import { useDeepLinking } from '@/hooks/useDeepLinking'
+import { Alert } from 'react-native'
+import { useAuth } from '@/hooks/useAuth'
 
 export default function WelcomeScreen() {
   const { t } = useTranslation()
   const { setHasSeenWelcome, hasSeenWelcome } = useApp()
 
-  // if (hasSeenWelcome) {
-  //   return <Redirect href="/auth/signin" />
-  // }
+  useDeepLinking((data) => {
+    console.log('Deep Link Data:', data)
+
+    if (data.path === 'verify-email') {
+      const tokenFromLink = data.queryParams?.token ?? null
+      const emailFromLink = data.queryParams?.email ?? null
+      const isSignUp = data.queryParams?.isSignup === 'true'
+      const { verifyEmailData, clearVerifyEmailData } = useAuth()
+
+      if (!tokenFromLink || !emailFromLink || !verifyEmailData) {
+        Alert.alert(t('invalidLink'), t('invalidLinkMessage'))
+        return
+      }
+
+      const { email: signupEmail, token: tempSignupToken } = verifyEmailData
+
+      if (tokenFromLink !== tempSignupToken || emailFromLink !== signupEmail) {
+        Alert.alert(t('verificationFailed'), t('verificationErrorMessage'))
+        return
+      }
+
+      clearVerifyEmailData()
+      if (isSignUp) {
+        router.push({ pathname: '/auth/signin', params: { from: 'signup' } })
+      }
+      else {
+        router.push({ pathname: '/auth/reset-password', params: { email: signupEmail, token: tempSignupToken } })
+      }
+    }
+  })
+
+  if (hasSeenWelcome) {
+    return <Redirect href="/auth/signin" />
+  }
 
   useEffect(() => {
     console.log('WelcomeScreen mounted')

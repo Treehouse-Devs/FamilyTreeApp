@@ -1,10 +1,10 @@
 {
   "expo": {
-    "name": "Family Tree",
-    "slug": "family-tree",
+    "name": "Treely",
+    "slug": "treely",
     "version": "1.0.0",
     "orientation": "portrait",
-    "scheme": "familytree",
+    "scheme": "treelyapp",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
@@ -21,7 +21,8 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "package": "com.treelydevs.treely"
     },
     "web": {
       "favicon": "./assets/favicon.png"

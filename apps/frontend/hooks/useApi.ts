@@ -13,7 +13,7 @@ export function useApi<TService extends BaseService, TResult = unknown>(serviceC
   // Create a proxy that wraps each method
   const api = useMemo(() => {
     const handler: ProxyHandler<TService> = {
-      get(target, prop, receiver) {
+      get(target, prop, _receiver) {
         console.log(`[useApi.${String(prop)}] processing API...`)
         const orig = target[prop as keyof TService]
         if (typeof orig !== 'function') return orig

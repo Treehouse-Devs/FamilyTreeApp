@@ -45,12 +45,14 @@
       "tailwind.config": [
         "./tailwind.config.js"
       ]
-    }
+    },
+    "resolveJsonModule": true
   },
   "include": [
     "./**/*",
     "./i18n/resources/**/*.json",
-    "nativewind-env.d.ts"
+    "nativewind-env.d.ts",
+    "assets/lottie/**/*.json"
   ],
   "exclude": [
     "node_modules"

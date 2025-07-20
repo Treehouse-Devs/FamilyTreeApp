@@ -7,4 +7,7 @@ export const authMocks = {
       email: 'mock@example.com',
     },
   },
+  'auth/register': {
+    message: 'User registered successfully',
+  },
 }
