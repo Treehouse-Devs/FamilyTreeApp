@@ -17,25 +17,24 @@ export class MailerService {
     },
   })
 
-  async sendTemplateEmail(to: string, subject: string, templateName: string, context: Record<string, any>) {
+  async sendTemplateEmail(to: string, subject: string, templateName: string, context: Record<string, string>) {
+    const templatePath = path.join(
+      __dirname,
+      '../src/mailer/templates',
+      `${templateName}.mjml`,
+    )
+
+    const mjmlTemplate = await fs.readFile(templatePath, 'utf-8')
+
+    const mjmlHtml = mjml2html(mjmlTemplate)
+
+    if (mjmlHtml.errors.length) {
+      throw new Error(`MJML compile error: ${JSON.stringify(mjmlHtml.errors)}`)
+    }
+
+    const template = handlebars.compile(mjmlHtml.html)
+    const html = template(context)
     try {
-      const templatePath = path.join(
-        '/Users/dimnab/FamilyTreeApp/apps/backend/src/mailer/',
-        'templates',
-        `${templateName}.mjml`,
-      )
-
-      const mjmlTemplate = await fs.readFile(templatePath, 'utf-8')
-
-      const mjmlHtml = mjml2html(mjmlTemplate)
-
-      if (mjmlHtml.errors.length) {
-        throw new Error(`MJML compile error: ${JSON.stringify(mjmlHtml.errors)}`)
-      }
-
-      const template = handlebars.compile(mjmlHtml.html)
-      const html = template(context)
-
       const info = await this.transporter.sendMail({
         from: `"Treely" <${process.env.SMTP_FROM}>`,
         to,

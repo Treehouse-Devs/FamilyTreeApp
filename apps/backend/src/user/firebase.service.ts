@@ -10,6 +10,23 @@ interface FirebaseUserData {
 
 @Injectable()
 export class FirebaseService {
+  // TODO: setting up actionCodeSettings
+  private actionCodeSettings = {
+    // set this on firebase console
+    url: 'https://www.example.com/finishSignUp?cartId=1234',
+    handleCodeInApp: true,
+    iOS: {
+      bundleId: 'com.example.ios',
+    },
+    android: {
+      packageName: 'com.example.android',
+      installApp: true,
+      minimumVersion: '12',
+    },
+    // The domain must be configured in Firebase Hosting and owned by the project.
+    linkDomain: 'custom-domain.com',
+  }
+
   async createUser({ displayName, email, password }: { displayName: string, email: string, password?: string }) {
     try {
       const userData: FirebaseUserData = { displayName, email }
@@ -91,7 +108,7 @@ export class FirebaseService {
 
   async generateEmailVerificationLink(email: string): Promise<string> {
     try {
-      // TODO: need to setup actionCodeSettings for deeplink
+      // TODO: codeActionSettings
       return admin.auth().generateEmailVerificationLink(email)
     }
     catch (error) {
@@ -109,7 +126,7 @@ export class FirebaseService {
 
   async generateResetPasswordLink(email: string): Promise<string> {
     try {
-      // TODO: need to setup actionCodeSettings for deeplink
+      // TODO: actionCodeSettings
       return admin.auth().generatePasswordResetLink(email)
     }
     catch (error) {
