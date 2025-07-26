@@ -15,6 +15,8 @@ import { ResetPasswordDto } from '@myorg/dto/src/user/reset-password.dto'
 import { JwtAuthGuard } from './jwt-auth.guard'
 import { GetUser } from './get-user.decorator'
 import { UserFromToken } from './user.types'
+import { ForgotPasswordDto } from '../../../../packages/dto/src/auth/forgot-password.dto'
+import { EmailVerificationDto } from '../../../../packages/dto/src/auth/email-verification.dto'
 
 @Controller('user')
 @UsePipes(new ValidationPipe({ transform: true }))
@@ -29,6 +31,16 @@ export class UserController {
   @Post('/login')
   async login(@Body() loginUserDto: LoginUserDto) {
     return this.userService.login(loginUserDto)
+  }
+
+  @Post('/forgot-password')
+  async forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto) {
+    return this.userService.forgotPassword(forgotPasswordDto)
+  }
+
+  @Post('/verification-email')
+  async sendVerificationEmail(@Body() emailVerificationDto: EmailVerificationDto) {
+    return this.userService.sendVerificationEmail(emailVerificationDto)
   }
 
   @Post('/google-auth')
