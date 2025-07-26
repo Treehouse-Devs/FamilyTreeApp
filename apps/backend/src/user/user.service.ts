@@ -1,5 +1,6 @@
 import {
   ConflictException,
+  ForbiddenException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -16,6 +17,8 @@ import { FirebaseError } from 'firebase/app'
 import { UserRecord } from 'firebase-admin/lib/auth/user-record'
 import { AxiosResponse } from 'axios'
 import { MailerService } from 'src/mailer/mailer.service'
+import { ForgotPasswordDto } from '@myorg/dto/auth/forgot-password.dto'
+import { EmailVerificationDto } from '@myorg/dto/auth/email-verification.dto'
 
 @Injectable()
 export class UserService {
@@ -31,11 +34,7 @@ export class UserService {
     let userRecord: UserRecord | null = null
     try {
       userRecord = await this.firebaseService.createUser({ displayName: name, email, password })
-      const link = await this.firebaseService.generateEmailVerificationLink(userRecord.email || '')
-      await this.mailerService.sendTemplateEmail(userRecord.email || '', 'Treely Email Verification', 'verify-email', {
-        displayName: userRecord.displayName || '',
-        link,
-      })
+      await this.sendVerificationEmail({ email: userRecord.email || '' })
       return userRecord
     }
     catch (error) {
@@ -48,6 +47,7 @@ export class UserService {
           throw error
         }
       }
+      throw error
     }
   }
 
@@ -57,6 +57,11 @@ export class UserService {
     try {
       await this.signInWithEmailAndPassword(email, password)
       const userRecord = await this.firebaseService.getUserByEmail(email)
+
+      if (!userRecord.emailVerified) {
+        throw new ForbiddenException('Email not verified')
+      }
+
       const tokenPayload: UserFromToken = {
         email: userRecord.email || '',
         uid: userRecord.uid,
@@ -90,6 +95,26 @@ export class UserService {
         throw new InternalServerErrorException('Unexpected error occured.')
       }
     }
+  }
+
+  async forgotPassword(forgotPasswordDto: ForgotPasswordDto): Promise<void> {
+    const { email } = forgotPasswordDto
+    const link = await this.firebaseService.generateResetPasswordLink(email)
+
+    await this.mailerService.sendTemplateEmail(email, 'Treely Reset Password', 'forgot-password', {
+      diplayName: email,
+      link,
+    })
+  }
+
+  async sendVerificationEmail(emailVerificationDto: EmailVerificationDto): Promise<void> {
+    const { email } = emailVerificationDto
+    const link = await this.firebaseService.generateEmailVerificationLink(email)
+
+    await this.mailerService.sendTemplateEmail(email, 'Treely Email Verification', 'verify-email', {
+      displayName: email,
+      link,
+    })
   }
 
   async googleAuth(googleAuthDto: GoogleAuthDto): Promise<LoginResponseDto> {
