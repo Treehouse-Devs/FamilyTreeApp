@@ -2,7 +2,7 @@ import gluestackPlugin from '@gluestack-ui/nativewind-utils/tailwind-plugin';
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  darkMode: "media",
+  darkMode: process.env.DARK_MODE ? process.env.DARK_MODE : "media",
   content: [
     "App.{tsx,jsx,ts,js}",
     "index.{tsx,jsx,ts,js}",
@@ -175,10 +175,11 @@ module.exports = {
         },
       },
       fontFamily: {
-        heading: undefined,
-        body: undefined,
-        mono: undefined,
-        roboto: ['Roboto', 'sans-serif'],
+        sans: ['PlusJakartaSans_400Regular', 'System'],
+        heading: ['PlusJakartaSans_600SemiBold', 'System'],
+        medium: ['PlusJakartaSans_500Medium', 'System'],
+        bold: ['PlusJakartaSans_700Bold', 'System'],
+        body: ['PlusJakartaSans_400Regular', 'System'],
       },
       fontWeight: {
         extrablack: '950',
