@@ -21,11 +21,11 @@ export class MockApi {
 
   private static getValueFromPath(obj: object, path: string): unknown {
     const keys = path.split('.')
-    let current
+    let current: unknown = obj
 
     for (const key of keys) {
-      if (current == null) return undefined
-      current = current[key]
+      if (current === null) return undefined
+      current = (current as Record<string, unknown>)[key]
     }
 
     return current
@@ -89,8 +89,7 @@ export class MockApi {
 
     // Handle error responses
     if (config.responseType === 'error') {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      const errorMessage = config.responseData.message || 'Mock error'
+      const errorMessage = (config.responseData as Error).message || 'Mock error'
       const error = new Error(String(errorMessage))
       // Simulate HTTP status codes by adding status to error
 
@@ -106,6 +105,31 @@ export class MockApi {
 
       if (matchingCondition) {
         return matchingCondition.response as T
+      }
+    }
+
+    // If search allowed, filter the response data
+    if (Array.isArray(config.allowSearch) && payload && typeof payload === 'object' && 'params' in payload && config.responseData.data && Array.isArray(config.responseData.data)) {
+      const params: { search?: string } = payload.params || {}
+      console.log(`[MockApi] Search params: ${params.search}`, config.allowSearch)
+      const value = params.search || ''
+
+      if (value) {
+        // Filter the response data based on search parameters
+        const filteredResponse = config.responseData.data.filter((item: object) => {
+          return config.allowSearch!.some((key) => {
+            const itemValue = this.getValueFromPath(item, key)
+            if (typeof itemValue === 'string') {
+              return itemValue.toLowerCase().includes(value.toLowerCase())
+            }
+            return false
+          })
+        })
+
+        return {
+          ...config.responseData,
+          data: filteredResponse,
+        } as T
       }
     }
 

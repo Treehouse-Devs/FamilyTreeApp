@@ -1,4 +1,6 @@
-export const authMocks = [
+import { MockConfig } from 'types/mockDevTool'
+
+export const authMocks: MockConfig[] = [
   {
     id: 'auth-login-success',
     endpoint: 'auth/login',
@@ -9,12 +11,14 @@ export const authMocks = [
     statusCode: 200,
     description: 'Successful login with regular user',
     responseData: {
-      token: 'mock-token-123',
-      user: {
-        id: 'user-1',
-        name: 'Mock User',
-        email: 'mock@example.com',
-        role: 'user',
+      data: {
+        token: 'mock-token-123',
+        user: {
+          id: 'user-1',
+          name: 'Mock User',
+          email: 'mock@example.com',
+          role: 'user',
+        },
       },
     },
   },
@@ -28,12 +32,14 @@ export const authMocks = [
     statusCode: 200,
     description: 'Admin login when using admin email',
     responseData: {
-      token: 'admin-token-456',
-      user: {
-        id: 'admin-1',
-        name: 'Admin User',
-        email: 'admin@familytree.com',
-        role: 'admin',
+      data: {
+        token: 'admin-token-456',
+        user: {
+          id: 'admin-1',
+          name: 'Admin User',
+          email: 'admin@familytree.com',
+          role: 'admin',
+        },
       },
     },
     conditions: [

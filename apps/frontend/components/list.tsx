@@ -17,7 +17,6 @@ import {
   Pressable,
   View,
   Text,
-  ActivityIndicator,
   Image,
   ListRenderItemInfo,
 } from 'react-native'
@@ -28,7 +27,6 @@ const FamilyList: React.FC<FamilyListProps> = ({
   onSelect,
   renderItem,
   ListEmptyComponent,
-  loading = false,
   refreshControl = undefined,
 }) => {
   const defaultRenderItem = ({ item }: ListRenderItemInfo<FamilyNode>) => (
@@ -69,15 +67,6 @@ const FamilyList: React.FC<FamilyListProps> = ({
       </View>
     </Pressable>
   )
-
-  if (loading) {
-    return (
-      <View className="flex-1 items-center justify-center py-10">
-        <ActivityIndicator size="large" color="#6366f1" />
-        <Text className="mt-2 text-gray-500">Loading...</Text>
-      </View>
-    )
-  }
 
   return (
     <FlatList

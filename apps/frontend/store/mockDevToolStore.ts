@@ -155,6 +155,7 @@ export const useMockDevToolStore = create<MockDevToolStore>((set, get) => ({
           if (config.id === id && config.isDynamic) {
             // Use the generateData callback if available, otherwise keep original data
             let newResponseData = config.responseData
+            console.log('Generating dynamic data for config:', id, 'Count:', count, config)
             if (config.generateData) {
               newResponseData = config.generateData(count)
             }

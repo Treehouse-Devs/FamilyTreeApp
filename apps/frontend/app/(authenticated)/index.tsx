@@ -2,39 +2,73 @@ import { StyleSheet, RefreshControl, View } from 'react-native'
 import FamilyList from '@/components/list'
 import { FamilyService } from '@/services/familiyService'
 import { useApi } from '@/hooks/useApi'
-import { useState } from 'react'
+import React from 'react'
 import { FamilyNode } from '@/components/list.type'
+import { Input, InputField } from '@/components/ui/input'
+import { Controller, useForm } from 'react-hook-form'
+import { t } from 'i18next'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { familyRequestSchema } from '@/validator/family/familyValidation'
 
 export default function App() {
   const {
     loading,
     result,
     api,
-  } = useApi<FamilyService, { families: FamilyNode[] }>(new FamilyService())
+  } = useApi<FamilyService, { data: FamilyNode[] }>(new FamilyService())
 
-  const [refreshing, setRefreshing] = useState(false)
+  const {
+    control,
+    handleSubmit,
+  } = useForm<{ name: string }>({
+    resolver: zodResolver(familyRequestSchema),
+    mode: 'onSubmit',
+    defaultValues: {
+      name: '',
+    },
+  })
 
   const onRefresh = async () => {
-    setRefreshing(true)
-    try {
+    await api.fetchFamiliesList()
+  }
+
+  const onSearch = async (data: { name: string }) => {
+    if (data.name.trim() === '') {
       await api.fetchFamiliesList()
     }
-    catch (error) {
-      console.error('Refresh failed:', error)
-    }
-    finally {
-      setRefreshing(false)
+    else {
+      await api.fetchFamiliesList({ search: data.name })
     }
   }
 
+  React.useEffect(() => {
+    void api.fetchFamiliesList()
+  }, [])
+
   return (
     <View style={styles.container}>
+      <Controller
+        control={control}
+        name="name"
+        render={({ field: { onChange, onBlur, value } }) => (
+          <Input>
+            <InputField
+              value={value}
+              onChangeText={onChange}
+              onBlur={onBlur}
+              placeholder={t('search')}
+              onSubmitEditing={() => void handleSubmit(onSearch)()}
+              returnKeyType="search"
+            />
+          </Input>
+        )}
+      />
+
       <FamilyList
-        data={result?.families || []}
+        data={result?.data || []}
         onSelect={family => console.log('Selected family:', family)}
-        loading={loading}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={() => void onRefresh()} />
+          <RefreshControl refreshing={loading} onRefresh={() => void onRefresh()} />
         }
       />
     </View>
@@ -44,8 +78,7 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingInline: 16,
-    paddingTop: 20,
+    paddingTop: 40,
   },
   welcomeText: {
     fontSize: 18,

@@ -20,6 +20,12 @@ export interface RequestCondition {
   response: unknown
 }
 
+export interface BaseResponseData {
+  message?: string
+  error?: string
+  data?: unknown // Optional data field for dynamic responses
+}
+
 export interface MockConfig {
   id: string
   endpoint: string
@@ -28,13 +34,14 @@ export interface MockConfig {
   responseType: 'success' | 'error' | 'custom'
   delay: number // 0-5000ms
   statusCode: number
-  responseData: unknown
+  responseData: BaseResponseData
+  allowSearch?: string[] // Fields that can be searched in the response
   conditions?: RequestCondition[]
   group?: string // Group name for organizing configs
   description?: string // Human-readable description
   dynamicCount?: number // Number of items to generate for dynamic responses
   isDynamic?: boolean // Whether this config uses dynamic data generation
-  generateData?: (count: number) => unknown // Callback function to generate dynamic data
+  generateData?: (count: number) => BaseResponseData // Callback function to generate dynamic data
 }
 
 export interface EndpointGroup {

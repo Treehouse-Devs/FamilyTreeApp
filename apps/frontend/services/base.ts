@@ -44,8 +44,6 @@ export class BaseService {
             `Mock data is enabled, but no matching mock configuration found for ${method.toUpperCase()} ${url}. Please check your mock configurations.`,
           )
         }
-
-        return response
       }
       else {
         const apiResponse = await api.request<T>({

@@ -39,5 +39,6 @@
   "loginErrorMessage": "There is something wrong when logging you in. Please try again.",
   "resetPasswordSuccess": "Password reset successful",
   "resetPasswordFailed": "Reset password failed",
-  "resetPasswordErrorMessage": "There was an error resetting your password. Please try again."
+  "resetPasswordErrorMessage": "There was an error resetting your password. Please try again.",
+  "search": "Search"
 }

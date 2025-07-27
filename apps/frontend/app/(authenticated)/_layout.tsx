@@ -1,5 +1,6 @@
 import { Slot, Redirect } from 'expo-router'
 import { useAuth } from '@/hooks/useAuth'
+import { StatusBar } from 'expo-status-bar'
 
 export default function AppLayout() {
   const { isLoggedIn } = useAuth()
@@ -8,5 +9,10 @@ export default function AppLayout() {
     return <Redirect href="/" />
   }
 
-  return <Slot />
+  return (
+    <>
+      <StatusBar style="auto" />
+      <Slot />
+    </>
+  )
 }

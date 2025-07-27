@@ -1,4 +1,5 @@
 import { FamilyNode } from '@/components/list.type'
+import { MockConfig } from 'types/mockDevTool'
 
 // Generate dynamic family data based on count
 export function generateFamilyData(count: number): FamilyNode[] {
@@ -17,7 +18,7 @@ export function generateFamilyData(count: number): FamilyNode[] {
   }))
 }
 
-export const familyMocks = [
+export const familyMocks: MockConfig[] = [
   {
     id: 'family-list-success',
     endpoint: 'families/list',
@@ -27,13 +28,14 @@ export const familyMocks = [
     delay: 500,
     statusCode: 200,
     description: 'Successful fetch of family list',
+    allowSearch: ['name'],
     isDynamic: true,
     dynamicCount: 5,
     generateData: (count: number) => ({
-      families: generateFamilyData(count),
+      data: generateFamilyData(count),
     }),
     responseData: {
-      families: generateFamilyData(5),
+      data: generateFamilyData(5),
     },
   },
   {
@@ -46,7 +48,7 @@ export const familyMocks = [
     statusCode: 200,
     description: 'Empty family list',
     responseData: {
-      families: [],
+      data: [],
     },
   },
   {
