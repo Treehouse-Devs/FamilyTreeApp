@@ -1,13 +1,13 @@
-import { MiddlewareConsumer, Module, NestModule } from "@nestjs/common";
-import { FamiliesModule } from "./families/families.module";
-import { MembersModule } from "./members/members.module";
-import { TypeOrmModule } from "@nestjs/typeorm";
-import { ConfigModule, ConfigService } from "@nestjs/config";
-import { typeOrmConfig } from "./config/database.config";
-import { UserModule } from "./user/user.module";
-import configuration from "./config/configuration";
-import { LoggerMiddleware } from "./logger/logger.middleware";
-import { MailerModule } from './mailer/mailer.module';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common'
+import { MembersModule } from './members/members.module'
+import { TypeOrmModule } from '@nestjs/typeorm'
+import { ConfigModule, ConfigService } from '@nestjs/config'
+import { typeOrmConfig } from './config/database.config'
+import { UserModule } from './user/user.module'
+import configuration from './config/configuration'
+import { LoggerMiddleware } from './logger/logger.middleware'
+import { MailerModule } from './mailer/mailer.module'
+import { FamilyModule } from './family/family.module'
 
 @Module({
   imports: [
@@ -21,15 +21,16 @@ import { MailerModule } from './mailer/mailer.module';
       useFactory: (configService: ConfigService) =>
         typeOrmConfig(configService),
     }),
-    FamiliesModule,
+    FamilyModule,
     MembersModule,
     UserModule,
     MailerModule,
+    FamilyModule,
   ],
   controllers: [],
   providers: [],
 })
-export class AppModule implements NestModule{
+export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer.apply(LoggerMiddleware).forRoutes('*')
   }
