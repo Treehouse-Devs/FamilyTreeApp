@@ -1,7 +1,7 @@
 import { ConflictException, Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Family } from './entities/family.entity'
-import { Repository } from 'typeorm'
+import { ILike, Repository } from 'typeorm'
 import { CreateFamilyDto } from '@myorg/dto/family/create-family.dto'
 import { UpdateFamilyDto } from '@myorg/dto/family/update-family.dto'
 
@@ -17,8 +17,8 @@ export class FamilyService {
     return await this.familyRepo.save(family)
   }
 
-  async findAll(userId: string) {
-    return await this.familyRepo.findBy({ createdByUid: userId })
+  async findAll(search: string, userId: string) {
+    return await this.familyRepo.find({ where: { createdByUid: userId, name: ILike(`%${search}%`) } })
   }
 
   async findOne(id: string, userId: string) {
@@ -42,6 +42,6 @@ export class FamilyService {
   async delete(id: string, userId: string) {
     await this.findOne(id, userId)
 
-    await this.familyRepo.delete(id)
+    await this.familyRepo.softDelete(id)
   }
 }

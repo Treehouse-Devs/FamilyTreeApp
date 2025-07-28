@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common'
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common'
 import { FamilyService } from './family.service'
 import { JwtAuthGuard } from 'src/user/jwt-auth.guard'
 import { CreateFamilyDto } from '@myorg/dto/family/create-family.dto'
@@ -19,8 +19,8 @@ export class FamilyController {
   }
 
   @Get()
-  async findAll(@GetUser() user: UserFromToken) {
-    return await this.familyService.findAll(user.uid)
+  async find(@Query('search') search: string, @GetUser() user: UserFromToken) {
+    return await this.familyService.findAll(search, user.uid)
   }
 
   @Patch(':id')
