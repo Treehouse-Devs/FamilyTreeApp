@@ -1,5 +1,4 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common'
-import { MembersModule } from './members/members.module'
 import { TypeOrmModule } from '@nestjs/typeorm'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import { typeOrmConfig } from './config/database.config'
@@ -8,6 +7,7 @@ import configuration from './config/configuration'
 import { LoggerMiddleware } from './logger/logger.middleware'
 import { MailerModule } from './mailer/mailer.module'
 import { FamilyModule } from './family/family.module'
+import { MemberModule } from './member/member.module'
 
 @Module({
   imports: [
@@ -22,10 +22,9 @@ import { FamilyModule } from './family/family.module'
         typeOrmConfig(configService),
     }),
     FamilyModule,
-    MembersModule,
+    MemberModule,
     UserModule,
     MailerModule,
-    FamilyModule,
   ],
   controllers: [],
   providers: [],
