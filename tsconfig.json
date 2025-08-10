@@ -10,6 +10,7 @@
         "moduleResolution": "Node",
         "strict": true,
         "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true,
         "skipLibCheck": true,
         "forceConsistentCasingInFileNames": true,
         "baseUrl": ".",
@@ -25,12 +26,6 @@
     "references": [
         {
             "path": "packages/dto/tsconfig.json"
-        },
-        {
-            "path": "apps/frontend/tsconfig.json"
-        },
-        {
-            "path": "apps/backend/tsconfig.json"
         }
     ]
 }

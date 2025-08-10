@@ -42,6 +42,7 @@ export default [
     quotes: 'single',
     semi: false,
     jsx: true,
+    braceStyle: '1tbs'
   }),
 
   {
