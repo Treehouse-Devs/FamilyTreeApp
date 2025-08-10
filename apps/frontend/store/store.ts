@@ -3,6 +3,7 @@ import { create } from 'zustand'
 import { AuthSlice, createAuthSlice } from './slices/authSlice'
 import { AppSlice, createAppSlice } from './slices/appSlice'
 import { persist, StorageValue } from 'zustand/middleware'
+import { createTreeSlice, TreeSlice } from './slices/treeSlice'
 
 // Add hydration state to the store
 interface HydrationState {
@@ -10,13 +11,14 @@ interface HydrationState {
   setHydrated: (state: boolean) => void
 }
 
-export type StoreState = HydrationState & AppSlice & AuthSlice
+export type StoreState = HydrationState & AppSlice & AuthSlice & TreeSlice
 
 export const useStore = create<StoreState>()(
   persist(
     (set, ...a) => ({
       ...createAuthSlice(set, ...a),
       ...createAppSlice(set, ...a),
+      ...createTreeSlice(set, ...a),
       // Hydration state
       hydrated: false,
       setHydrated: (state: boolean) => {

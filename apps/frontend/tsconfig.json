@@ -36,6 +36,9 @@
       "@/tests/*": [
         "./tests/*"
       ],
+      "@/types/*": [
+        "./types/*"
+      ],
       "@/validator/*": [
         "./validator/*"
       ],
