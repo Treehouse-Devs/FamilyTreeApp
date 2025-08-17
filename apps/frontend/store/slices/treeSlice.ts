@@ -52,7 +52,7 @@ export interface TreeActions {
   setTree: (tree: Tree) => void
   selectTree: (treeId: string) => void
   setRoot: (root: Person) => void
-  getRoot: () => Person | undefined
+  selectedRoot?: Person
   addPerson: (Person: Person, type: 'spouse' | 'children' | 'parent', originId: string) => void
   setPerson: (Person: Person) => void
   addPersonDetail: (treeId: string, personId: string, person: DetailedPerson) => void
@@ -101,7 +101,7 @@ export const createTreeSlice: StateCreator<TreeSlice, [], [], TreeSlice> = (set,
     set((state) => {
       const { trees } = state
       const updatedTrees = trees.map(t => (t.id === tree.id ? { ...t, ...tree } : t))
-      return { trees: updatedTrees }
+      return { trees: updatedTrees, root: tree.root }
     })
   },
 
@@ -115,11 +115,12 @@ export const createTreeSlice: StateCreator<TreeSlice, [], [], TreeSlice> = (set,
         trees: trees.map(tree =>
           tree.id === selectedTreeId ? { ...tree, root } : tree,
         ),
+        selectedRoot: root,
       }
     })
   },
 
-  getRoot: () => {
+  get selectedRoot() {
     const { trees, selectedTreeId } = get()
     const selectedTree = trees.find(tree => tree.id === selectedTreeId)
     return selectedTree ? selectedTree.root : undefined
