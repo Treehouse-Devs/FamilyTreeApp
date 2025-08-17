@@ -44,8 +44,7 @@ export default function SignInScreen() {
       console.log('Login successful:', res)
       login(res.user, res.token)
       router.replace('/(authenticated)')
-    }
-    else if (error) {
+    } else if (error) {
       console.error('Login failed:', error)
       Alert.alert(t('loginFailed'), t('loginErrorMessage'))
     }

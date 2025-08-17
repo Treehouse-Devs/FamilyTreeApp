@@ -8,7 +8,7 @@ export const useFamilyTree = () => {
   const selectTree = useStore(state => state.selectTree)
   const selectedTreeId = useStore(state => state.selectedTreeId)
   const setRoot = useStore(state => state.setRoot)
-  const getRoot = useStore(state => state.getRoot)
+  const selectedRoot = useStore(state => state.selectedRoot)
   const addPerson = useStore(state => state.addPerson)
   const setPerson = useStore(state => state.setPerson)
 
@@ -20,7 +20,7 @@ export const useFamilyTree = () => {
     selectTree,
     selectedTreeId,
     setRoot,
-    getRoot,
+    selectedRoot,
     addPerson,
     setPerson,
   }
