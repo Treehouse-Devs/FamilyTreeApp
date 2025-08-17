@@ -22,7 +22,7 @@ export class MemberService {
       throw new ForbiddenException('This family is not belong to this user')
     }
 
-    const { familyId, fullName, gender, birthDate, deathDate } = createFamilyMemberDto
+    const { familyId, fullName, gender, birthDate, deathDate, relatedMemberId, relationType } = createFamilyMemberDto
 
     // TODO: use Gender enum on CreateFamilyMemberDto
     let dtoGender: Gender
@@ -38,17 +38,20 @@ export class MemberService {
       await manager.save(FamilyMember, member)
 
       const memberCount = await manager.count(FamilyMember, { where: { familyId } })
-      console.log('member', memberCount)
-      const hasRelationship = createFamilyMemberDto.relatedMemberId && createFamilyMemberDto.relationType
-      console.log('membercount:', memberCount)
+      const hasRelationship = relatedMemberId && relationType
       if (memberCount > 1 && !hasRelationship) {
         throw new BadRequestException('Relationship must exist')
       }
 
       if (hasRelationship) {
         // TODO: Use RelationType enum on DTO
-        const relationType = createFamilyMemberDto.relationType === 'PARENT' ? RelationType.PARENT : RelationType.SPOUSE
-        const relationship = manager.create(FamilyRelationship, { familyId, sourceMemberId: createFamilyMemberDto.relatedMemberId, targetMemberId: member.id, relationType })
+        const relatedMember = await manager.findOne(FamilyMember, { where: { id: relatedMemberId } })
+        if (!relatedMember) {
+          throw new BadRequestException('Related member not found!')
+        }
+
+        const relationTypeParsed = relationType === 'PARENT' ? RelationType.PARENT : RelationType.SPOUSE
+        const relationship = manager.create(FamilyRelationship, { familyId, sourceMemberId: relatedMemberId, targetMemberId: member.id, relationType: relationTypeParsed })
         await manager.save(FamilyRelationship, relationship)
       }
       return member
