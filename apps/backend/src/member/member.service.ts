@@ -1,15 +1,17 @@
-import { ConflictException, ForbiddenException, Injectable } from '@nestjs/common'
+import { BadRequestException, ConflictException, ForbiddenException, Injectable } from '@nestjs/common'
 import { DataSource, Repository } from 'typeorm'
 import { FamilyMember, Gender } from './entities/family-member.entity'
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm'
 import { CreateFamilyMemberDto } from '@myorg/dto/member/create-family-member.dto'
 import { FamilyService } from 'src/family/family.service'
 import { UpdateFamilyMemberDto } from '@myorg/dto/member/update-family-member-dto'
+import { FamilyRelationship, RelationType } from './entities/family-relationship.entity'
 
 @Injectable()
 export class MemberService {
   constructor(
         @InjectRepository(FamilyMember) private readonly memberRepository: Repository<FamilyMember>,
+        @InjectRepository(FamilyRelationship) private readonly relationshipRepository: Repository<FamilyRelationship>,
         @InjectDataSource() private dataSource: DataSource,
         private familyService: FamilyService,
   ) {}
@@ -19,7 +21,7 @@ export class MemberService {
     if (!family) {
       throw new ForbiddenException('This family is not belong to this user')
     }
-    // TODO: Wrap with transaction
+
     const { familyId, fullName, gender, birthDate, deathDate } = createFamilyMemberDto
 
     // TODO: use Gender enum on CreateFamilyMemberDto
@@ -31,13 +33,26 @@ export class MemberService {
       dtoGender = Gender.FEMALE
     }
 
-    const member = this.memberRepository.create({ familyId, fullName, gender: dtoGender, birthDate, deathDate })
-    await this.memberRepository.save(member)
+    return await this.dataSource.transaction(async (manager) => {
+      const member = manager.create(FamilyMember, { familyId, fullName, gender: dtoGender, birthDate, deathDate })
+      await manager.save(FamilyMember, member)
 
-    // TODO: Check if there any relationship on dto
-    // will implement when relationship module is ready
+      const memberCount = await manager.count(FamilyMember, { where: { familyId } })
+      console.log('member', memberCount)
+      const hasRelationship = createFamilyMemberDto.relatedMemberId && createFamilyMemberDto.relationType
+      console.log('membercount:', memberCount)
+      if (memberCount > 1 && !hasRelationship) {
+        throw new BadRequestException('Relationship must exist')
+      }
 
-    return member
+      if (hasRelationship) {
+        // TODO: Use RelationType enum on DTO
+        const relationType = createFamilyMemberDto.relationType === 'PARENT' ? RelationType.PARENT : RelationType.SPOUSE
+        const relationship = manager.create(FamilyRelationship, { familyId, sourceMemberId: createFamilyMemberDto.relatedMemberId, targetMemberId: member.id, relationType })
+        await manager.save(FamilyRelationship, relationship)
+      }
+      return member
+    })
   }
 
   async findOne(id: string, userId: string): Promise<FamilyMember | null> {
