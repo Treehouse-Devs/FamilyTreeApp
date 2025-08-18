@@ -4,6 +4,7 @@
         "outDir": "dist",
         "module": "CommonJS",
         "target": "ES2021",
+        "experimentalDecorators": true,
         "noEmit": false,
         "composite": true
     },
