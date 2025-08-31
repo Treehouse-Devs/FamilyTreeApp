@@ -72,6 +72,13 @@ export class MemberService {
     return member
   }
 
+  async findByFamilyId(familyId: string): Promise<FamilyMember[]> {
+    return await this.memberRepository.find({
+      where: { familyId },
+      relations: ['incomingRelations', 'outgoingRelations'],
+    })
+  }
+
   async update(id: string, updateFamilyMemberDto: UpdateFamilyMemberDto, userId: string): Promise<FamilyMember | null> {
     const { fullName, birthDate, deathDate } = updateFamilyMemberDto
     const gender = updateFamilyMemberDto.gender === 'male' ? Gender.MALE : Gender.FEMALE

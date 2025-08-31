@@ -1,5 +1,6 @@
 import { Family } from '../../family/entities/family.entity'
-import { Column, CreateDateColumn, DeleteDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm'
+import { Column, CreateDateColumn, DeleteDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm'
+import { FamilyRelationship } from './family-relationship.entity'
 
 export enum Gender {
   MALE = 'male',
@@ -29,6 +30,12 @@ export class FamilyMember {
 
   @Column({ type: 'date', nullable: true })
   deathDate!: Date
+
+  @OneToMany(() => FamilyRelationship, relation => relation.sourceMember)
+  outgoingRelations!: FamilyRelationship[]
+
+  @OneToMany(() => FamilyRelationship, relation => relation.targetMember)
+  incomingRelations!: FamilyRelationship[]
 
   @CreateDateColumn()
   createdAt!: Date

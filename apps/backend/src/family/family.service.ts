@@ -6,6 +6,9 @@ import { CreateFamilyDto } from '@myorg/dto/family/create-family.dto'
 import { UpdateFamilyDto } from '@myorg/dto/family/update-family.dto'
 import { UserFromToken } from 'src/user/user.types'
 import { MemberService } from 'src/member/member.service'
+import { FamilyMemberNodeDto, FamilyTreeResponseDto } from '@myorg/dto/family/family-tree.dto'
+import { FamilyMember } from 'src/member/entities/family-member.entity'
+import { RelationType } from 'src/member/entities/family-relationship.entity'
 
 @Injectable()
 export class FamilyService {
@@ -43,6 +46,54 @@ export class FamilyService {
     }
 
     return family
+  }
+
+  async getFamilyTree(id: string, userId: string): Promise<FamilyTreeResponseDto> {
+    const family = await this.findOne(id, userId)
+
+    const members = await this.familyMemberService.findByFamilyId(id)
+
+    const memberMap = new Map<string, FamilyMember>(members.map(m => [m.id, m]))
+
+    const root = members.find(m => !m.incomingRelations.some(r => r.relationType === RelationType.PARENT))
+    if (!root) {
+      throw new ConflictException('No root member found')
+    }
+
+    const buildNode = (member: FamilyMember): FamilyMemberNodeDto => {
+      const childrenRels = member.outgoingRelations.filter(
+        r => r.relationType === RelationType.PARENT,
+      )
+      const children = childrenRels.map(rel =>
+        buildNode(memberMap.get(rel.targetMemberId)!),
+      )
+
+      const spouseRel = member.outgoingRelations.find(
+        r => r.relationType === RelationType.SPOUSE,
+      )
+      const spouse = spouseRel
+        ? buildNode(memberMap.get(spouseRel.targetMemberId)!)
+        : null
+
+      return {
+        id: member.id,
+        name: member.fullName,
+        birthDate: member.birthDate,
+        deathDate: member.deathDate ?? null,
+        children,
+        spouse,
+      }
+    }
+
+    return {
+      tree: {
+        id: family?.id ?? '',
+        name: family?.name ?? '',
+        createdAt: family?.createdAt ?? new Date(),
+        updatedAt: family?.updatedAt ?? new Date(),
+        root: buildNode(root),
+      },
+    }
   }
 
   async update(id: string, updateFamilyDto: UpdateFamilyDto, userId: string): Promise<Family | null> {

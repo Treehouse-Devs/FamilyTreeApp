@@ -5,6 +5,7 @@ import { CreateFamilyDto } from '@myorg/dto/family/create-family.dto'
 import { GetUser } from 'src/user/get-user.decorator'
 import { UserFromToken } from 'src/user/user.types'
 import { UpdateFamilyDto } from '@myorg/dto/family/update-family.dto'
+import { FamilyTreeResponseDto } from '@myorg/dto/family/family-tree.dto'
 
 @Controller('family')
 @UsePipes(new ValidationPipe({ transform: true }))
@@ -21,6 +22,11 @@ export class FamilyController {
   @Get()
   async find(@Query('search') search: string, @GetUser() user: UserFromToken) {
     return await this.familyService.findAll(search, user.uid)
+  }
+
+  @Get(':id')
+  async getFamilyTree(@Param('id') id: string, @GetUser() user: UserFromToken): Promise<FamilyTreeResponseDto> {
+    return await this.familyService.getFamilyTree(id, user.uid)
   }
 
   @Patch(':id')
