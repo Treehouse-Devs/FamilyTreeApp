@@ -1,4 +1,4 @@
-import { BadRequestException, ConflictException, ForbiddenException, Injectable } from '@nestjs/common'
+import { BadRequestException, ConflictException, ForbiddenException, Inject, Injectable, forwardRef } from '@nestjs/common'
 import { DataSource, Repository } from 'typeorm'
 import { FamilyMember, Gender } from './entities/family-member.entity'
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm'
@@ -13,7 +13,7 @@ export class MemberService {
         @InjectRepository(FamilyMember) private readonly memberRepository: Repository<FamilyMember>,
         @InjectRepository(FamilyRelationship) private readonly relationshipRepository: Repository<FamilyRelationship>,
         @InjectDataSource() private dataSource: DataSource,
-        private familyService: FamilyService,
+        @Inject(forwardRef(() => FamilyService)) private familyService: FamilyService,
   ) {}
 
   async create(createFamilyMemberDto: CreateFamilyMemberDto, userId: string): Promise<FamilyMember> {
