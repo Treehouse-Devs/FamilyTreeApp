@@ -1,20 +1,34 @@
-import { ConflictException, Injectable } from '@nestjs/common'
-import { InjectRepository } from '@nestjs/typeorm'
+import { ConflictException, Inject, Injectable, InternalServerErrorException, forwardRef } from '@nestjs/common'
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm'
 import { Family } from './entities/family.entity'
-import { ILike, Repository } from 'typeorm'
+import { DataSource, EntityManager, ILike, Repository } from 'typeorm'
 import { CreateFamilyDto } from '@myorg/dto/family/create-family.dto'
 import { UpdateFamilyDto } from '@myorg/dto/family/update-family.dto'
+import { UserFromToken } from 'src/user/user.types'
+import { MemberService } from 'src/member/member.service'
 
 @Injectable()
 export class FamilyService {
   constructor(
-        @InjectRepository(Family)
-        private readonly familyRepo: Repository<Family>,
+        @InjectRepository(Family) private readonly familyRepo: Repository<Family>,
+        @InjectDataSource() private dataSource: DataSource,
+        @Inject(forwardRef(() => MemberService)) private familyMemberService: MemberService,
   ) {}
 
-  async create(createFamilyDto: CreateFamilyDto) {
+  async create(createFamilyDto: CreateFamilyDto, user: UserFromToken) {
     const family = this.familyRepo.create(createFamilyDto)
-    return await this.familyRepo.save(family)
+    await this.familyRepo.save(family)
+
+    const date = new Date()
+    const birthDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
+    try {
+      await this.familyMemberService.create({ familyId: family.id, fullName: user.displayName ?? '', gender: 'male', birthDate }, user.uid)
+      return family
+    }
+    catch (error) {
+      await this.familyRepo.delete(family.id)
+      throw new InternalServerErrorException(error)
+    }
   }
 
   async findAll(search: string, userId: string) {

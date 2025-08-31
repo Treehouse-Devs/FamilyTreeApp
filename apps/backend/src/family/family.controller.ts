@@ -15,7 +15,7 @@ export class FamilyController {
   @Post()
   async create(@Body() createFamilyDto: CreateFamilyDto, @GetUser() user: UserFromToken) {
     createFamilyDto.createdByUid = user.uid
-    return await this.familyService.create(createFamilyDto)
+    return await this.familyService.create(createFamilyDto, user)
   }
 
   @Get()
