@@ -1,4 +1,5 @@
 import { Tree, Person } from '@/store/slices/treeSlice'
+import { MockConfig } from '@/types/mockDevTool'
 
 type TreeMock = {
   trees: {
@@ -9,19 +10,6 @@ type TreeMock = {
 export type TreeMockWithParams = {
   fetchTreeById: (id: string) => { tree: Tree }
   fetchPersonById: (id: string) => { person: Person }
-}
-
-export const treeMocks: TreeMock = {
-  trees: {
-    allTrees: [
-      {
-        id: '1f7d15dd-11bc-4e6c-888d-19a1f633d83e',
-        name: 'Bardock Family Tree',
-        createdAt: Date.now(),
-        updatedAt: Date.now(),
-      },
-    ],
-  },
 }
 
 export const treeMocksWithParams: TreeMockWithParams = {
@@ -169,3 +157,17 @@ export const treeMocksWithParams: TreeMockWithParams = {
     },
   }),
 }
+
+export const treeMocks: MockConfig[] = [
+  {
+    id: 'family-list-success',
+    endpoint: 'trees/family-1',
+    method: 'get',
+    enabled: true,
+    responseType: 'success',
+    delay: 500,
+    statusCode: 200,
+    description: 'Successful fetch of family tree with CRUD simulation',
+    responseData: treeMocksWithParams.fetchTreeById('family-1').tree,
+  },
+]

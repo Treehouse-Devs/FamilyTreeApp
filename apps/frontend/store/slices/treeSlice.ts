@@ -121,7 +121,9 @@ export const createTreeSlice: StateCreator<TreeSlice, [], [], TreeSlice> = (set,
   },
 
   get selectedRoot() {
-    const { trees, selectedTreeId } = get()
+    const state = get()
+    if (!state || !state.trees) return undefined
+    const { trees, selectedTreeId } = state
     const selectedTree = trees.find(tree => tree.id === selectedTreeId)
     return selectedTree ? selectedTree.root : undefined
   },

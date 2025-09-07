@@ -3,6 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import { MockConfig, RequestLog } from '../types/mockDevTool'
 import { authMocks } from '@/tests/data/auth'
 import { familyCreateMocks, familyDeleteMocks, familyListMocks } from '@/tests/data/family'
+import { treeMocks } from '@/tests/data/trees'
 
 // Helper function to get display names for groups
 function getGroupDisplayName(groupName: string): string {
@@ -48,6 +49,7 @@ interface MockDevToolStore {
 const DEFAULT_CONFIGS_BY_GROUP = {
   auth: authMocks,
   families: [...familyCreateMocks, ...familyDeleteMocks, ...familyListMocks],
+  trees: treeMocks,
   members: [
     // TODO: Add family members mock configurations
   ],
@@ -101,8 +103,7 @@ export const useMockDevToolStore = create<MockDevToolStore>((set, get) => ({
       const newExpandedGroups = new Set(state.expandedGroups)
       if (newExpandedGroups.has(groupName)) {
         newExpandedGroups.delete(groupName)
-      }
-      else {
+      } else {
         newExpandedGroups.add(groupName)
       }
       return { ...state, expandedGroups: newExpandedGroups }
@@ -121,8 +122,7 @@ export const useMockDevToolStore = create<MockDevToolStore>((set, get) => ({
             if (config.id === id) {
               // Enable the target config
               return { ...config, ...updates }
-            }
-            else if (config.endpoint === targetConfig.endpoint && config.method === targetConfig.method) {
+            } else if (config.endpoint === targetConfig.endpoint && config.method === targetConfig.method) {
               // Disable other configs with the same endpoint and method
               return { ...config, enabled: false }
             }
@@ -232,8 +232,7 @@ export const useMockDevToolStore = create<MockDevToolStore>((set, get) => ({
             requestHistory: data.requestHistory ?? [],
             expandedGroups: new Set(data.expandedGroups ?? ['auth']), // Convert Array back to Set
           }))
-        }
-        else {
+        } else {
           // First time, load defaults
           get().loadDefaultConfigurations()
         }

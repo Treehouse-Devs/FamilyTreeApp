@@ -1,15 +1,16 @@
 import { StyleSheet, RefreshControl, View } from 'react-native'
-import FamilyList from '@/components/family/list'
+import FamilyList from '@/components/custom//family-list/list'
 import { FamilyService } from '@/services/familiyService'
 import { useApi } from '@/hooks/useApi'
 import React from 'react'
-import { FamilyNode } from '@/components/family/list.type'
+import { FamilyNode } from '@/components/custom//family-list/list.type'
 import { Input, InputField } from '@/components/ui/input'
 import { Controller, useForm } from 'react-hook-form'
 import { t } from 'i18next'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { familyRequestSchema } from '@/validator/family/familyValidation'
 import { useFocusEffect } from '@react-navigation/native'
+import { router } from 'expo-router'
 
 export default function App() {
   const {
@@ -40,6 +41,11 @@ export default function App() {
     else {
       await api.fetchFamiliesList({ search: data.name })
     }
+  }
+
+  const navigateToFamilyTree = (family: FamilyNode) => {
+    // Navigate to the family tree screen with the selected family's ID
+    router.push(`/(authenticated)/tree/${family.id}/tree`)
   }
 
   React.useEffect(() => {
@@ -76,7 +82,7 @@ export default function App() {
 
       <FamilyList
         data={result?.data || []}
-        onSelect={family => console.log('Selected family:', family)}
+        onSelect={family => navigateToFamilyTree(family)}
         refreshControl={
           <RefreshControl refreshing={loading} onRefresh={() => void onRefresh()} />
         }

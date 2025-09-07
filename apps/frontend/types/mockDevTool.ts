@@ -1,3 +1,5 @@
+import { BaseResponseData } from './api'
+
 export type HttpMethod = 'get' | 'post' | 'put' | 'patch' | 'delete'
 
 export interface RequestLog {
@@ -20,12 +22,6 @@ export interface RequestCondition {
   response: unknown
 }
 
-export interface BaseResponseData<T> {
-  message?: string
-  error?: string
-  data?: T // Optional data field for dynamic responses
-}
-
 export interface MockConfig {
   id: string
   endpoint: string
@@ -40,7 +36,7 @@ export interface MockConfig {
   description?: string // Human-readable description
   dynamicCount?: number // Number of items to generate for dynamic responses
   isDynamic?: boolean // Whether this config uses dynamic data generation
-  responseData: BaseResponseData<unknown>
+  responseData: unknown
   generateData?: (count: number) => void // Callback function to generate dynamic data
   handler?: (payload?: object) => BaseResponseData<unknown> | null // Custom CRUD handler
 }

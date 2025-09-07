@@ -1,6 +1,7 @@
 import { TreeScreenButtons } from '@/components/custom/family-tree/button'
 import { HStack } from '@/components/ui/hstack'
 import { useFamilyTree } from '@/hooks/useFamilyTree'
+import { useApp } from '@/hooks/useApp'
 import { TreeService } from '@/services/treeService'
 import { useLocalSearchParams } from 'expo-router'
 import { ChevronLeft, Menu, Minus, Plus } from 'lucide-react-native'
@@ -9,9 +10,13 @@ import { View } from 'react-native'
 
 const TreeScreen = () => {
   const { id } = useLocalSearchParams<{ id: string }>()
+  const { hydrated } = useApp()
   const { selectTree, selectedRoot, setRoot } = useFamilyTree()
   const [loading, setLoading] = useState(true)
   const [zoomLevel, setZoomLevel] = useState(1)
+
+  // Don't render until hydrated to prevent accessing undefined state
+  if (!hydrated) return null
 
   useEffect(() => {
     if (!id) return

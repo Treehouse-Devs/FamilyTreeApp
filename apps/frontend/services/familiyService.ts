@@ -1,6 +1,6 @@
-import { FamilyNode } from '@/components/family/list.type'
+import { FamilyNode } from '@/components/custom//family-list/list.type'
 import { BaseService } from './base'
-import { BaseResponseData } from '../types/mockDevTool'
+import { BaseResponseData } from '@/types/api'
 
 export class FamilyService extends BaseService {
   async fetchFamiliesList(params: { search?: string } = {}): Promise<BaseResponseData<FamilyNode[]>> {

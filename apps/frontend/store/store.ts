@@ -44,6 +44,9 @@ export const useStore = create<StoreState>()(
         user: state.user,
         token: state.token,
         hasSeenWelcome: state.hasSeenWelcome,
+        trees: state.trees,
+        persons: state.persons,
+        selectedTreeId: state.selectedTreeId,
       } as unknown as StoreState),
       // Set hydration state when rehydration is complete
       onRehydrateStorage: () => (state) => {

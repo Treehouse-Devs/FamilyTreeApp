@@ -11,7 +11,7 @@ import { Text } from '@/components/ui/text'
 import { FormControl, FormControlErrorText, FormControlLabel, FormControlLabelText } from '@/components/ui/form-control'
 import { useApi } from '@/hooks/useApi'
 import { FamilyService } from '@/services/familiyService'
-import { FamilyNode } from '@/components/family/list.type'
+import { FamilyNode } from '@/components/custom/family-list/list.type'
 
 export default function AddFamily() {
   const { t } = useTranslation()

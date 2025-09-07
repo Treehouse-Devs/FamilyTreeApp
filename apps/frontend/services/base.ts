@@ -38,14 +38,12 @@ export class BaseService {
         )
         if (hasCustomConfigs) {
           response = await MockApi.handleRequest(url, method, payload) as T
-        }
-        else {
+        } else {
           throw new Error(
             `Mock data is enabled, but no matching mock configuration found for ${method.toUpperCase()} ${url}. Please check your mock configurations.`,
           )
         }
-      }
-      else {
+      } else {
         const apiResponse = await api.request<T>({
           method,
           url,
@@ -75,8 +73,7 @@ export class BaseService {
       }
 
       return response
-    }
-    catch (error) {
+    } catch (error) {
       // Log failed request
       if (ENABLE_DEVTOOLS) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment

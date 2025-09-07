@@ -29,8 +29,8 @@ export default function AppLayout() {
         name="index"
         options={{
           title: 'Home',
-          tabBarActiveTintColor: '#D3A98F',
-          tabBarIcon: ({ focused }) => <HomeIcon size={24} color={focused ? '#C28762' : '#000000'} />,
+          tabBarActiveTintColor: 'primary',
+          tabBarIcon: ({ focused }) => <HomeIcon size={24} color={focused ? '#DE9776' : 'black'} />,
         }}
       />
       <Tabs.Screen
@@ -45,7 +45,7 @@ export default function AppLayout() {
                 width: 60,
                 height: 60,
                 borderRadius: 30,
-                backgroundColor: focused ? '#C28762' : '#D3A98F',
+                backgroundColor: focused ? '#97654C' : '#DE9776',
                 justifyContent: 'center',
                 alignItems: 'center',
               }}
@@ -59,8 +59,21 @@ export default function AppLayout() {
         name="settings"
         options={{
           title: 'Settings',
-          tabBarActiveTintColor: '#D3A98F',
-          tabBarIcon: ({ focused }) => <SettingsIcon size={24} color={focused ? '#C28762' : '#000000'} />,
+          tabBarActiveTintColor: '#DE9776',
+          tabBarIcon: ({ focused }) => <SettingsIcon size={24} color={focused ? '#97654C' : '#000000'} />,
+        }}
+      />
+      <Tabs.Screen
+        name="tree/[id]"
+        options={{
+          href: null, // Hide this route from tabs
+          tabBarStyle: { display: 'none' }, // Hide tab bar when on this route
+        }}
+      />
+      <Tabs.Screen
+        name="tree/[id]/tree"
+        options={{
+          href: null, // Hide this route from tabs
         }}
       />
     </Tabs>

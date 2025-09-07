@@ -1,5 +1,6 @@
-import { FamilyNode } from 'apps/frontend/components/family/list.type'
-import { BaseResponseData, MockConfig } from 'types/mockDevTool'
+import { FamilyNode } from '@/components/custom/family-list/list.type'
+import { BaseResponseData } from '@/types/api'
+import { MockConfig } from '@/types/mockDevTool'
 
 // Generate dynamic family data based on count
 export function generateFamilyData(count: number): FamilyNode[] {
