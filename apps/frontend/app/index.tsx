@@ -1,7 +1,8 @@
-import { router } from 'expo-router'
+import { router, Redirect } from 'expo-router'
 import React, { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useApp } from '@/hooks/useApp'
+import { useAuth } from '@/hooks/useAuth'
 import { VStack } from '@/components/ui/vstack'
 import { Text } from '@/components/ui/text'
 import { Button, ButtonText } from '@/components/ui/button'
@@ -11,6 +12,12 @@ import welcomeImage from '@/assets/images/welcome.webp'
 export default function WelcomeScreen() {
   const { t } = useTranslation()
   const { setHasSeenWelcome, hasSeenWelcome } = useApp()
+  const { isLoggedIn } = useAuth()
+
+  // Auto-redirect to authenticated area when mock data is enabled (bypasses login)
+  if (isLoggedIn) {
+    return <Redirect href="/(authenticated)" />
+  }
 
   // if (hasSeenWelcome) {
   //   return <Redirect href="/auth/signin" />

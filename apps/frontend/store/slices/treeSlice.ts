@@ -1,4 +1,4 @@
-import { findPersonById, setPerson } from '@/utils/tree-slice-utils'
+import { collectAllPersons, findPersonById, setPerson } from '@/utils/tree-slice-utils'
 import { StateCreator } from 'zustand'
 
 // TODO use DTO
@@ -36,6 +36,7 @@ export interface Tree {
   name: string
   createdAt: number
   updatedAt: number
+  familyImageUrl?: string
   root?: Person
 }
 
@@ -58,6 +59,7 @@ export interface TreeActions {
   addPersonDetail: (treeId: string, personId: string, person: DetailedPerson) => void
   patchPersonDetail: (treeId: string, personId: string, person: Partial<DetailedPerson>) => void
   getPersonDetail: (treeId: string, personId: string) => DetailedPerson | undefined
+  getArrayOfPerson: (treeId: string) => DetailedPerson[]
 }
 
 export interface TreeSlice extends TreeState, TreeActions {}
@@ -121,7 +123,9 @@ export const createTreeSlice: StateCreator<TreeSlice, [], [], TreeSlice> = (set,
   },
 
   get selectedRoot() {
-    const { trees, selectedTreeId } = get()
+    const state = get()
+    if (!state) return undefined
+    const { trees, selectedTreeId } = state
     const selectedTree = trees.find(tree => tree.id === selectedTreeId)
     return selectedTree ? selectedTree.root : undefined
   },
@@ -195,7 +199,26 @@ export const createTreeSlice: StateCreator<TreeSlice, [], [], TreeSlice> = (set,
   },
 
   getPersonDetail: (treeId, personId) => {
-    const { persons } = get()
+    const state = get()
+    if (!state) return undefined
+    const { persons } = state
     return persons[treeId]?.[personId]
+  },
+
+  getArrayOfPerson: (treeId) => {
+    const state = get()
+    if (!state) return []
+    const { trees, persons } = state
+    const tree = trees.find(t => t.id === treeId)
+    if (!tree || !tree.root) return []
+
+    const allPersons = collectAllPersons(tree.root)
+    return allPersons.map((person) => {
+      const detail = persons[treeId]?.[person.id]
+      return {
+        ...person,
+        ...(detail || {}),
+      }
+    })
   },
 })

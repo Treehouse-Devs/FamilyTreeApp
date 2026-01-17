@@ -39,5 +39,11 @@
   "loginErrorMessage": "Ada masalah saat proses masuk. Coba lagi ya!",
   "resetPasswordSuccess": "Berhasil mengatur ulang kata sandi",
   "resetPasswordFailed": "Gagal mengatur ulang kata sandi",
-  "resetPasswordErrorMessage": "Ada masalah saat mengatur ulang kata sandi. Coba lagi ya!"
+  "resetPasswordErrorMessage": "Ada masalah saat mengatur ulang kata sandi. Coba lagi ya!",
+  "age": "Usia {{years}} tahun",
+  "deceased": "Wafat {{year}}",
+  "familyMemberList": "Daftar Anggota",
+  "share": "Bagikan",
+  "print": "Cetak",
+  "remove": "Hapus"
 }
