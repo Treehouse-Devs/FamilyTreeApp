@@ -71,3 +71,25 @@ function processDescendants(node: Person): number {
 
   return processedCount
 }
+
+export function collectAllPersons(root: Person): Person[] {
+  const visited = new Set<string>()
+  const persons: Person[] = []
+  const queue: Person[] = [root]
+
+  while (queue.length > 0) {
+    const current = queue.shift()
+    if (!current || visited.has(current.id)) continue
+
+    visited.add(current.id)
+    persons.push(current)
+
+    if (current.spouse) {
+      queue.push(current.spouse)
+    }
+    if (current.children) {
+      queue.push(...current.children)
+    }
+  }
+  return persons
+}

@@ -1,0 +1,166 @@
+import { TreeScreenButtons } from '@/components/custom/family-tree/button'
+import { HStack } from '@/components/ui/hstack'
+import { useFamilyTree } from '@/hooks/useFamilyTree'
+import { TreeService } from '@/services/treeService'
+import { useLocalSearchParams, router } from 'expo-router'
+import { ChevronLeft, Menu, Minus, Plus } from 'lucide-react-native'
+import { useEffect, useState, useCallback } from 'react'
+import { View, ActivityIndicator } from 'react-native'
+import { GestureHandlerRootView } from 'react-native-gesture-handler'
+
+import { LinearGradient } from 'expo-linear-gradient'
+import { asHex, getVar, useCurrentMode } from '@/utils/color-token'
+import { FamilyTreeSkia } from '@/components/custom/family-tree/skia'
+
+import { ButtonIcon } from '@/components/ui/button'
+import { FamilyMenuActionSheet } from '@/components/custom/family-tree/action-sheet'
+
+const TreeScreen = () => {
+  const { id } = useLocalSearchParams<{ id: string }>()
+  const { selectTree, selectedRoot, setRoot, setTree } = useFamilyTree()
+  const [loading, setLoading] = useState(true)
+  const [zoomLevel, setZoomLevel] = useState(1)
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
+
+  const mode = useCurrentMode()
+  // Resolve colors for gradient
+  const colorPrimary0 = asHex(getVar(mode, 'primary', '0'))
+  const colorPrimary50 = asHex(getVar(mode, 'primary', '50'))
+
+  // Callback for pinch gesture zoom changes
+  const handleZoomChange = useCallback((newScale: number) => {
+    setZoomLevel(newScale)
+  }, [])
+
+  useEffect(() => {
+    if (!id) return
+    let cancelled = false
+
+    selectTree(id)
+
+    const fetchTree = async () => {
+      setLoading(true)
+      try {
+        const tree = await TreeService.fetchTreeById(id)
+        if (!cancelled && tree) {
+          setTree(tree)
+          if (tree.root) {
+            setRoot(tree.root)
+          }
+        }
+      } catch (err) {
+        if (!cancelled) {
+          console.error('Failed to fetch tree:', err)
+          // TODO show alert
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false)
+        }
+      }
+    }
+
+    void fetchTree()
+
+    return () => {
+      cancelled = true
+    }
+  }, [id]) // Only re-fetch when id changes
+
+  if (loading) {
+    return (
+      <LinearGradient
+        colors={[colorPrimary0, colorPrimary50]}
+        style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}
+      >
+        <ActivityIndicator size="large" />
+      </LinearGradient>
+    )
+  }
+
+  if (!selectedRoot) return null
+
+  const onPress = (type: 'back' | 'zoomIn' | 'zoomOut' | 'menu') => () => {
+    switch (type) {
+      case 'back':
+        router.back()
+        break
+      case 'zoomIn': {
+        // Limit zoom level to 200%
+        const newZoomLevel = Math.min(zoomLevel + 0.4, 2)
+        setZoomLevel(newZoomLevel)
+        break
+      }
+      case 'zoomOut': {
+        // Limit zoom level to 50%
+        const newZoomLevelOut = Math.max(zoomLevel - 0.4, 0.5)
+        setZoomLevel(newZoomLevelOut)
+        break
+      }
+      case 'menu': {
+        console.log('menu opened')
+        setIsMenuOpen(true)
+        break
+      }
+    }
+  }
+
+  return (
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <LinearGradient
+        colors={[colorPrimary0, colorPrimary50]}
+        style={{ flex: 1 }}
+      >
+        {/* Canvas layer - full screen */}
+        <View style={{ flex: 1, marginTop: 48 }}>
+          <FamilyTreeSkia
+            root={selectedRoot}
+            scale={zoomLevel}
+            minScale={0.5}
+            maxScale={2}
+            onZoomChange={handleZoomChange}
+          />
+        </View>
+        {/* Header layer - overlays canvas but allows touch passthrough */}
+        <View
+          style={{ position: 'absolute', top: 48, left: 0, right: 0, zIndex: 10 }}
+          pointerEvents="box-none"
+        >
+          <HStack className="items-center p-2 w-screen" space="md" pointerEvents="box-none">
+            <TreeScreenButtons
+              button={{
+                icon: <ButtonIcon as={ChevronLeft} className="text-secondary-900 w-8 h-8" />,
+                onPress: onPress('back'),
+              }}
+            />
+            <TreeScreenButtons buttons={[
+              {
+                icon: <ButtonIcon as={Minus} className="text-secondary-900 w-8 h-8" pointerEvents="none" />,
+                onPress: onPress('zoomOut'),
+              },
+              {
+                label: `${Math.round(zoomLevel * 100)}%`,
+              },
+              {
+                icon: <ButtonIcon as={Plus} className="text-secondary-900 w-8 h-8" pointerEvents="none" />,
+                onPress: onPress('zoomIn'),
+              },
+            ]}
+            />
+            <TreeScreenButtons
+              button={{
+                icon: <ButtonIcon as={Menu} className="text-secondary-900 w-8 h-8" />,
+                onPress: onPress('menu'),
+              }}
+              className="ml-auto"
+            />
+
+          </HStack>
+        </View>
+      </LinearGradient>
+      <FamilyMenuActionSheet isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} />
+    </GestureHandlerRootView>
+  )
+}
+
+export default TreeScreen

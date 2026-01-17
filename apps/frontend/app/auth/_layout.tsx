@@ -18,22 +18,18 @@ export default function RootLayout() {
     text = from === 'signup'
       ? t('signinAfterSignup')
       : from === 'resetPassword' ? t('signinAfterResetPasswordTitle') : t('signinTitle')
-  }
-  else if (pathname === '/auth/signup') {
+  } else if (pathname === '/auth/signup') {
     text = t('signupTitle')
-  }
-  else if (pathname === '/auth/forget-password') {
+  } else if (pathname === '/auth/forget-password') {
     text = t('forgetPasswordTitle')
   }
 
   const onNavigationClick = () => {
     if (pathname === '/auth/signin') {
       router.push('/auth/signup')
-    }
-    else if (pathname === '/auth/signup') {
+    } else if (pathname === '/auth/signup') {
       router.replace('/auth/signin')
-    }
-    else if (pathname === '/auth/forget-password') {
+    } else if (pathname === '/auth/forget-password') {
       router.push('/auth/signup')
     }
   }
