@@ -45,5 +45,16 @@
   "familyMemberList": "Family Members",
   "share": "Share",
   "print": "Print",
-  "remove": "Remove"
+  "remove": "Remove",
+  "add": "Add",
+  "addFamilyMember": "Add Family Member",
+  "details": "Details",
+  "parents": "Parents",
+  "spouse": "Spouse",
+  "sibling": "Sibling",
+  "children": "Children",
+  "cancel": "Cancel",
+  "confirmRemove": "Are you sure?",
+  "confirmRemoveDescriptionWithDependents": "Removing this person will also remove all their dependents below.",
+  "confirmRemoveDescription": "If you remove this person, they will be removed permanently."
 }

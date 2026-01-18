@@ -11,9 +11,11 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { LinearGradient } from 'expo-linear-gradient'
 import { asHex, getVar, useCurrentMode } from '@/utils/color-token'
 import { FamilyTreeSkia } from '@/components/custom/family-tree/skia'
+import { Person } from '@/store/slices/treeSlice'
 
 import { ButtonIcon } from '@/components/ui/button'
 import { FamilyMenuActionSheet } from '@/components/custom/family-tree/action-sheet'
+import { MemberType, PersonTooltip } from '@/components/custom/family-tree/tooltip'
 
 const TreeScreen = () => {
   const { id } = useLocalSearchParams<{ id: string }>()
@@ -21,6 +23,7 @@ const TreeScreen = () => {
   const [loading, setLoading] = useState(true)
   const [zoomLevel, setZoomLevel] = useState(1)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [selectedPerson, setSelectedPerson] = useState<Person | null>(null)
 
   const mode = useCurrentMode()
   // Resolve colors for gradient
@@ -30,6 +33,11 @@ const TreeScreen = () => {
   // Callback for pinch gesture zoom changes
   const handleZoomChange = useCallback((newScale: number) => {
     setZoomLevel(newScale)
+  }, [])
+
+  // Callback for person card press
+  const handlePersonPress = useCallback((person: Person) => {
+    setSelectedPerson(person)
   }, [])
 
   useEffect(() => {
@@ -98,7 +106,6 @@ const TreeScreen = () => {
         break
       }
       case 'menu': {
-        console.log('menu opened')
         setIsMenuOpen(true)
         break
       }
@@ -119,6 +126,7 @@ const TreeScreen = () => {
             minScale={0.5}
             maxScale={2}
             onZoomChange={handleZoomChange}
+            onPressNode={handlePersonPress}
           />
         </View>
         {/* Header layer - overlays canvas but allows touch passthrough */}
@@ -126,39 +134,56 @@ const TreeScreen = () => {
           style={{ position: 'absolute', top: 48, left: 0, right: 0, zIndex: 10 }}
           pointerEvents="box-none"
         >
-          <HStack className="items-center p-2 w-screen" space="md" pointerEvents="box-none">
+          <HStack className="items-center p-2 w-screen px-4" space="md" pointerEvents="box-none">
             <TreeScreenButtons
               button={{
                 icon: <ButtonIcon as={ChevronLeft} className="text-secondary-900 w-8 h-8" />,
                 onPress: onPress('back'),
               }}
             />
-            <TreeScreenButtons buttons={[
-              {
-                icon: <ButtonIcon as={Minus} className="text-secondary-900 w-8 h-8" pointerEvents="none" />,
-                onPress: onPress('zoomOut'),
-              },
-              {
-                label: `${Math.round(zoomLevel * 100)}%`,
-              },
-              {
-                icon: <ButtonIcon as={Plus} className="text-secondary-900 w-8 h-8" pointerEvents="none" />,
-                onPress: onPress('zoomIn'),
-              },
-            ]}
+            <TreeScreenButtons
+              buttons={[
+                {
+                  icon: <ButtonIcon as={Minus} className="text-secondary-900 w-8 h-8" pointerEvents="none" />,
+                  onPress: onPress('zoomOut'),
+                },
+                {
+                  label: `${Math.round(zoomLevel * 100)}%`,
+                },
+                {
+                  icon: <ButtonIcon as={Plus} className="text-secondary-900 w-8 h-8" pointerEvents="none" />,
+                  onPress: onPress('zoomIn'),
+                },
+              ]}
+              className="mx-auto"
             />
             <TreeScreenButtons
               button={{
                 icon: <ButtonIcon as={Menu} className="text-secondary-900 w-8 h-8" />,
                 onPress: onPress('menu'),
               }}
-              className="ml-auto"
             />
-
           </HStack>
         </View>
       </LinearGradient>
       <FamilyMenuActionSheet isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} />
+
+      {/* Person Card Menu */}
+      {selectedPerson && (
+        <PersonTooltip
+          person={selectedPerson}
+          visible={selectedPerson !== null}
+          treeId={id}
+          onClose={() => setSelectedPerson(null)}
+          onAddMember={(type: MemberType) => {
+            // TODO: Implement add member based on type
+            console.log('Add member type:', type)
+          }}
+          onViewDetails={() => {
+            // TODO: Implement edit person
+          }}
+        />
+      )}
     </GestureHandlerRootView>
   )
 }

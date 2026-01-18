@@ -13,6 +13,7 @@
     "@expo/html-elements": "0.4.2",
     "@gluestack-ui/actionsheet": "^0.2.53",
     "@gluestack-ui/button": "^1.0.14",
+    "@gluestack-ui/core": "^3.0.12",
     "@gluestack-ui/divider": "^0.1.10",
     "@gluestack-ui/form-control": "^0.1.19",
     "@gluestack-ui/icon": "^0.1.27",
@@ -23,6 +24,7 @@
     "@gluestack-ui/pressable": "^0.1.23",
     "@gluestack-ui/toast": "^1.0.9",
     "@hookform/resolvers": "^5.1.1",
+    "@legendapp/motion": "2.4.0",
     "@myorg/dto": "*",
     "@react-native-async-storage/async-storage": "^2.2.0",
     "@shopify/react-native-skia": "2.2.12",
@@ -60,6 +62,7 @@
   "devDependencies": {
     "@babel/core": "^7.25.2",
     "@gluestack-ui/nativewind-utils": "^1.0.26",
+    "@gluestack-ui/utils": "^3.0.15",
     "@types/react": "~19.1.10",
     "jscodeshift": "0.15.2",
     "typescript": "~5.9.2"

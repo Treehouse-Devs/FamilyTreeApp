@@ -15,6 +15,9 @@ export const useFamilyTree = () => {
   const addPerson = useStore(state => state.addPerson)
   const setPerson = useStore(state => state.setPerson)
   const getArrayOfPerson = useStore(state => state.getArrayOfPerson)
+  const hasSpouse = useStore(state => state.hasSpouse)
+  const isRoot = useStore(state => state.isRoot)
+  const collectAllDependents = useStore(state => state.collectAllDependents)
 
   return {
     trees,
@@ -29,5 +32,8 @@ export const useFamilyTree = () => {
     addPerson,
     setPerson,
     getArrayOfPerson,
+    hasSpouse,
+    isRoot,
+    collectAllDependents,
   }
 }
