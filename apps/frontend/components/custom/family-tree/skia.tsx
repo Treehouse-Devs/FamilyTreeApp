@@ -1,5 +1,5 @@
 // FamilyTreeSkia.tsx
-import React, { useMemo, useEffect } from 'react'
+import React, { useMemo, useEffect, useState } from 'react'
 import { useWindowDimensions } from 'react-native'
 import { useTranslation } from 'react-i18next'
 import {
@@ -88,9 +88,7 @@ const calculateSubtreeWidth = (person: Person): number => {
 /**
  * Format birth year from timestamp
  */
-const getYear = (timestamp: number): string => {
-  return new Date(timestamp).getFullYear().toString()
-}
+import { getYear, getAge } from '@/utils/date'
 
 /**
  * Calculate age or death info
@@ -98,15 +96,13 @@ const getYear = (timestamp: number): string => {
 type TFunction = (key: string, options?: Record<string, unknown>) => string
 
 const getAgeInfo = (birthDate: number, deathDate: number | undefined, t: TFunction): string => {
-  const birthYear = new Date(birthDate).getFullYear()
+  const age = getAge(birthDate, deathDate)
 
   if (deathDate) {
-    const deathYear = new Date(deathDate).getFullYear()
+    const deathYear = getYear(deathDate)
     return t('deceased', { year: deathYear })
   }
 
-  const currentYear = new Date().getFullYear()
-  const age = currentYear - birthYear
   return t('age', { years: age })
 }
 
@@ -140,6 +136,9 @@ export const FamilyTreeSkia: React.FC<Props> = ({
   const savedTranslateX = useSharedValue(0)
   const savedTranslateY = useSharedValue(0)
 
+  // Track pressed node for visual feedback
+  const [pressedNodeId, setPressedNodeId] = useState<string | null>(null)
+
   // Get viewport dimensions for view-center zoom
   const { width: viewportWidth, height: viewportHeight } = useWindowDimensions()
 
@@ -152,13 +151,14 @@ export const FamilyTreeSkia: React.FC<Props> = ({
 
   // Colors based on current mode
   const CARD_FILL_COLOR = asHex(getVar(mode, 'secondary', '0'))
+  const CARD_PRESSED_FILL_COLOR = asHex(getVar(mode, 'secondary', '50'))
   const CARD_BORDER_COLOR = asHex(getVar(mode, 'secondary', '500'))
   const TEXT_COLOR = asHex(getVar(mode, 'secondary', '900'))
   const EDGE_COLOR = asHex(getVar(mode, 'primary', '800'))
 
   // Load font
   // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-require-imports
-  const nameFont = useFont(require('@expo-google-fonts/plus-jakarta-sans/500Medium/PlusJakartaSans_500Medium.ttf'), 14)
+  const nameFont = useFont(require('@expo-google-fonts/plus-jakarta-sans/600SemiBold/PlusJakartaSans_600SemiBold.ttf'), 14)
   // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-require-imports
   const smallFont = useFont(require('@expo-google-fonts/plus-jakarta-sans/400Regular/PlusJakartaSans_400Regular.ttf'), 11)
 
@@ -331,33 +331,56 @@ export const FamilyTreeSkia: React.FC<Props> = ({
     if (onZoomChange) {
       onZoomChange(initialScale)
     }
-
-    console.log(viewportWidth, contentWidth, initialTranslateX)
   }, [contentMinX, contentMinY, contentMaxX, contentMaxY, viewportWidth, viewportHeight, onZoomChange])
 
   // Handle tap gesture
-  const tapGesture = Gesture.Tap().onEnd((event) => {
-    if (!onPressNode) return
+  const tapGesture = Gesture.Tap()
+    .onBegin((event) => {
+      'worklet'
+      const { x, y } = event
+      const adjustedX = x / scale
+      const adjustedY = y / scale
 
-    const { x, y } = event
-
-    // Adjust tap coordinates based on current scale
-    const adjustedX = x / scale
-    const adjustedY = y / scale
-
-    // Find which node was tapped
-    for (const node of nodes) {
-      if (
-        adjustedX >= node.x
-        && adjustedX <= node.x + NODE_W
-        && adjustedY >= node.y
-        && adjustedY <= node.y + NODE_H
-      ) {
-        onPressNode(node.person)
-        break
+      // Find which node is being pressed
+      for (const node of nodes) {
+        if (
+          adjustedX >= node.x
+          && adjustedX <= node.x + NODE_W
+          && adjustedY >= node.y
+          && adjustedY <= node.y + NODE_H
+        ) {
+          runOnJS(setPressedNodeId)(node.id)
+          break
+        }
       }
-    }
-  })
+    })
+    .onFinalize(() => {
+      'worklet'
+      runOnJS(setPressedNodeId)(null)
+    })
+    .onEnd((event) => {
+      'worklet'
+      if (!onPressNode) return
+
+      const { x, y } = event
+
+      // Adjust tap coordinates based on current scale
+      const adjustedX = x / scale
+      const adjustedY = y / scale
+
+      // Find which node was tapped
+      for (const node of nodes) {
+        if (
+          adjustedX >= node.x
+          && adjustedX <= node.x + NODE_W
+          && adjustedY >= node.y
+          && adjustedY <= node.y + NODE_H
+        ) {
+          runOnJS(onPressNode)(node.person)
+          break
+        }
+      }
+    })
 
   // Handle pinch gesture for zoom (requires 2 fingers)
   const pinchGesture = Gesture.Pinch()
@@ -551,7 +574,7 @@ export const FamilyTreeSkia: React.FC<Props> = ({
               node={node}
               nameFont={nameFont}
               smallFont={smallFont}
-              cardFillColor={CARD_FILL_COLOR}
+              cardFillColor={pressedNodeId === node.id ? CARD_PRESSED_FILL_COLOR : CARD_FILL_COLOR}
               cardBorderColor={CARD_BORDER_COLOR}
               textColor={TEXT_COLOR}
               t={t}

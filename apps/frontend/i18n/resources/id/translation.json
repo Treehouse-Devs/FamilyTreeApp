@@ -45,5 +45,16 @@
   "familyMemberList": "Daftar Anggota",
   "share": "Bagikan",
   "print": "Cetak",
-  "remove": "Hapus"
+  "remove": "Hapus",
+  "add": "Tambah",
+  "addFamilyMember": "Tambah Anggota Keluarga",
+  "details": "Detail",
+  "parents": "Orang Tua",
+  "spouse": "Suami/Istri",
+  "sibling": "Kakak/Adik",
+  "children": "Anak",
+  "cancel": "Batal",
+  "confirmRemove": "Apakah kamu yakin?",
+  "confirmRemoveDescriptionWithDependents": "Menghapus anggota ini akan menghapus semua anggota yang tergantung pada anggota ini.",
+  "confirmRemoveDescription": "Jika kamu menghapus anggota ini, maka anggota ini akan dihapus secara permanen."
 }

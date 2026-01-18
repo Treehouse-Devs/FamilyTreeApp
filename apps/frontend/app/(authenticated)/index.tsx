@@ -85,14 +85,6 @@ export default function App() {
             />
           )}
 
-      {/* Demo button - navigate to a test tree */}
-      <TouchableOpacity
-        style={styles.demoButton}
-        onPress={() => navigateToTree('demo')}
-      >
-        <Text style={styles.demoButtonText}>View Demo Tree</Text>
-      </TouchableOpacity>
-
       <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
         <Text style={styles.logoutButtonText}>Logout</Text>
       </TouchableOpacity>

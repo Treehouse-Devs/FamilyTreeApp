@@ -33,12 +33,14 @@ export const treeMocksWithParams: TreeMockWithParams = {
       imageThumbnailUrl: '/images/thumbnails/dbc07888-3701-40c4-87be-4df09f04e324.jpg',
       birthDate: -916617600000,
       deathDate: 1628553600000,
+      spouseId: 'b83d4904-b535-401c-9c63-37f0d9096435',
       children: [
         {
           id: 'c6a256ab-7747-488b-81de-a7cf9c9b2910',
           name: 'Raditz',
           imageThumbnailUrl: '/images/thumbnails/c6a256ab-7747-488b-81de-a7cf9c9b2910.jpg',
           birthDate: -296438400000,
+          spouseId: 'f2ac7d84-a7ea-4195-8e46-04042cfc81c8',
           children: [
             {
               id: '5330e122-3fec-4e4e-97be-0a7868c49242',
@@ -70,6 +72,7 @@ export const treeMocksWithParams: TreeMockWithParams = {
             name: 'Launch',
             imageThumbnailUrl: '/images/thumbnails/f2ac7d84-a7ea-4195-8e46-04042cfc81c8.jpg',
             birthDate: -198720000000,
+            spouseId: 'c6a256ab-7747-488b-81de-a7cf9c9b2910',
             children: [],
             isBloodRelated: false,
           },
@@ -80,12 +83,14 @@ export const treeMocksWithParams: TreeMockWithParams = {
           name: 'Goku',
           imageThumbnailUrl: '/images/thumbnails/56dc74ba-7600-4f0b-ad06-bab252a8f0de.jpg',
           birthDate: -146102400000,
+          spouseId: '783d4904-b535-401c-9c63-37f0d9096435',
           children: [
             {
               id: 'e1a15888-6a4b-4143-9521-fc45deb5d2a5',
               name: 'Gohan',
               imageThumbnailUrl: '/images/thumbnails/e1a15888-6a4b-4143-9521-fc45deb5d2a5.jpg',
               birthDate: 543024000000,
+              spouseId: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
               children: [
                 {
                   id: 'c5d4904a-b535-401c-9c63-37f0d9096435',
@@ -101,6 +106,7 @@ export const treeMocksWithParams: TreeMockWithParams = {
                 name: 'Videl',
                 imageThumbnailUrl: '/images/thumbnails/f2ac7d84-a7ea-4195-8e46-04042cfc81c8.jpg',
                 birthDate: 568944000000,
+                spouseId: 'e1a15888-6a4b-4143-9521-fc45deb5d2a5',
                 children: [],
                 isBloodRelated: false,
               },
@@ -120,6 +126,7 @@ export const treeMocksWithParams: TreeMockWithParams = {
             name: 'Chi-Chi',
             imageThumbnailUrl: '/images/thumbnails/783d4904-b535-401c-9c63-37f0d9096435.jpg',
             birthDate: 74304000000,
+            spouseId: '56dc74ba-7600-4f0b-ad06-bab252a8f0de',
             children: [],
             isBloodRelated: false,
           },
@@ -131,6 +138,7 @@ export const treeMocksWithParams: TreeMockWithParams = {
         name: 'Gine',
         imageThumbnailUrl: '/images/thumbnails/b83d4904-b535-401c-9c63-37f0d9096435.jpg',
         birthDate: -773798400000,
+        spouseId: 'dbc07888-3701-40c4-87be-4df09f04e324',
         children: [],
         isBloodRelated: true,
       },

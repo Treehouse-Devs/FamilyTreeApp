@@ -10,6 +10,7 @@ export interface Person {
   deathDate?: number
   children?: Person[]
   spouse?: Person
+  spouseId?: string
   imageThumbnailUrl?: string
 }
 
@@ -54,12 +55,15 @@ export interface TreeActions {
   selectTree: (treeId: string) => void
   setRoot: (root: Person) => void
   selectedRoot?: Person
-  addPerson: (Person: Person, type: 'spouse' | 'children' | 'parent', originId: string) => void
-  setPerson: (Person: Person) => void
+  addPerson: (person: Person, type: 'spouse' | 'children' | 'parent', originId: string) => void
+  setPerson: (person: Person) => void
   addPersonDetail: (treeId: string, personId: string, person: DetailedPerson) => void
   patchPersonDetail: (treeId: string, personId: string, person: Partial<DetailedPerson>) => void
   getPersonDetail: (treeId: string, personId: string) => DetailedPerson | undefined
   getArrayOfPerson: (treeId: string) => DetailedPerson[]
+  hasSpouse: (treeId: string, personId: string) => boolean
+  isRoot: (treeId: string, personId: string) => boolean
+  collectAllDependents: (treeId: string, personId: string) => Person[]
 }
 
 export interface TreeSlice extends TreeState, TreeActions {}
@@ -118,6 +122,12 @@ export const createTreeSlice: StateCreator<TreeSlice, [], [], TreeSlice> = (set,
           tree.id === selectedTreeId ? { ...tree, root } : tree,
         ),
         selectedRoot: root,
+        persons: {
+          [selectedTreeId!]: get().getArrayOfPerson(selectedTreeId!).reduce((acc, person) => {
+            acc[person.id] = person
+            return acc
+          }, {} as Record<string, DetailedPerson>),
+        },
       }
     })
   },
@@ -220,5 +230,38 @@ export const createTreeSlice: StateCreator<TreeSlice, [], [], TreeSlice> = (set,
         ...(detail || {}),
       }
     })
+  },
+
+  hasSpouse: (treeId, personId) => {
+    const state = get()
+    if (!state) return false
+    const { persons } = state
+    return !!persons[treeId]?.[personId]?.spouseId
+  },
+
+  isRoot: (treeId, personId) => {
+    const state = get()
+    if (!state) return false
+    const { trees } = state
+    const tree = trees.find(t => t.id === treeId)
+    if (!tree || !tree.root) return false
+    if (tree.root.id === personId) return true
+    const person = findPersonById(tree.root, personId)
+    if (!person) return false
+    return person.spouseId === tree.root.id
+  },
+
+  collectAllDependents: (treeId, personId) => {
+    const state = get()
+    if (!state) return []
+    const { trees } = state
+    const tree = trees.find(t => t.id === treeId)
+    if (!tree || !tree.root) return []
+    const person = findPersonById(tree.root, personId)
+    if (!person) return []
+
+    // recursively find all dependents
+    const dependents = collectAllPersons(person)
+    return dependents
   },
 })
