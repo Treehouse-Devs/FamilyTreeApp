@@ -1,4 +1,6 @@
 import { DetailedPerson, Tree } from '@/store/slices/treeSlice'
+import { useStore } from '@/store/store'
+import { composeTreeFromFlat, FlatTree } from '@/utils/tree-compose'
 import { BaseService } from './base'
 
 export class TreeService extends BaseService {
@@ -11,6 +13,8 @@ export class TreeService extends BaseService {
   }
 
   static async updateTree(tree: Tree) {
+    // update tree in zustand store
+    useStore.getState().setTree(tree)
     return this.put<Tree>(`/trees/${tree.id}`, tree)
   }
 
@@ -19,7 +23,11 @@ export class TreeService extends BaseService {
   }
 
   static async fetchTreeById(treeId: string) {
-    return this.get<Tree>(`/trees/${treeId}`)
+    const flatTree = await this.get<FlatTree>(`/trees/${treeId}`)
+    const tree = composeTreeFromFlat(flatTree)
+    // Store the tree in Zustand store
+    useStore.getState().setTree(tree)
+    return tree
   }
 
   static async fetchPersonById(treeId: string, personId: string) {

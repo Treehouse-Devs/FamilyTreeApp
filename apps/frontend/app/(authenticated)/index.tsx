@@ -16,6 +16,12 @@ export default function App() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    // Only fetch if store is empty
+    if (trees.length > 0) {
+      setLoading(false)
+      return
+    }
+
     const fetchTrees = async () => {
       try {
         const treesData = await TreeService.fetchTrees()
@@ -28,7 +34,7 @@ export default function App() {
     }
 
     void fetchTrees()
-  }, [setTrees])
+  }, [trees.length, setTrees])
 
   const handleLogout = () => {
     try {

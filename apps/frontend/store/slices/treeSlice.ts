@@ -16,17 +16,17 @@ export interface Person {
 
 export interface DetailedPerson extends Person {
   gender?: 'male' | 'female'
-  nationality?: string
-  addresses?: {
+  location?: {
+    nationality?: string
     hometown?: string
-    residence?: string
+    domicile?: string
   }
   contact?: {
-    mobile?: string
-    home?: string
+    phoneNumber: number | null
+    homeNumber: number | null
   }
-  job?: {
-    title?: string
+  occupation?: {
+    occupation?: string
     officeAddress?: string
   }
   fullImageUrl?: string

@@ -7,6 +7,7 @@ import { Printer, Share2, Trash, Pencil, Users, Check } from 'lucide-react-nativ
 import { Button, ButtonIcon } from '@/components/ui/button'
 import { useTranslation } from 'react-i18next'
 import { Input, InputField } from '@/components/ui/input'
+import { TreeService } from '@/services/treeService'
 
 export const FamilyMenuActionSheet = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) => {
   const [visible, setVisible] = useState(false)
@@ -52,7 +53,7 @@ export const FamilyMenuActionSheet = ({ isOpen, onClose }: { isOpen: boolean, on
     if (isEditingName) {
       // Save the edited name
       if (selectedTree && editedName.trim()) {
-        setTree({ ...selectedTree, name: editedName.trim() })
+        void TreeService.updateTree({ ...selectedTree, name: editedName.trim() })
       }
       setIsEditingName(false)
     } else {
