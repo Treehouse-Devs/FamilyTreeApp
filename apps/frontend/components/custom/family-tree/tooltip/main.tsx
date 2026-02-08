@@ -7,7 +7,7 @@ import { HStack } from '@/components/ui/hstack'
 import { useFamilyTree } from '@/hooks/useFamilyTree'
 
 import { ActionButtonProps, MainContentViewProps } from './types'
-import { ActionButton, sharedViewClassName } from './base'
+import { ActionButton } from './base'
 
 export const MainContentView: React.FC<MainContentViewProps> = ({
   treeId,
@@ -46,7 +46,7 @@ export const MainContentView: React.FC<MainContentViewProps> = ({
 
   return (
     <View
-      className={sharedViewClassName}
+      className="flex flex-col items-center"
       onStartShouldSetResponder={() => true}
     >
       {/* Profile Image */}

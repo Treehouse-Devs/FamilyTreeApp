@@ -27,6 +27,10 @@ const rules = {
   'node/no-unsupported-features/es-syntax': 'off',
   'node/no-missing-import': 'off',
   'react-native/no-inline-styles': 'off',
+  '@stylistic/padding-line-between-statements': [
+    'error',
+    { blankLine: 'always', prev: '*', next: 'return' },
+  ],
 }
 
 export default [

@@ -457,6 +457,7 @@ export const treeMocksWithParams: TreeMockWithParams = {
     if (!person) {
       throw new Error(`Person with id ${id} not found`)
     }
+
     return { person }
   },
 }

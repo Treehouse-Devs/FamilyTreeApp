@@ -7,7 +7,7 @@ export type PersonDetailListItems = {
   items: ListItemType[]
 }[]
 
-export function mapPersonToListItem(person: DetailedPerson, t: TFunction, onDetailPress: (id: string, description?: string) => void): PersonDetailListItems {
+export function mapPersonToListItem(person: DetailedPerson, t: TFunction, onDetailPress: (id: string, selectedId?: string) => void): PersonDetailListItems {
   const listItems: PersonDetailListItems = []
 
   listItems.push({
@@ -45,7 +45,7 @@ export function mapPersonToListItem(person: DetailedPerson, t: TFunction, onDeta
         onPress: () => onDetailPress('birthDate'),
       },
       {
-        id: 'stillAlive',
+        id: 'isStillAliveQ',
         title: t('isStillAliveQ'),
         radioButtons: {
           selectedId: person.deathDate != null ? 'notAlive' : 'stillAlive',
@@ -53,12 +53,12 @@ export function mapPersonToListItem(person: DetailedPerson, t: TFunction, onDeta
             {
               id: 'stillAlive',
               label: t('stillAlive'),
-              onPress: () => onDetailPress('stillAlive', 'stillAlive'),
+              onPress: () => onDetailPress('isStillAliveQ', 'stillAlive'),
             },
             {
               id: 'notAlive',
               label: t('notAlive'),
-              onPress: () => onDetailPress('stillAlive', 'notAlive'),
+              onPress: () => onDetailPress('isStillAliveQ', 'notAlive'),
             },
           ],
         },
@@ -101,5 +101,6 @@ export function formatPhoneNumber(phoneNumber: number | null) {
   if (phoneNumber == null) {
     return '-'
   }
+
   return phoneNumber.toString().replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3')
 }

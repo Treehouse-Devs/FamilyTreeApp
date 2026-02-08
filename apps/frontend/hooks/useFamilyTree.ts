@@ -12,6 +12,7 @@ export const useFamilyTree = () => {
   const selectedTree = useStore(state =>
     state.trees.find(tree => tree.id === state.selectedTreeId),
   )
+  const getPerson = useStore(state => state.getPerson)
   const addPerson = useStore(state => state.addPerson)
   const setPerson = useStore(state => state.setPerson)
   const getArrayOfPerson = useStore(state => state.getArrayOfPerson)
@@ -29,6 +30,7 @@ export const useFamilyTree = () => {
     setRoot,
     selectedRoot,
     selectedTree,
+    getPerson,
     addPerson,
     setPerson,
     getArrayOfPerson,

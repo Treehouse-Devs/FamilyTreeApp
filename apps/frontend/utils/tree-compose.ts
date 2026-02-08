@@ -49,6 +49,7 @@ export function composeTreeFromFlat(flatTree: FlatTree): Tree {
         childrenIds.push(person.id)
       }
     }
+
     return childrenIds
   }
 

@@ -8,7 +8,7 @@ import { VStack } from '@/components/ui/vstack'
 import { useFamilyTree } from '@/hooks/useFamilyTree'
 
 import { ActionButtonProps, AddMemberContentViewProps, MemberType } from './types'
-import { ActionButton, sharedViewClassName } from './base'
+import { ActionButton } from './base'
 
 export const AddMemberContentView: React.FC<AddMemberContentViewProps> = ({
   person,
@@ -39,19 +39,19 @@ export const AddMemberContentView: React.FC<AddMemberContentViewProps> = ({
       isDisabled: !person.isBloodRelated,
     },
     {
-      key: 'children',
+      key: 'child',
       icon: Baby,
-      label: t('children'),
+      label: t('child'),
       isDisabled: false,
     },
   ]
 
   return (
     <View
-      className={sharedViewClassName}
+      className="flex flex-col items-center"
       onStartShouldSetResponder={() => true}
     >
-      <Text className="text-lg font-heading text-secondary-900 mb-4 px-2">
+      <Text className="text-lg font-heading text-secondary-900 mb-4 px-2 py-2 text-center">
         {t('addFamilyMember')}
       </Text>
 

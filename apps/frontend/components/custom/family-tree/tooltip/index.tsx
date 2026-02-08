@@ -1,9 +1,9 @@
 import React, { useState } from 'react'
-import { Modal, Pressable } from 'react-native'
-import Animated, { Easing, FadeIn, FadeOut, LinearTransition } from 'react-native-reanimated'
+import Animated, { FadeIn, FadeOut } from 'react-native-reanimated'
 import { useTranslation } from 'react-i18next'
 
 import { getYear, getAge } from '@/utils/date'
+import { Modal } from '@/components/custom/modal'
 
 import { ContentView, MemberType, PersonTooltipProps } from './types'
 import { MainContentView } from './main'
@@ -50,63 +50,56 @@ export const PersonTooltip: React.FC<PersonTooltipProps> = ({
     setCurrentView('removeMember')
   }
 
+  const renderContent = () => {
+    switch (currentView) {
+      case 'main':
+        return (
+          <Animated.View entering={FadeIn.duration(150)} exiting={FadeOut.duration(100)}>
+            <MainContentView
+              treeId={treeId}
+              person={person}
+              year={year}
+              ageText={ageText}
+              onAddPress={handleAddPress}
+              onDetailsPress={() => {
+                onViewDetails?.()
+                handleClose()
+              }}
+              onDeletePress={handleRemovePress}
+              t={t}
+            />
+          </Animated.View>
+        )
+      case 'addMember':
+        return (
+          <Animated.View entering={FadeIn.duration(150)} exiting={FadeOut.duration(100)}>
+            <AddMemberContentView
+              onSelectType={handleSelectMemberType}
+              person={person}
+              treeId={treeId}
+              t={t}
+            />
+          </Animated.View>
+        )
+      case 'removeMember':
+        return (
+          <Animated.View entering={FadeIn.duration(150)} exiting={FadeOut.duration(100)} className="w-full">
+            <RemovePersonContentView
+              person={person}
+              treeId={treeId}
+              onClose={onClose}
+              t={t}
+            />
+          </Animated.View>
+        )
+      default:
+        return null
+    }
+  }
+
   return (
-    <Modal
-      visible={visible}
-      transparent={true}
-      onRequestClose={handleClose}
-    >
-      <Pressable
-        className="flex-1 bg-black/30 justify-center items-center"
-        onPress={handleClose}
-      >
-        <Animated.View
-          layout={LinearTransition.duration(150).easing(Easing.ease)}
-          className="min-w-fit max-w-[80%] lg:max-w-[60%] xl:max-w-[50%]"
-        >
-          {currentView === 'main'
-            ? (
-                <Animated.View entering={FadeIn.duration(150)} exiting={FadeOut.duration(100)}>
-                  <MainContentView
-                    treeId={treeId}
-                    person={person}
-                    year={year}
-                    ageText={ageText}
-                    onAddPress={handleAddPress}
-                    onDetailsPress={() => {
-                      onViewDetails?.()
-                      handleClose()
-                    }}
-                    onDeletePress={handleRemovePress}
-                    t={t}
-                  />
-                </Animated.View>
-              )
-            : currentView === 'addMember'
-              ? (
-                  <Animated.View entering={FadeIn.duration(150)} exiting={FadeOut.duration(100)}>
-                    <AddMemberContentView
-                      onSelectType={handleSelectMemberType}
-                      person={person}
-                      treeId={treeId}
-                      t={t}
-                    />
-                  </Animated.View>
-                )
-              : currentView === 'removeMember'
-                ? (
-                    <Animated.View entering={FadeIn.duration(150)} exiting={FadeOut.duration(100)} className="w-full">
-                      <RemovePersonContentView
-                        person={person}
-                        treeId={treeId}
-                        onClose={onClose}
-                        t={t}
-                      />
-                    </Animated.View>
-                  )
-                : null }
-        </Animated.View>
-      </Pressable>
+    <Modal visible={visible} onClose={handleClose}>
+      {renderContent()}
     </Modal>
   )
 }
