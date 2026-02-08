@@ -14,6 +14,13 @@ const mockResponseMap: Record<string, unknown> = {
 
 export const mockApi = async (url: string, method: string): Promise<unknown> => {
   await delay(DELAY_MS) // Simulate network delay
+
+  // For write operations, return a success response (mock data doesn't persist)
+  if (['patch', 'post', 'put', 'delete'].includes(method.toLowerCase())) {
+    console.log(`[Mock API] ${method.toUpperCase()} ${url} - returning success (not persisted)`)
+    return { success: true }
+  }
+
   const mockKey = url.replace(/^\//, '') // remove leading slash
   let response
   if (uuidRegex.test(mockKey)) {

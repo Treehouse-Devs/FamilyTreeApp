@@ -10,7 +10,6 @@ import { Person } from '@/store/slices/treeSlice'
 import { useFamilyTree } from '@/hooks/useFamilyTree'
 
 import { RemovePersonContentViewProps } from './types'
-import { sharedViewClassName } from './base'
 
 export const RemovePersonContentView: React.FC<RemovePersonContentViewProps> = ({
   person,
@@ -34,16 +33,16 @@ export const RemovePersonContentView: React.FC<RemovePersonContentViewProps> = (
 
   return (
     <View
-      className={sharedViewClassName + ' max-w-[80%]'}
+      className="flex flex-col items-center w-full"
       onStartShouldSetResponder={() => true}
     >
-      <Text className="text-lg font-heading text-secondary-900 mb-4 px-2">
+      <Text className="text-lg font-heading text-secondary-900 px-2 py-2 text-center">
         {t('confirmRemove')}
       </Text>
-      <Text className="text-base font-body text-secondary-700 mb-4 px-2">
+      <Text className="text-base font-body text-secondary-700 mb-2 px-2 text-center">
         {dependents.length > 0 ? t('confirmRemoveDescriptionWithDependents') : t('confirmRemoveDescription')}
       </Text>
-      <VStack space="sm" className="w-full px-4 mb-4">
+      <VStack space="sm" className="w-fit px-4 mb-4 mx-auto pl-[-8px]">
         {dependents.map((dependent: Person) => (
           <View key={dependent.id} className="flex-row items-center gap-2">
             <Text className="text-base text-secondary-700">•</Text>

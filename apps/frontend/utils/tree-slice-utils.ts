@@ -8,14 +8,15 @@ export function findPersonById(root: Person, segmentId: string): Person | undefi
       if (found) return found
     }
   }
+
   return root.spouse && root.spouse.id === segmentId ? root.spouse : undefined
 }
 
-export function setPerson(root: Person, segment: Person): Person {
-  if (root.id === segment.id) return segment
+export function setPerson(root: Person, segment: Pick<Person, 'id' | 'name' | 'birthDate' | 'deathDate'>): Person {
+  if (root.id === segment.id) return { ...root, ...segment }
 
   const updatedChildren = root.children ? root.children.map(child => setPerson(child, segment)) : undefined
-  const updatedSpouse = root.spouse && root.spouse.id === segment.id ? segment : root.spouse
+  const updatedSpouse = root.spouse && root.spouse.id === segment.id ? { ...root.spouse, ...segment } : root.spouse
 
   return {
     ...root,
@@ -43,5 +44,6 @@ export function collectAllPersons(root: Person): Person[] {
       queue.push(...current.children)
     }
   }
+
   return persons
 }

@@ -1,6 +1,6 @@
 import { Person } from '@/store/slices/treeSlice'
 
-export type MemberType = 'parents' | 'spouse' | 'sibling' | 'children'
+export type MemberType = 'parents' | 'spouse' | 'sibling' | 'child'
 
 export type ContentView = 'main' | 'addMember' | 'removeMember'
 

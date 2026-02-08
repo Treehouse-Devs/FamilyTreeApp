@@ -52,6 +52,7 @@
   "parents": "Parents",
   "spouse": "Spouse",
   "sibling": "Sibling",
+  "child": "Child",
   "children": "Children",
   "cancel": "Cancel",
   "confirmRemove": "Are you sure?",
@@ -76,5 +77,6 @@
   "phoneNumber": "Phone Number",
   "homeNumber": "Home Number",
   "occupation": "Occupation",
-  "officeAddress": "Office Address"
+  "officeAddress": "Office Address",
+  "save": "Save"
 }

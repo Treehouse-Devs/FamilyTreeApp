@@ -4,8 +4,6 @@ import { Text } from '@/components/ui/text'
 import { Button, ButtonIcon } from '@/components/ui/button'
 import { ActionButtonProps } from './types'
 
-export const sharedViewClassName = 'bg-secondary-0 rounded-2xl border-2 border-secondary-500 px-[0.75rem] py-[0.625rem] items-center shadow-lg elevation-lg'
-
 export const ActionButton: React.FC<ActionButtonProps> = ({
   icon,
   label,

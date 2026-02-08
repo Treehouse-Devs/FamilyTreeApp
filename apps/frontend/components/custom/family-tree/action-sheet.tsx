@@ -1,13 +1,14 @@
 import { ActionsheetItem, ActionsheetItemText, ActionsheetDragIndicator, ActionsheetItemIcon } from '@/components/ui/actionsheet'
 import { Modal, View, Pressable, Image, Text, PanResponder } from 'react-native'
 import { ElementType, useEffect, useRef, useState } from 'react'
-import Animated, { useSharedValue, useAnimatedStyle, withTiming, Easing, runOnJS } from 'react-native-reanimated'
+import Animated, { useSharedValue, useAnimatedStyle, withTiming, Easing } from 'react-native-reanimated'
 import { useFamilyTree } from '@/hooks/useFamilyTree'
 import { Printer, Share2, Trash, Pencil, Users, Check } from 'lucide-react-native'
 import { Button, ButtonIcon } from '@/components/ui/button'
 import { useTranslation } from 'react-i18next'
 import { Input, InputField } from '@/components/ui/input'
 import { TreeService } from '@/services/treeService'
+import { scheduleOnRN } from 'react-native-worklets'
 
 export const FamilyMenuActionSheet = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) => {
   const [visible, setVisible] = useState(false)
@@ -15,7 +16,7 @@ export const FamilyMenuActionSheet = ({ isOpen, onClose }: { isOpen: boolean, on
   const [editedName, setEditedName] = useState('')
   const backdropOpacity = useSharedValue(0)
   const translateY = useSharedValue(300)
-  const { selectedTree, setTree } = useFamilyTree()
+  const { selectedTree } = useFamilyTree()
   const { t } = useTranslation()
 
   useEffect(() => {
@@ -31,7 +32,7 @@ export const FamilyMenuActionSheet = ({ isOpen, onClose }: { isOpen: boolean, on
       backdropOpacity.value = withTiming(0, { duration: 100 })
       translateY.value = withTiming(300, { duration: 200, easing: Easing.ease }, (finished) => {
         if (finished) {
-          runOnJS(setVisible)(false)
+          scheduleOnRN(setVisible, false)
         }
       })
     }

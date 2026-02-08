@@ -15,6 +15,7 @@ export class TreeService extends BaseService {
   static async updateTree(tree: Tree) {
     // update tree in zustand store
     useStore.getState().setTree(tree)
+
     return this.put<Tree>(`/trees/${tree.id}`, tree)
   }
 
@@ -27,6 +28,7 @@ export class TreeService extends BaseService {
     const tree = composeTreeFromFlat(flatTree)
     // Store the tree in Zustand store
     useStore.getState().setTree(tree)
+
     return tree
   }
 

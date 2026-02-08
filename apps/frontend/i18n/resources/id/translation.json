@@ -52,6 +52,7 @@
   "parents": "Orang Tua",
   "spouse": "Suami/Istri",
   "sibling": "Kakak/Adik",
+  "child": "Anak",
   "children": "Anak",
   "cancel": "Batal",
   "confirmRemove": "Apakah kamu yakin?",
@@ -76,5 +77,6 @@
   "phoneNumber": "Nomor Telepon",
   "homeNumber": "Nomor Rumah",
   "occupation": "Pekerjaan",
-  "officeAddress": "Alamat Kantor"
+  "officeAddress": "Alamat Kantor",
+  "save": "Simpan"
 }

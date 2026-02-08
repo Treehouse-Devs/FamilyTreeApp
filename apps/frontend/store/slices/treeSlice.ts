@@ -55,8 +55,9 @@ export interface TreeActions {
   selectTree: (treeId: string) => void
   setRoot: (root: Person) => void
   selectedRoot?: Person
+  getPerson: (treeId: string, personId: string) => DetailedPerson | undefined
   addPerson: (person: Person, type: 'spouse' | 'children' | 'parent', originId: string) => void
-  setPerson: (person: Person) => void
+  setPerson: (treeId: string, personId: string, person: DetailedPerson) => void
   addPersonDetail: (treeId: string, personId: string, person: DetailedPerson) => void
   patchPersonDetail: (treeId: string, personId: string, person: Partial<DetailedPerson>) => void
   getPersonDetail: (treeId: string, personId: string) => DetailedPerson | undefined
@@ -94,6 +95,7 @@ export const createTreeSlice: StateCreator<TreeSlice, [], [], TreeSlice> = (set,
         }
       } else {
         const updatedTrees = [...trees, tree]
+
         return { trees: updatedTrees }
       }
     })
@@ -107,6 +109,7 @@ export const createTreeSlice: StateCreator<TreeSlice, [], [], TreeSlice> = (set,
     set((state) => {
       const { trees } = state
       const updatedTrees = trees.map(t => (t.id === tree.id ? { ...t, ...tree } : t))
+
       return { trees: updatedTrees, root: tree.root }
     })
   },
@@ -125,6 +128,7 @@ export const createTreeSlice: StateCreator<TreeSlice, [], [], TreeSlice> = (set,
         persons: {
           [selectedTreeId!]: get().getArrayOfPerson(selectedTreeId!).reduce((acc, person) => {
             acc[person.id] = person
+
             return acc
           }, {} as Record<string, DetailedPerson>),
         },
@@ -137,7 +141,18 @@ export const createTreeSlice: StateCreator<TreeSlice, [], [], TreeSlice> = (set,
     if (!state) return undefined
     const { trees, selectedTreeId } = state
     const selectedTree = trees.find(tree => tree.id === selectedTreeId)
+
     return selectedTree ? selectedTree.root : undefined
+  },
+
+  getPerson: (treeId, personId) => {
+    const state = get()
+    if (!state) return undefined
+    const { trees } = state
+    const selectedTree = trees.find(tree => tree.id === treeId)
+    if (!selectedTree) return undefined
+
+    return state.persons[treeId][personId] ?? undefined
   },
 
   addPerson: (Person, type, originId) => {
@@ -170,19 +185,25 @@ export const createTreeSlice: StateCreator<TreeSlice, [], [], TreeSlice> = (set,
     })
   },
 
-  setPerson: (Person) => {
+  setPerson: (treeId, personId, person) => {
     set((state) => {
       const { trees, selectedTreeId } = state
       const selectedTree = trees.find(tree => tree.id === selectedTreeId)
       if (!selectedTree) return state
 
       if (!selectedTree.root) return state // No root to update Person
-      const updatedRoot = setPerson(selectedTree.root, Person)
+      const updatedRoot = setPerson(selectedTree.root, { id: personId, name: person.name, birthDate: person.birthDate, deathDate: person.deathDate })
 
       return {
         trees: trees.map(tree =>
           tree.id === selectedTreeId ? { ...tree, root: updatedRoot } : tree,
         ),
+        persons: {
+          [treeId]: {
+            ...get().persons[treeId],
+            [personId]: person,
+          },
+        },
       }
     })
   },
@@ -192,6 +213,7 @@ export const createTreeSlice: StateCreator<TreeSlice, [], [], TreeSlice> = (set,
       const { persons } = state
       const treePersons = persons[treeId] || {}
       treePersons[personId] = person
+
       return { persons: { ...persons, [treeId]: treePersons } }
     })
   },
@@ -204,6 +226,7 @@ export const createTreeSlice: StateCreator<TreeSlice, [], [], TreeSlice> = (set,
         throw new Error(`Person with ID ${personId} not found in tree ${treeId}`)
       }
       treePersons[personId] = { ...treePersons[personId], ...person }
+
       return { persons: { ...persons, [treeId]: treePersons } }
     })
   },
@@ -212,6 +235,7 @@ export const createTreeSlice: StateCreator<TreeSlice, [], [], TreeSlice> = (set,
     const state = get()
     if (!state) return undefined
     const { persons } = state
+
     return persons[treeId]?.[personId]
   },
 
@@ -223,8 +247,10 @@ export const createTreeSlice: StateCreator<TreeSlice, [], [], TreeSlice> = (set,
     if (!tree || !tree.root) return []
 
     const allPersons = collectAllPersons(tree.root)
+
     return allPersons.map((person) => {
       const detail = persons[treeId]?.[person.id]
+
       return {
         ...person,
         ...(detail || {}),
@@ -236,6 +262,7 @@ export const createTreeSlice: StateCreator<TreeSlice, [], [], TreeSlice> = (set,
     const state = get()
     if (!state) return false
     const { persons } = state
+
     return !!persons[treeId]?.[personId]?.spouseId
   },
 
@@ -248,6 +275,7 @@ export const createTreeSlice: StateCreator<TreeSlice, [], [], TreeSlice> = (set,
     if (tree.root.id === personId) return true
     const person = findPersonById(tree.root, personId)
     if (!person) return false
+
     return person.spouseId === tree.root.id
   },
 
@@ -262,6 +290,7 @@ export const createTreeSlice: StateCreator<TreeSlice, [], [], TreeSlice> = (set,
 
     // recursively find all dependents
     const dependents = collectAllPersons(person)
+
     return dependents
   },
 })
