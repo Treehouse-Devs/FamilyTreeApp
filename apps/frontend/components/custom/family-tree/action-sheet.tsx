@@ -2,22 +2,31 @@ import { ActionsheetItem, ActionsheetItemText, ActionsheetDragIndicator, Actions
 import { Modal, View, Pressable, Image, Text, PanResponder } from 'react-native'
 import { ElementType, useEffect, useRef, useState } from 'react'
 import Animated, { useSharedValue, useAnimatedStyle, withTiming, Easing } from 'react-native-reanimated'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useFamilyTree } from '@/hooks/useFamilyTree'
-import { Printer, Share2, Trash, Pencil, Users, Check } from 'lucide-react-native'
+import { Printer, Share2, Trash2, Pencil, Users, Check } from 'lucide-react-native'
 import { Button, ButtonIcon } from '@/components/ui/button'
 import { useTranslation } from 'react-i18next'
 import { Input, InputField } from '@/components/ui/input'
 import { TreeService } from '@/services/treeService'
 import { scheduleOnRN } from 'react-native-worklets'
+import { navigate } from 'expo-router/build/global-state/routing'
+import DUMMY_FAMILY from '@/assets/images/dummy-family.webp'
+import { ImageEditModal } from '@/components/custom/modals/image-edit-modal'
+import * as ImagePicker from 'expo-image-picker'
 
 export const FamilyMenuActionSheet = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) => {
   const [visible, setVisible] = useState(false)
   const [isEditingName, setIsEditingName] = useState(false)
   const [editedName, setEditedName] = useState('')
+  const [imageEditModalVisible, setImageEditModalVisible] = useState(false)
+  const [selectedImageUri, setSelectedImageUri] = useState<string | undefined>()
+  const [isUploading, setIsUploading] = useState(false)
   const backdropOpacity = useSharedValue(0)
   const translateY = useSharedValue(300)
   const { selectedTree } = useFamilyTree()
   const { t } = useTranslation()
+  const { bottom: bottomInset } = useSafeAreaInsets()
 
   useEffect(() => {
     if (isOpen) {
@@ -93,7 +102,7 @@ export const FamilyMenuActionSheet = ({ isOpen, onClose }: { isOpen: boolean, on
       icon: Users,
       text: t('familyMemberList'),
       onPress: () => {
-
+        navigate(`/tree/${selectedTree?.id}/members`)
       },
     },
     {
@@ -111,7 +120,7 @@ export const FamilyMenuActionSheet = ({ isOpen, onClose }: { isOpen: boolean, on
       },
     },
     {
-      icon: Trash,
+      icon: Trash2,
       text: t('remove'),
       onPress: () => {
 
@@ -120,10 +129,66 @@ export const FamilyMenuActionSheet = ({ isOpen, onClose }: { isOpen: boolean, on
     },
   ]
 
+  const imageSource = selectedTree?.familyImageUrl
+    ? { uri: selectedTree.familyImageUrl }
+    : DUMMY_FAMILY
+
+  const openImagePicker = () => {
+    setSelectedImageUri(selectedTree?.familyImageUrl)
+    setImageEditModalVisible(true)
+  }
+
+  const modalImageSource = selectedImageUri
+    ? { uri: selectedImageUri }
+    : imageSource
+
+  const handleChangePhoto = async () => {
+    if (!selectedTree) return
+
+    // Request permissions
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync()
+    if (status !== ImagePicker.PermissionStatus.GRANTED) {
+      alert(t('cameraPermissionRequired'))
+
+      return
+    }
+
+    // Launch image picker
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.8,
+    })
+
+    if (!result.canceled && result.assets[0]) {
+      const imageUri = result.assets[0].uri
+      setSelectedImageUri(imageUri)
+
+      // Start upload
+      setIsUploading(true)
+      try {
+        const response = await TreeService.updateTreeImageById(
+          selectedTree.id,
+          imageUri,
+        )
+
+        await TreeService.updateTree({ ...selectedTree, familyImageUrl: response.familyImageUrl })
+        setImageEditModalVisible(false)
+      } catch (error) {
+        console.error('Failed to upload family picture:', error)
+        alert(t('failedToUploadImage'))
+      } finally {
+        setIsUploading(false)
+      }
+    }
+  }
+
   return (
     <Modal
       visible={visible}
       transparent
+      statusBarTranslucent
       animationType="none"
       onRequestClose={handleClose}
     >
@@ -133,27 +198,21 @@ export const FamilyMenuActionSheet = ({ isOpen, onClose }: { isOpen: boolean, on
         >
           <Pressable className="flex-1" onPress={handleClose} />
         </Animated.View>
-        <Animated.View style={contentStyle} className="bg-primary-0 rounded-t-3xl p-5 pt-2">
+        <Animated.View style={[contentStyle, { paddingBottom: bottomInset }]} className="bg-primary-0 rounded-t-3xl p-5 pt-2">
           <View {...panResponder.panHandlers} className="py-2">
             <ActionsheetDragIndicator className="self-center" />
           </View>
 
           {/* Header with family image and name */}
           <View className="flex-row items-center py-4 px-2">
-            <View className="w-16 h-16 rounded-full bg-primary-800 overflow-hidden mr-3">
-              {selectedTree?.familyImageUrl
-                ? (
-                    <Image
-                      source={{ uri: selectedTree?.familyImageUrl }}
-                      className="w-full h-full"
-                    />
-                  )
-                : (
-                    <View className="w-full h-full bg-teal-100 items-center justify-center">
-                      <Text className="text-2xl text-teal-600">👨‍👩‍👧‍👦</Text>
-                    </View>
-                  )}
-            </View>
+            <Pressable onPress={openImagePicker}>
+              <View className="w-16 h-16 rounded-full bg-primary-800 overflow-hidden mr-3">
+                <Image
+                  source={imageSource}
+                  className="w-full h-full"
+                />
+              </View>
+            </Pressable>
             {isEditingName
               ? (
                   <Input className="flex-1 mr-2">
@@ -193,6 +252,14 @@ export const FamilyMenuActionSheet = ({ isOpen, onClose }: { isOpen: boolean, on
           ))}
         </Animated.View>
       </View>
+      <ImageEditModal
+        visible={imageEditModalVisible}
+        imageSource={modalImageSource}
+        isUploading={isUploading}
+        onChangePhoto={() => void handleChangePhoto()}
+        onClose={() => setImageEditModalVisible(false)}
+        t={t}
+      />
     </Modal>
   )
 }

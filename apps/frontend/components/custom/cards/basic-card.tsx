@@ -1,11 +1,11 @@
 import { cn } from '@gluestack-ui/utils/nativewind-utils'
-import { View, Pressable } from 'react-native'
+import { View, Pressable, StyleProp, ViewStyle } from 'react-native'
 import { Text } from '@/components/ui/text'
 import { VStack } from '@/components/ui/vstack'
 
-export const BasicCard = ({ children, className, onPress, category }: { children: React.ReactNode, className?: string, onPress?: () => void, category?: string }) => {
+export const BasicCard = ({ children, className, onPress, category, style }: { children: React.ReactNode, className?: string, onPress?: () => void, category?: string, style?: StyleProp<ViewStyle> }) => {
   const cardContent = (
-    <VStack className="w-full max-w-md px-1">
+    <VStack className="w-full max-w-md px-1" style={style}>
       {!onPress && category && (
         <Text className="text-primary-700 text-sm mb-2 mr-auto ml-4">{category}</Text>
       )}
@@ -17,7 +17,7 @@ export const BasicCard = ({ children, className, onPress, category }: { children
 
   if (onPress) {
     return (
-      <VStack className="w-full max-w-md px-1">
+      <VStack className="w-full max-w-md px-1" style={style}>
         {category && (
           <Text className="text-primary-700 text-xs mb-2 mr-auto ml-4">{category}</Text>
         )}

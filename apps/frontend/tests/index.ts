@@ -18,6 +18,15 @@ export const mockApi = async (url: string, method: string): Promise<unknown> => 
   // For write operations, return a success response (mock data doesn't persist)
   if (['patch', 'post', 'put', 'delete'].includes(method.toLowerCase())) {
     console.log(`[Mock API] ${method.toUpperCase()} ${url} - returning success (not persisted)`)
+
+    // Special handling for image upload endpoint
+    if (url.includes('/image') && method.toLowerCase() === 'post') {
+      return {
+        fullImageUrl: 'https://picsum.photos/400/400',
+        imageThumbnailUrl: 'https://picsum.photos/200/200',
+      }
+    }
+
     return { success: true }
   }
 

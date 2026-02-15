@@ -1,3 +1,5 @@
+import { TFunction } from 'i18next'
+
 /**
  * Get the year from a timestamp
  */
@@ -13,5 +15,22 @@ export const getAge = (birthDate: number, deathDate: number | undefined): number
   if (deathDate) {
     return new Date(deathDate).getFullYear() - birthYear
   }
+
   return new Date().getFullYear() - birthYear
+}
+
+/**
+ * Calculate age or death info
+ */
+
+export const getAgeInfo = (birthDate: number, deathDate: number | undefined, t: TFunction): string => {
+  const age = getAge(birthDate, deathDate)
+
+  if (deathDate) {
+    const deathYear = getYear(deathDate)
+
+    return t('deceased', { year: deathYear })
+  }
+
+  return t('age', { years: age })
 }

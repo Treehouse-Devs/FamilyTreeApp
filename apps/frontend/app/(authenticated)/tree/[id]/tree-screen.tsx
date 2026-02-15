@@ -52,6 +52,7 @@ const TreeScreen = () => {
     if (existingTree && existingTree.root) {
       setRoot(existingTree.root)
       setLoading(false)
+
       return
     }
 

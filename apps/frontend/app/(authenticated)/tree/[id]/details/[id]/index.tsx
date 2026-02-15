@@ -1,4 +1,4 @@
-import { ActivityIndicator, View } from 'react-native'
+import { ActivityIndicator, View, Image, Pressable } from 'react-native'
 import { ActionBar } from '@/components/custom/action-bar'
 import { router, useLocalSearchParams } from 'expo-router'
 import { useCallback, useEffect, useRef, useState } from 'react'
@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next'
 import { TreeService } from '@/services/treeService'
 import { useFamilyTree } from '@/hooks/useFamilyTree'
 import type { DetailedPerson } from '@/store/slices/treeSlice'
-import { mapPersonToListItem, PersonDetailListItems } from './utils'
+import { mapPersonToListItem, PersonDetailListItems, handleImageUpload } from './utils'
 import { ListItems } from '@/components/custom/list-item'
 import { BasicCard } from '@/components/custom/cards/basic-card'
 import { VStack } from '@/components/ui/vstack'
@@ -15,6 +15,9 @@ import { Input, InputField } from '@/components/ui/input'
 import { Button, ButtonText } from '@/components/ui/button'
 import Modal from '@/components/custom/modal'
 import { ThemedDatePicker } from '@/components/custom/date-picker'
+import { ImageEditModal } from '@/components/custom/modals/image-edit-modal'
+import DUMMY_MALE from '@/assets/images/dummy-profile-male.webp'
+import DUMMY_FEMALE from '@/assets/images/dummy-profile-female.webp'
 
 interface ModalConfig {
   title: string
@@ -77,6 +80,10 @@ const PersonDetailScreen = () => {
   const { t } = useTranslation()
   const [isModalVisible, setIsModalVisible] = useState(false)
   const [modalConfig, setModalConfig] = useState<ModalConfig | null>(null)
+  const [imageEditModalVisible, setImageEditModalVisible] = useState(false)
+  const [selectedImageUri, setSelectedImageUri] = useState<string | undefined>()
+  const [isUploading, setIsUploading] = useState(false)
+  const [showThumbnailInActionBar, setShowThumbnailInActionBar] = useState(false)
   const inputValueRef = useRef('')
 
   if (!selectedTreeId) {
@@ -91,9 +98,12 @@ const PersonDetailScreen = () => {
       if (person && (person.location || person.occupation || person.contact)) {
         setPersonDetail(person)
       } else {
-        const { person } = await TreeService.fetchPersonById(selectedTreeId, id)
-        setPersonDetail(person)
-        setPerson(selectedTreeId, id, person)
+        const treePerson = getPerson(selectedTreeId, id)
+        const { person: fetchedPerson } = await TreeService.fetchPersonById(selectedTreeId, id)
+        // Merge fetched data with tree person to preserve gender and other tree fields
+        const mergedPerson = { ...fetchedPerson, gender: treePerson?.gender }
+        setPersonDetail(mergedPerson)
+        setPerson(selectedTreeId, id, mergedPerson)
       }
       setIsLoading(false)
     }
@@ -207,6 +217,7 @@ const PersonDetailScreen = () => {
               <Input className="w-full">
                 <InputField
                   className="w-full"
+                  keyboardType={prop === 'phoneNumber' || prop === 'homeNumber' ? 'phone-pad' : 'default'}
                   defaultValue={currValueStr}
                   onChangeText={(text) => { inputValueRef.current = text }}
                 />
@@ -222,6 +233,38 @@ const PersonDetailScreen = () => {
     }
   }, [personDetail, t])
 
+  const openImagePicker = useCallback(() => {
+    setSelectedImageUri(personDetail?.fullImageUrl)
+    setImageEditModalVisible(true)
+  }, [personDetail])
+
+  const handleChangePhoto = useCallback(async () => {
+    if (!personDetail) return
+
+    await handleImageUpload({
+      treeId: selectedTreeId,
+      personId: id,
+      t,
+      onImageSelect: (uri: string) => setSelectedImageUri(uri),
+      onUploadStart: () => setIsUploading(true),
+      onUploadSuccess: (fullImageUrl: string, imageThumbnailUrl: string) => {
+        const editedPersonDetail: DetailedPerson = {
+          ...personDetail,
+          fullImageUrl,
+          imageThumbnailUrl,
+        }
+        setPersonDetail(editedPersonDetail)
+        setPerson(selectedTreeId, id, editedPersonDetail)
+        setImageEditModalVisible(false)
+      },
+      onUploadError: (error: unknown) => {
+        console.error('Failed to upload profile picture:', error)
+        alert(t('failedToUploadImage'))
+      },
+      onUploadComplete: () => setIsUploading(false),
+    })
+  }, [personDetail, selectedTreeId, id, setPerson, t])
+
   useEffect(() => {
     if (personDetail) {
       const processedListItems = mapPersonToListItem(personDetail, t, onDetailPress)
@@ -229,9 +272,28 @@ const PersonDetailScreen = () => {
     }
   }, [personDetail, t])
 
+  const handleScroll = useCallback((event: { nativeEvent: { contentOffset: { y: number } } }) => {
+    const scrollY = event.nativeEvent.contentOffset.y
+    // Show thumbnail when scrolled past approximately 135px (profile image height + margin)
+    setShowThumbnailInActionBar(scrollY > 135)
+  }, [])
+
+  const thumbnailSource = personDetail?.fullImageUrl
+    ? { uri: personDetail.fullImageUrl }
+    : (personDetail?.gender === 'female' ? DUMMY_FEMALE : DUMMY_MALE)
+
+  const modalImageSource = selectedImageUri
+    ? { uri: selectedImageUri }
+    : thumbnailSource
+
   return (
-    <View className="flex-1 bg-primary-0 pb-6">
-      <ActionBar title={t('personDetail', { name: personDetail?.name ?? 'Person' })} onBack={() => router.back()} />
+    <View className="flex-1 bg-primary-0">
+      <ActionBar
+        title={t('personDetail', { name: personDetail?.name ?? 'Person' })}
+        onBack={() => router.back()}
+        thumbnailSource={thumbnailSource}
+        showThumbnail={showThumbnailInActionBar}
+      />
       {isLoading
         ? (
             <View className="flex-1 items-center justify-center">
@@ -239,8 +301,17 @@ const PersonDetailScreen = () => {
             </View>
           )
         : (
-            <ScrollView>
+            <ScrollView onScroll={handleScroll} scrollEventThrottle={16}>
               <VStack className="flex-1 items-center justify-start w-full gap-3">
+                <Pressable onPress={openImagePicker}>
+                  <View className="w-36 h-36 rounded-full bg-secondary-500 overflow-hidden mt-4 mb-2 border-2 border-secondary-500">
+                    <Image
+                      source={personDetail?.fullImageUrl ? { uri: personDetail.fullImageUrl } : (personDetail?.gender === 'female' ? DUMMY_FEMALE : DUMMY_MALE)}
+                      className="w-36 h-36"
+                      resizeMode="cover"
+                    />
+                  </View>
+                </Pressable>
                 {
                   listItems.map(item => (
                     <BasicCard key={item.category} category={item.category}>
@@ -258,6 +329,14 @@ const PersonDetailScreen = () => {
       >
         {modalConfig?.content}
       </Modal>
+      <ImageEditModal
+        visible={imageEditModalVisible}
+        imageSource={modalImageSource}
+        isUploading={isUploading}
+        onChangePhoto={() => void handleChangePhoto()}
+        onClose={() => setImageEditModalVisible(false)}
+        t={t}
+      />
     </View>
   )
 }

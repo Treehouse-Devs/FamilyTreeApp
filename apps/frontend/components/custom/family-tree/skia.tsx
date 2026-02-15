@@ -11,14 +11,17 @@ import {
   Path,
   Skia,
   Circle,
-  Image,
   useImage,
+  ImageShader,
 } from '@shopify/react-native-skia'
 import { GestureDetector, Gesture } from 'react-native-gesture-handler'
 import Animated, { useSharedValue, useAnimatedStyle, runOnJS, withTiming } from 'react-native-reanimated'
 
 import { Person } from '@/store/slices/treeSlice'
 import { asHex, getVar, useCurrentMode } from '@/utils/color-token'
+
+import DUMMY_MALE from '@/assets/images/dummy-profile-male.webp'
+import DUMMY_FEMALE from '@/assets/images/dummy-profile-female.webp'
 
 // --- Types -------------------------------------------------------------------
 
@@ -79,6 +82,7 @@ const calculateSubtreeWidth = (person: Person): number => {
   const childrenWidth = person.children.reduce((sum, child, index) => {
     const childWidth = calculateSubtreeWidth(child)
     const gap = index > 0 ? H_GAP : 0
+
     return sum + childWidth + gap
   }, 0)
 
@@ -88,23 +92,8 @@ const calculateSubtreeWidth = (person: Person): number => {
 /**
  * Format birth year from timestamp
  */
-import { getYear, getAge } from '@/utils/date'
-
-/**
- * Calculate age or death info
- */
-type TFunction = (key: string, options?: Record<string, unknown>) => string
-
-const getAgeInfo = (birthDate: number, deathDate: number | undefined, t: TFunction): string => {
-  const age = getAge(birthDate, deathDate)
-
-  if (deathDate) {
-    const deathYear = getYear(deathDate)
-    return t('deceased', { year: deathYear })
-  }
-
-  return t('age', { years: age })
-}
+import { getYear, getAgeInfo } from '@/utils/date'
+import { TFunction } from 'i18next'
 
 // --- Main Component ----------------------------------------------------------
 
@@ -186,6 +175,7 @@ export const FamilyTreeSkia: React.FC<Props> = ({
         const childrenTotalWidth = person.children.reduce((sum, child, index) => {
           const childWidth = calculateSubtreeWidth(child)
           const gap = index > 0 ? H_GAP : 0
+
           return sum + childWidth + gap
         }, 0)
 
@@ -608,7 +598,10 @@ const PersonCard: React.FC<PersonCardProps> = ({
   t,
 }) => {
   const { person, x, y } = node
-  const image = useImage(person.imageThumbnailUrl || null)
+  const dummyImage = person.gender === 'female' ? DUMMY_FEMALE : DUMMY_MALE
+  const imageSource = person.imageThumbnailUrl || (dummyImage as number)
+
+  const image = useImage(imageSource)
 
   const yearText = getYear(person.birthDate)
   const ageText = getAgeInfo(person.birthDate, person.deathDate, t)
@@ -658,14 +651,20 @@ const PersonCard: React.FC<PersonCardProps> = ({
 
       {/* Avatar image (if available) */}
       {image && (
-        <Image
-          image={image}
-          x={x + NODE_W / 2 - THUMB / 2}
-          y={y + PADDING}
-          width={THUMB}
-          height={THUMB}
-          fit="cover"
-        />
+        <Circle
+          cx={x + NODE_W / 2}
+          cy={y + THUMB / 2 + PADDING}
+          r={THUMB / 2}
+        >
+          <ImageShader
+            image={image}
+            fit="cover"
+            x={x + NODE_W / 2 - THUMB / 2}
+            y={y + PADDING}
+            width={THUMB}
+            height={THUMB}
+          />
+        </Circle>
       )}
 
       {/* Name text */}

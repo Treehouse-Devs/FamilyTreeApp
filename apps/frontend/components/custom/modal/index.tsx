@@ -29,9 +29,10 @@ export const Modal: React.FC<ModalProps> = ({
       visible={visible}
       transparent={true}
       onRequestClose={onClose}
+      statusBarTranslucent
     >
       <Pressable
-        className="flex-1 bg-black/30 justify-center items-center"
+        className="flex-1 bg-black/50 justify-center items-center"
         onPress={onClose}
       >
         <Animated.View

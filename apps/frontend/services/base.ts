@@ -45,4 +45,21 @@ export class BaseService {
   protected static async delete<T>(url: string) {
     return this.request<T>('delete', url)
   }
+
+  protected static async postFormData<T>(url: string, formData: FormData) {
+    if (MOCK_DATA) {
+      return await mockApi(url, 'post') as T
+    }
+
+    const response = await api.request<T>({
+      method: 'post',
+      url,
+      data: formData,
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    })
+
+    return response.data
+  }
 }

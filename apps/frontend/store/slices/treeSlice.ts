@@ -12,22 +12,23 @@ export interface Person {
   spouse?: Person
   spouseId?: string
   imageThumbnailUrl?: string
+  gender?: 'male' | 'female'
 }
 
 export interface DetailedPerson extends Person {
   gender?: 'male' | 'female'
   location?: {
-    nationality?: string
-    hometown?: string
-    domicile?: string
+    nationality: string
+    hometown: string
+    domicile: string
   }
   contact?: {
     phoneNumber: number | null
     homeNumber: number | null
   }
   occupation?: {
-    occupation?: string
-    officeAddress?: string
+    occupation: string
+    officeAddress: string
   }
   fullImageUrl?: string
 }
@@ -45,6 +46,8 @@ export interface TreeState {
   trees: Tree[]
   persons: Record<string, Record<string, DetailedPerson>>
   selectedTreeId?: string
+  memberSortField: 'name' | 'birthYear'
+  memberSortDirection: 'asc' | 'desc'
 }
 
 export interface TreeActions {
@@ -65,6 +68,7 @@ export interface TreeActions {
   hasSpouse: (treeId: string, personId: string) => boolean
   isRoot: (treeId: string, personId: string) => boolean
   collectAllDependents: (treeId: string, personId: string) => Person[]
+  setMemberSort: (field: 'name' | 'birthYear', direction: 'asc' | 'desc') => void
 }
 
 export interface TreeSlice extends TreeState, TreeActions {}
@@ -72,6 +76,8 @@ export interface TreeSlice extends TreeState, TreeActions {}
 export const createTreeSlice: StateCreator<TreeSlice, [], [], TreeSlice> = (set, get) => ({
   trees: [],
   persons: {},
+  memberSortField: 'birthYear',
+  memberSortDirection: 'asc',
 
   setTrees: (trees) => {
     set({ trees })
@@ -292,5 +298,9 @@ export const createTreeSlice: StateCreator<TreeSlice, [], [], TreeSlice> = (set,
     const dependents = collectAllPersons(person)
 
     return dependents
+  },
+
+  setMemberSort: (field, direction) => {
+    set({ memberSortField: field, memberSortDirection: direction })
   },
 })
