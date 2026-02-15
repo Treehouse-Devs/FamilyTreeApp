@@ -12,7 +12,7 @@ export function findPersonById(root: Person, segmentId: string): Person | undefi
   return root.spouse && root.spouse.id === segmentId ? root.spouse : undefined
 }
 
-export function setPerson(root: Person, segment: Pick<Person, 'id' | 'name' | 'birthDate' | 'deathDate'>): Person {
+export function setPerson(root: Person, segment: Pick<Person, 'id' | 'name' | 'birthDate' | 'deathDate' | 'gender'>): Person {
   if (root.id === segment.id) return { ...root, ...segment }
 
   const updatedChildren = root.children ? root.children.map(child => setPerson(child, segment)) : undefined

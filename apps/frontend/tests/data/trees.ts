@@ -26,14 +26,15 @@ export const treeMocksWithParams: TreeMockWithParams = {
     name: 'Bardock Family Tree',
     createdAt: 1754784000000,
     updatedAt: 1754784000000,
-    familyImageUrl: '/images/family-thumbnail.webp',
+    familyImageUrl: undefined,
     rootId: 'dbc07888-3701-40c4-87be-4df09f04e324',
     persons: [
       // Root: Bardock
       {
         id: 'dbc07888-3701-40c4-87be-4df09f04e324',
         name: 'Bardock',
-        imageThumbnailUrl: '/images/thumbnails/dbc07888-3701-40c4-87be-4df09f04e324.jpg',
+        gender: 'male',
+        imageThumbnailUrl: undefined,
         birthDate: -916617600000,
         deathDate: 1628553600000,
         spouseId: 'b83d4904-b535-401c-9c63-37f0d9096435',
@@ -43,7 +44,8 @@ export const treeMocksWithParams: TreeMockWithParams = {
       {
         id: 'b83d4904-b535-401c-9c63-37f0d9096435',
         name: 'Gine',
-        imageThumbnailUrl: '/images/thumbnails/b83d4904-b535-401c-9c63-37f0d9096435.jpg',
+        gender: 'female',
+        imageThumbnailUrl: undefined,
         birthDate: -773798400000,
         spouseId: 'dbc07888-3701-40c4-87be-4df09f04e324',
         isBloodRelated: true,
@@ -52,7 +54,8 @@ export const treeMocksWithParams: TreeMockWithParams = {
       {
         id: 'c6a256ab-7747-488b-81de-a7cf9c9b2910',
         name: 'Raditz',
-        imageThumbnailUrl: '/images/thumbnails/c6a256ab-7747-488b-81de-a7cf9c9b2910.jpg',
+        gender: 'male',
+        imageThumbnailUrl: undefined,
         birthDate: -296438400000,
         spouseId: 'f2ac7d84-a7ea-4195-8e46-04042cfc81c8',
         fatherId: 'dbc07888-3701-40c4-87be-4df09f04e324',
@@ -63,7 +66,8 @@ export const treeMocksWithParams: TreeMockWithParams = {
       {
         id: 'f2ac7d84-a7ea-4195-8e46-04042cfc81c8',
         name: 'Launch',
-        imageThumbnailUrl: '/images/thumbnails/f2ac7d84-a7ea-4195-8e46-04042cfc81c8.jpg',
+        gender: 'female',
+        imageThumbnailUrl: undefined,
         birthDate: -198720000000,
         spouseId: 'c6a256ab-7747-488b-81de-a7cf9c9b2910',
         isBloodRelated: false,
@@ -72,7 +76,8 @@ export const treeMocksWithParams: TreeMockWithParams = {
       {
         id: '5330e122-3fec-4e4e-97be-0a7868c49242',
         name: 'Rashi',
-        imageThumbnailUrl: '/images/thumbnails/5330e122-3fec-4e4e-97be-0a7868c49242.jpg',
+        gender: 'male',
+        imageThumbnailUrl: undefined,
         birthDate: 490233600000,
         fatherId: 'c6a256ab-7747-488b-81de-a7cf9c9b2910',
         motherId: 'f2ac7d84-a7ea-4195-8e46-04042cfc81c8',
@@ -81,7 +86,8 @@ export const treeMocksWithParams: TreeMockWithParams = {
       {
         id: 'a83d4904-b535-401c-9c63-37f0d9096435',
         name: 'Ranch',
-        imageThumbnailUrl: '/images/thumbnails/a83d4904-b535-401c-9c63-37f0d9096435.jpg',
+        gender: 'female',
+        imageThumbnailUrl: undefined,
         birthDate: 543628800000,
         fatherId: 'c6a256ab-7747-488b-81de-a7cf9c9b2910',
         motherId: 'f2ac7d84-a7ea-4195-8e46-04042cfc81c8',
@@ -90,7 +96,8 @@ export const treeMocksWithParams: TreeMockWithParams = {
       {
         id: '123d4904-b535-401c-9c63-37f0d9096435',
         name: 'Mooli',
-        imageThumbnailUrl: '/images/thumbnails/123d4904-b535-401c-9c63-37f0d9096435.jpg',
+        gender: 'male',
+        imageThumbnailUrl: undefined,
         birthDate: 613440000000,
         fatherId: 'c6a256ab-7747-488b-81de-a7cf9c9b2910',
         motherId: 'f2ac7d84-a7ea-4195-8e46-04042cfc81c8',
@@ -100,7 +107,8 @@ export const treeMocksWithParams: TreeMockWithParams = {
       {
         id: '56dc74ba-7600-4f0b-ad06-bab252a8f0de',
         name: 'Goku',
-        imageThumbnailUrl: '/images/thumbnails/56dc74ba-7600-4f0b-ad06-bab252a8f0de.jpg',
+        gender: 'male',
+        imageThumbnailUrl: undefined,
         birthDate: -146102400000,
         spouseId: '783d4904-b535-401c-9c63-37f0d9096435',
         fatherId: 'dbc07888-3701-40c4-87be-4df09f04e324',
@@ -111,7 +119,8 @@ export const treeMocksWithParams: TreeMockWithParams = {
       {
         id: '783d4904-b535-401c-9c63-37f0d9096435',
         name: 'Chi-Chi',
-        imageThumbnailUrl: '/images/thumbnails/783d4904-b535-401c-9c63-37f0d9096435.jpg',
+        gender: 'female',
+        imageThumbnailUrl: undefined,
         birthDate: 74304000000,
         spouseId: '56dc74ba-7600-4f0b-ad06-bab252a8f0de',
         isBloodRelated: false,
@@ -120,7 +129,8 @@ export const treeMocksWithParams: TreeMockWithParams = {
       {
         id: 'e1a15888-6a4b-4143-9521-fc45deb5d2a5',
         name: 'Gohan',
-        imageThumbnailUrl: '/images/thumbnails/e1a15888-6a4b-4143-9521-fc45deb5d2a5.jpg',
+        gender: 'male',
+        imageThumbnailUrl: undefined,
         birthDate: 543024000000,
         spouseId: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
         fatherId: '56dc74ba-7600-4f0b-ad06-bab252a8f0de',
@@ -131,7 +141,8 @@ export const treeMocksWithParams: TreeMockWithParams = {
       {
         id: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
         name: 'Videl',
-        imageThumbnailUrl: '/images/thumbnails/f2ac7d84-a7ea-4195-8e46-04042cfc81c8.jpg',
+        gender: 'female',
+        imageThumbnailUrl: undefined,
         birthDate: 568944000000,
         spouseId: 'e1a15888-6a4b-4143-9521-fc45deb5d2a5',
         isBloodRelated: false,
@@ -140,7 +151,8 @@ export const treeMocksWithParams: TreeMockWithParams = {
       {
         id: 'c5d4904a-b535-401c-9c63-37f0d9096435',
         name: 'Pan',
-        imageThumbnailUrl: '/images/thumbnails/c5d4904a-b535-401c-9c63-37f0d9096435.jpg',
+        gender: 'female',
+        imageThumbnailUrl: undefined,
         birthDate: 1192060800000,
         fatherId: 'e1a15888-6a4b-4143-9521-fc45deb5d2a5',
         motherId: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
@@ -150,7 +162,8 @@ export const treeMocksWithParams: TreeMockWithParams = {
       {
         id: '883d4904-b535-401c-9c63-37f0d9096435',
         name: 'Goten',
-        imageThumbnailUrl: '/images/thumbnails/883d4904-b535-401c-9c63-37f0d9096435.jpg',
+        gender: 'male',
+        imageThumbnailUrl: undefined,
         birthDate: 718588800000,
         fatherId: '56dc74ba-7600-4f0b-ad06-bab252a8f0de',
         motherId: '783d4904-b535-401c-9c63-37f0d9096435',
@@ -164,7 +177,7 @@ export const treeMocksWithParams: TreeMockWithParams = {
       'dbc07888-3701-40c4-87be-4df09f04e324': {
         id: 'dbc07888-3701-40c4-87be-4df09f04e324',
         name: 'Bardock',
-        gender: 'male',
+
         birthDate: -916617600000,
         deathDate: 1628553600000,
         location: {
@@ -180,15 +193,15 @@ export const treeMocksWithParams: TreeMockWithParams = {
           occupation: 'Low-Class Warrior',
           officeAddress: 'Frieza Force Base',
         },
-        imageThumbnailUrl: '/images/thumbnails/dbc07888-3701-40c4-87be-4df09f04e324.jpg',
-        fullImageUrl: '/images/full/dbc07888-3701-40c4-87be-4df09f04e324.jpg',
+        imageThumbnailUrl: undefined,
+        fullImageUrl: undefined,
         isBloodRelated: true,
       },
       // Gine
       'b83d4904-b535-401c-9c63-37f0d9096435': {
         id: 'b83d4904-b535-401c-9c63-37f0d9096435',
         name: 'Gine',
-        gender: 'female',
+
         birthDate: -773798400000,
         location: {
           nationality: 'Saiyan',
@@ -203,15 +216,15 @@ export const treeMocksWithParams: TreeMockWithParams = {
           occupation: 'Meat Distribution Employee',
           officeAddress: 'Planet Vegeta',
         },
-        imageThumbnailUrl: '/images/thumbnails/b83d4904-b535-401c-9c63-37f0d9096435.jpg',
-        fullImageUrl: '/images/full/b83d4904-b535-401c-9c63-37f0d9096435.jpg',
+        imageThumbnailUrl: undefined,
+        fullImageUrl: undefined,
         isBloodRelated: true,
       },
       // Raditz
       'c6a256ab-7747-488b-81de-a7cf9c9b2910': {
         id: 'c6a256ab-7747-488b-81de-a7cf9c9b2910',
         name: 'Raditz',
-        gender: 'male',
+
         birthDate: -296438400000,
         location: {
           nationality: 'Saiyan',
@@ -226,15 +239,15 @@ export const treeMocksWithParams: TreeMockWithParams = {
           occupation: 'Mid-Class Warrior',
           officeAddress: 'Frieza Force',
         },
-        imageThumbnailUrl: '/images/thumbnails/c6a256ab-7747-488b-81de-a7cf9c9b2910.jpg',
-        fullImageUrl: '/images/full/c6a256ab-7747-488b-81de-a7cf9c9b2910.jpg',
+        imageThumbnailUrl: undefined,
+        fullImageUrl: undefined,
         isBloodRelated: true,
       },
       // Launch
       'f2ac7d84-a7ea-4195-8e46-04042cfc81c8': {
         id: 'f2ac7d84-a7ea-4195-8e46-04042cfc81c8',
         name: 'Launch',
-        gender: 'female',
+
         birthDate: -198720000000,
         location: {
           nationality: 'Earthling',
@@ -247,16 +260,17 @@ export const treeMocksWithParams: TreeMockWithParams = {
         },
         occupation: {
           occupation: 'Homemaker',
+          officeAddress: 'Kame House',
         },
-        imageThumbnailUrl: '/images/thumbnails/f2ac7d84-a7ea-4195-8e46-04042cfc81c8.jpg',
-        fullImageUrl: '/images/full/f2ac7d84-a7ea-4195-8e46-04042cfc81c8.jpg',
+        imageThumbnailUrl: undefined,
+        fullImageUrl: undefined,
         isBloodRelated: false,
       },
       // Rashi
       '5330e122-3fec-4e4e-97be-0a7868c49242': {
         id: '5330e122-3fec-4e4e-97be-0a7868c49242',
         name: 'Rashi',
-        gender: 'male',
+
         birthDate: 490233600000,
         location: {
           nationality: 'Saiyan-Human Hybrid',
@@ -269,16 +283,17 @@ export const treeMocksWithParams: TreeMockWithParams = {
         },
         occupation: {
           occupation: 'Student',
+          officeAddress: '',
         },
-        imageThumbnailUrl: '/images/thumbnails/5330e122-3fec-4e4e-97be-0a7868c49242.jpg',
-        fullImageUrl: '/images/full/5330e122-3fec-4e4e-97be-0a7868c49242.jpg',
+        imageThumbnailUrl: undefined,
+        fullImageUrl: undefined,
         isBloodRelated: true,
       },
       // Ranch
       'a83d4904-b535-401c-9c63-37f0d9096435': {
         id: 'a83d4904-b535-401c-9c63-37f0d9096435',
         name: 'Ranch',
-        gender: 'female',
+
         birthDate: 543628800000,
         location: {
           nationality: 'Saiyan-Human Hybrid',
@@ -291,16 +306,17 @@ export const treeMocksWithParams: TreeMockWithParams = {
         },
         occupation: {
           occupation: 'Student',
+          officeAddress: '',
         },
-        imageThumbnailUrl: '/images/thumbnails/a83d4904-b535-401c-9c63-37f0d9096435.jpg',
-        fullImageUrl: '/images/full/a83d4904-b535-401c-9c63-37f0d9096435.jpg',
+        imageThumbnailUrl: undefined,
+        fullImageUrl: undefined,
         isBloodRelated: true,
       },
       // Mooli
       '123d4904-b535-401c-9c63-37f0d9096435': {
         id: '123d4904-b535-401c-9c63-37f0d9096435',
         name: 'Mooli',
-        gender: 'male',
+
         birthDate: 613440000000,
         location: {
           nationality: 'Saiyan-Human Hybrid',
@@ -313,16 +329,17 @@ export const treeMocksWithParams: TreeMockWithParams = {
         },
         occupation: {
           occupation: 'Student',
+          officeAddress: '',
         },
-        imageThumbnailUrl: '/images/thumbnails/123d4904-b535-401c-9c63-37f0d9096435.jpg',
-        fullImageUrl: '/images/full/123d4904-b535-401c-9c63-37f0d9096435.jpg',
+        imageThumbnailUrl: undefined,
+        fullImageUrl: undefined,
         isBloodRelated: true,
       },
       // Goku
       '56dc74ba-7600-4f0b-ad06-bab252a8f0de': {
         id: '56dc74ba-7600-4f0b-ad06-bab252a8f0de',
         name: 'Goku',
-        gender: 'male',
+
         birthDate: -146102400000,
         location: {
           nationality: 'Saiyan',
@@ -335,16 +352,17 @@ export const treeMocksWithParams: TreeMockWithParams = {
         },
         occupation: {
           occupation: 'Martial Artist',
+          officeAddress: '',
         },
-        imageThumbnailUrl: '/images/thumbnails/56dc74ba-7600-4f0b-ad06-bab252a8f0de.jpg',
-        fullImageUrl: '/images/full/56dc74ba-7600-4f0b-ad06-bab252a8f0de.jpg',
+        imageThumbnailUrl: undefined,
+        fullImageUrl: undefined,
         isBloodRelated: true,
       },
       // Chi-Chi
       '783d4904-b535-401c-9c63-37f0d9096435': {
         id: '783d4904-b535-401c-9c63-37f0d9096435',
         name: 'Chi-Chi',
-        gender: 'female',
+
         birthDate: 74304000000,
         location: {
           nationality: 'Earthling',
@@ -357,16 +375,17 @@ export const treeMocksWithParams: TreeMockWithParams = {
         },
         occupation: {
           occupation: 'Homemaker',
+          officeAddress: '',
         },
-        imageThumbnailUrl: '/images/thumbnails/783d4904-b535-401c-9c63-37f0d9096435.jpg',
-        fullImageUrl: '/images/full/783d4904-b535-401c-9c63-37f0d9096435.jpg',
+        imageThumbnailUrl: undefined,
+        fullImageUrl: undefined,
         isBloodRelated: false,
       },
       // Gohan
       'e1a15888-6a4b-4143-9521-fc45deb5d2a5': {
         id: 'e1a15888-6a4b-4143-9521-fc45deb5d2a5',
         name: 'Gohan',
-        gender: 'male',
+
         birthDate: 543024000000,
         location: {
           nationality: 'Saiyan-Human Hybrid',
@@ -381,15 +400,15 @@ export const treeMocksWithParams: TreeMockWithParams = {
           occupation: 'Scholar / Martial Artist',
           officeAddress: 'Orange Star University',
         },
-        imageThumbnailUrl: '/images/thumbnails/e1a15888-6a4b-4143-9521-fc45deb5d2a5.jpg',
-        fullImageUrl: '/images/full/e1a15888-6a4b-4143-9521-fc45deb5d2a5.jpg',
+        imageThumbnailUrl: undefined,
+        fullImageUrl: undefined,
         isBloodRelated: true,
       },
       // Videl
       'a1b2c3d4-e5f6-7890-abcd-ef1234567890': {
         id: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
         name: 'Videl',
-        gender: 'female',
+
         birthDate: 568944000000,
         location: {
           nationality: 'Earthling',
@@ -402,16 +421,17 @@ export const treeMocksWithParams: TreeMockWithParams = {
         },
         occupation: {
           occupation: 'Martial Artist / Crime Fighter',
+          officeAddress: '',
         },
-        imageThumbnailUrl: '/images/thumbnails/a1b2c3d4-e5f6-7890-abcd-ef1234567890.jpg',
-        fullImageUrl: '/images/full/a1b2c3d4-e5f6-7890-abcd-ef1234567890.jpg',
+        imageThumbnailUrl: undefined,
+        fullImageUrl: undefined,
         isBloodRelated: false,
       },
       // Pan
       'c5d4904a-b535-401c-9c63-37f0d9096435': {
         id: 'c5d4904a-b535-401c-9c63-37f0d9096435',
         name: 'Pan',
-        gender: 'female',
+
         birthDate: 1192060800000,
         location: {
           nationality: 'Saiyan-Human Hybrid',
@@ -424,16 +444,17 @@ export const treeMocksWithParams: TreeMockWithParams = {
         },
         occupation: {
           occupation: 'Student / Martial Artist',
+          officeAddress: '',
         },
-        imageThumbnailUrl: '/images/thumbnails/c5d4904a-b535-401c-9c63-37f0d9096435.jpg',
-        fullImageUrl: '/images/full/c5d4904a-b535-401c-9c63-37f0d9096435.jpg',
+        imageThumbnailUrl: undefined,
+        fullImageUrl: undefined,
         isBloodRelated: true,
       },
       // Goten
       '883d4904-b535-401c-9c63-37f0d9096435': {
         id: '883d4904-b535-401c-9c63-37f0d9096435',
         name: 'Goten',
-        gender: 'male',
+
         birthDate: 718588800000,
         location: {
           nationality: 'Saiyan-Human Hybrid',
@@ -446,9 +467,10 @@ export const treeMocksWithParams: TreeMockWithParams = {
         },
         occupation: {
           occupation: 'Student / Martial Artist',
+          officeAddress: '',
         },
-        imageThumbnailUrl: '/images/thumbnails/883d4904-b535-401c-9c63-37f0d9096435.jpg',
-        fullImageUrl: '/images/full/883d4904-b535-401c-9c63-37f0d9096435.jpg',
+        imageThumbnailUrl: undefined,
+        fullImageUrl: undefined,
         isBloodRelated: true,
       },
     }

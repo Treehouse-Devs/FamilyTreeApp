@@ -19,6 +19,10 @@ export const useFamilyTree = () => {
   const hasSpouse = useStore(state => state.hasSpouse)
   const isRoot = useStore(state => state.isRoot)
   const collectAllDependents = useStore(state => state.collectAllDependents)
+  const getArrayOfPersons = (treeId: string) => useStore(state => state.persons[treeId] ?? {})
+  const memberSortField = useStore(state => state.memberSortField)
+  const memberSortDirection = useStore(state => state.memberSortDirection)
+  const setMemberSort = useStore(state => state.setMemberSort)
 
   return {
     trees,
@@ -37,5 +41,9 @@ export const useFamilyTree = () => {
     hasSpouse,
     isRoot,
     collectAllDependents,
+    getArrayOfPersons,
+    memberSortField,
+    memberSortDirection,
+    setMemberSort,
   }
 }

@@ -34,7 +34,7 @@ cssInterop(PrimitiveIcon, {
 })
 
 const inputStyle = tva({
-  base: 'border-background-300 flex-row overflow-hidden content-center data-[hover=true]:border-outline-400 data-[focus=true]:border-primary-700 data-[focus=true]:hover:border-primary-700 data-[disabled=true]:opacity-40 data-[disabled=true]:hover:border-background-300 items-center',
+  base: 'bg-white/70 border-secondary-500 flex-row overflow-hidden content-center data-[hover=true]:border-outline-400 data-[focus=true]:border-secondary-700 data-[focus=true]:hover:border-secondary-700 data-[disabled=true]:opacity-40 data-[disabled=true]:hover:border-background-300 items-center',
 
   variants: {
     size: {
@@ -58,7 +58,7 @@ const inputStyle = tva({
 })
 
 const inputIconStyle = tva({
-  base: 'justify-center items-center text-typography-400 fill-none',
+  base: 'justify-center items-center text-secondary-400 fill-none',
   parentVariants: {
     size: {
       '2xs': 'h-3 w-3',
@@ -76,7 +76,7 @@ const inputSlotStyle = tva({
 })
 
 const inputFieldStyle = tva({
-  base: 'flex-1 text-typography-900 py-0 px-3 placeholder:text-typography-500 h-full ios:leading-[0px] web:cursor-text web:data-[disabled=true]:cursor-not-allowed',
+  base: 'flex-1 text-secondary-900 py-0 px-3 placeholder:text-secondary-500 h-full ios:leading-[0px] web:cursor-text web:data-[disabled=true]:cursor-not-allowed',
 
   parentVariants: {
     variant: {

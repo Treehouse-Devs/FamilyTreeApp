@@ -8,6 +8,7 @@ export interface FlatPerson {
   name: string
   birthDate: number
   isBloodRelated: boolean
+  gender?: 'male' | 'female'
   deathDate?: number
   spouseId?: string
   fatherId?: string
@@ -63,6 +64,7 @@ export function composeTreeFromFlat(flatTree: FlatTree): Tree {
       name: flatPerson.name,
       birthDate: flatPerson.birthDate,
       isBloodRelated: flatPerson.isBloodRelated,
+      gender: flatPerson.gender,
       deathDate: flatPerson.deathDate,
       spouseId: flatPerson.spouseId,
       imageThumbnailUrl: flatPerson.imageThumbnailUrl,
@@ -85,6 +87,7 @@ export function composeTreeFromFlat(flatTree: FlatTree): Tree {
           name: spouseFlat.name,
           birthDate: spouseFlat.birthDate,
           isBloodRelated: spouseFlat.isBloodRelated,
+          gender: spouseFlat.gender,
           deathDate: spouseFlat.deathDate,
           spouseId: spouseFlat.spouseId,
           imageThumbnailUrl: spouseFlat.imageThumbnailUrl,

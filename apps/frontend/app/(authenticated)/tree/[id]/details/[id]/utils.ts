@@ -1,6 +1,7 @@
 import { ListItemType } from '@/components/custom/list-item/types'
 import { DetailedPerson } from '@/store/slices/treeSlice'
 import type { TFunction } from 'i18next'
+import * as ImagePicker from 'expo-image-picker'
 
 export type PersonDetailListItems = {
   category: string
@@ -83,7 +84,7 @@ export function mapPersonToListItem(person: DetailedPerson, t: TFunction, onDeta
         items: Object.entries(detail).map(([key, value]) => ({
           id: key,
           title: t(key),
-          description: typeof value === 'string' ? value : value === undefined ? '-' : formatPhoneNumber(value as number),
+          description: typeof value === 'string' ? (value === '' ? '-' : value) : formatPhoneNumber(value as number),
           onPress: () => onDetailPress(key),
         })),
       })
@@ -103,4 +104,62 @@ export function formatPhoneNumber(phoneNumber: number | null) {
   }
 
   return phoneNumber.toString().replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3')
+}
+
+export async function handleImageUpload({
+  treeId,
+  personId,
+  t,
+  onImageSelect,
+  onUploadStart,
+  onUploadSuccess,
+  onUploadError,
+  onUploadComplete,
+}: {
+  treeId: string
+  personId: string
+  t: TFunction
+  onImageSelect: (uri: string) => void
+  onUploadStart: () => void
+  onUploadSuccess: (fullImageUrl: string, imageThumbnailUrl: string) => void
+  onUploadError: (error: unknown) => void
+  onUploadComplete: () => void
+}) {
+  // Request permissions
+  const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync()
+  if (status !== ImagePicker.PermissionStatus.GRANTED) {
+    alert(t('cameraPermissionRequired'))
+
+    return
+  }
+
+  // Launch image picker
+  const result = await ImagePicker.launchImageLibraryAsync({
+    mediaTypes: ['images'],
+    allowsEditing: true,
+    aspect: [1, 1],
+    quality: 0.8,
+  })
+
+  if (!result.canceled && result.assets[0]) {
+    const imageUri = result.assets[0].uri
+    onImageSelect(imageUri)
+
+    // Start upload
+    onUploadStart()
+    try {
+      const { TreeService } = await import('@/services/treeService')
+      const response = await TreeService.updatePersonImageById(
+        treeId,
+        personId,
+        imageUri,
+      )
+
+      onUploadSuccess(response.fullImageUrl, response.imageThumbnailUrl)
+    } catch (error) {
+      onUploadError(error)
+    } finally {
+      onUploadComplete()
+    }
+  }
 }

@@ -78,5 +78,14 @@
   "homeNumber": "Home Number",
   "occupation": "Occupation",
   "officeAddress": "Office Address",
-  "save": "Save"
+  "save": "Save",
+  "failedToUploadImage": "Failed to upload image. Please try again.",
+  "cameraPermissionRequired": "Sorry, we need camera roll permissions to change profile pictures!",
+  "change": "Change",
+  "uploading": "Uploading...",
+  "changePhoto": "Change Photo",
+  "sortByName": "Name",
+  "sortByBirthYear": "Birth Year",
+  "ascending": "Ascending",
+  "descending": "Descending"
 }

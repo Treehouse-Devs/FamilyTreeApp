@@ -78,5 +78,14 @@
   "homeNumber": "Nomor Rumah",
   "occupation": "Pekerjaan",
   "officeAddress": "Alamat Kantor",
-  "save": "Simpan"
+  "save": "Simpan",
+  "failedToUploadImage": "Gagal mengunggah gambar. Coba lagi ya!",
+  "cameraPermissionRequired": "Maaf, kami memerlukan izin akses galeri untuk mengubah foto profil!",
+  "change": "Ubah",
+  "uploading": "Mengunggah...",
+  "changePhoto": "Ubah Foto",
+  "sortByName": "Nama",
+  "sortByBirthYear": "Tahun Lahir",
+  "ascending": "A-Z",
+  "descending": "Z-A"
 }

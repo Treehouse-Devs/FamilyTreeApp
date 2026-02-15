@@ -9,6 +9,9 @@ import { useFamilyTree } from '@/hooks/useFamilyTree'
 import { ActionButtonProps, MainContentViewProps } from './types'
 import { ActionButton } from './base'
 
+import DUMMY_MALE from '@/assets/images/dummy-profile-male.webp'
+import DUMMY_FEMALE from '@/assets/images/dummy-profile-female.webp'
+
 export const MainContentView: React.FC<MainContentViewProps> = ({
   treeId,
   person,
@@ -51,21 +54,11 @@ export const MainContentView: React.FC<MainContentViewProps> = ({
     >
       {/* Profile Image */}
       <View className="w-14 h-14 rounded-full bg-secondary-500 overflow-hidden mt-3 mb-1">
-        {person.imageThumbnailUrl
-          ? (
-              <Image
-                source={{ uri: person.imageThumbnailUrl }}
-                className="w-14 h-14"
-                resizeMode="cover"
-              />
-            )
-          : (
-              <View className="w-14 h-14 bg-secondary-500 justify-center items-center">
-                <Text className="text-2xl text-secondary-0">
-                  {person.name.charAt(0).toUpperCase()}
-                </Text>
-              </View>
-            )}
+        <Image
+          source={person.imageThumbnailUrl ? { uri: person.imageThumbnailUrl } : (person.gender === 'female' ? DUMMY_FEMALE : DUMMY_MALE)}
+          className="w-14 h-14"
+          resizeMode="cover"
+        />
       </View>
 
       {/* Name */}
