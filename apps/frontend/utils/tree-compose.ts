@@ -1,33 +1,8 @@
 import { Person, Tree } from '@/store/slices/treeSlice'
+import type { FlatPersonDto, FlatTreeDto } from '@myorg/dto'
 
-/**
- * Flat person data from API response
- */
-export interface FlatPerson {
-  id: string
-  name: string
-  birthDate: number
-  isBloodRelated: boolean
-  gender?: 'male' | 'female'
-  deathDate?: number
-  spouseId?: string
-  fatherId?: string
-  motherId?: string
-  imageThumbnailUrl?: string
-}
-
-/**
- * Flat tree data from API response
- */
-export interface FlatTree {
-  id: string
-  name: string
-  createdAt: number
-  updatedAt: number
-  familyImageUrl?: string
-  rootId: string
-  persons: FlatPerson[]
-}
+export type FlatPerson = FlatPersonDto
+export type FlatTree = FlatTreeDto
 
 /**
  * Composes a nested tree structure from a flat persons array.

@@ -1,7 +1,6 @@
 import { View, Image, ActivityIndicator, ImageSourcePropType } from 'react-native'
 import { VStack } from '@/components/ui/vstack'
-import { Button, ButtonText } from '@/components/ui/button'
-import Modal from '@/components/custom/modal'
+import Modal from '@/components/custom/modals/modal'
 
 interface ImageEditModalProps {
   visible: boolean
@@ -25,6 +24,11 @@ export const ImageEditModal: React.FC<ImageEditModalProps> = ({
       visible={visible}
       onClose={onClose}
       title={t('changePhoto')}
+      button={{
+        text: isUploading ? t('uploading') : t('change'),
+        onPress: onChangePhoto,
+        isDisabled: isUploading,
+      }}
     >
       <VStack className="items-center w-full" space="lg">
         {/* Image Preview */}
@@ -40,18 +44,6 @@ export const ImageEditModal: React.FC<ImageEditModalProps> = ({
             </View>
           )}
         </View>
-
-        {/* Buttons */}
-        <VStack space="md">
-          <Button
-            onPress={onChangePhoto}
-            disabled={isUploading}
-          >
-            <ButtonText>
-              {isUploading ? t('uploading') : t('change')}
-            </ButtonText>
-          </Button>
-        </VStack>
       </VStack>
     </Modal>
   )

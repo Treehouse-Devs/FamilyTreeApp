@@ -2,7 +2,7 @@ import { DetailedPerson, Tree } from '@/store/slices/treeSlice'
 import { useStore } from '@/store/store'
 import { composeTreeFromFlat, FlatTree } from '@/utils/tree-compose'
 import { BaseService } from './base'
-import { manipulateAsync, SaveFormat } from 'expo-image-manipulator'
+import type { UploadFamilyImageResponseDto, UploadMemberImageResponseDto } from '@myorg/dto'
 
 export class TreeService extends BaseService {
   static async fetchTrees() {
@@ -46,27 +46,16 @@ export class TreeService extends BaseService {
     imageUri: string,
     defaultFilename: string = 'image.webp',
   ): Promise<T> {
-    // Convert image to WebP format for better compression
-    // Note: manipulateAsync is deprecated in favor of useImageManipulator hook,
-    // but the hook only works in React components. This static service requires manipulateAsync.
-    const result = await manipulateAsync(
-      imageUri,
-      [], // No actions - just format conversion
-      {
-        compress: 0.85, // 85% quality
-        format: SaveFormat.WEBP,
-      },
-    )
-
     const formData = new FormData()
 
     // Extract filename from URI and change extension to .webp
     const originalFilename = imageUri.split('/').pop() || defaultFilename
     const filename = originalFilename.replace(/\.[^.]+$/, '.webp')
 
-    // Create file object for upload (React Native FormData accepts this format)
+    // imageUri is expected to already be compressed to WebP by the caller
+    // (e.g. via the useCompressImage hook) before passing here.
     const fileBlob = {
-      uri: result.uri,
+      uri: imageUri,
       type: 'image/webp',
       name: filename,
     }
@@ -80,8 +69,8 @@ export class TreeService extends BaseService {
     treeId: string,
     personId: string,
     imageUri: string,
-  ): Promise<{ fullImageUrl: string, imageThumbnailUrl: string }> {
-    return this.uploadImage<{ fullImageUrl: string, imageThumbnailUrl: string }>(
+  ): Promise<UploadMemberImageResponseDto> {
+    return this.uploadImage<UploadMemberImageResponseDto>(
       `/trees/${treeId}/person/${personId}/image`,
       imageUri,
       'profile.webp',
@@ -91,8 +80,8 @@ export class TreeService extends BaseService {
   static async updateTreeImageById(
     treeId: string,
     imageUri: string,
-  ): Promise<{ familyImageUrl: string }> {
-    return this.uploadImage<{ familyImageUrl: string }>(
+  ): Promise<UploadFamilyImageResponseDto> {
+    return this.uploadImage<UploadFamilyImageResponseDto>(
       `/trees/${treeId}/image`,
       imageUri,
       'family.webp',

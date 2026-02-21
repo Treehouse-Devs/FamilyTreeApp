@@ -1,46 +1,10 @@
 import { collectAllPersons, findPersonById, setPerson } from '@/utils/tree-slice-utils'
 import { StateCreator } from 'zustand'
+import type { PersonDto, DetailedPersonDto, TreeDto } from '@myorg/dto'
 
-// TODO use DTO
-export interface Person {
-  id: string
-  name: string
-  birthDate: number
-  isBloodRelated: boolean
-  deathDate?: number
-  children?: Person[]
-  spouse?: Person
-  spouseId?: string
-  imageThumbnailUrl?: string
-  gender?: 'male' | 'female'
-}
-
-export interface DetailedPerson extends Person {
-  gender?: 'male' | 'female'
-  location?: {
-    nationality: string
-    hometown: string
-    domicile: string
-  }
-  contact?: {
-    phoneNumber: number | null
-    homeNumber: number | null
-  }
-  occupation?: {
-    occupation: string
-    officeAddress: string
-  }
-  fullImageUrl?: string
-}
-
-export interface Tree {
-  id: string
-  name: string
-  createdAt: number
-  updatedAt: number
-  familyImageUrl?: string
-  root?: Person
-}
+export type Person = PersonDto
+export type DetailedPerson = DetailedPersonDto
+export type Tree = TreeDto
 
 export interface TreeState {
   trees: Tree[]
