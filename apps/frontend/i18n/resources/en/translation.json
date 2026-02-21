@@ -87,5 +87,12 @@
   "sortByName": "Name",
   "sortByBirthYear": "Birth Year",
   "ascending": "Ascending",
-  "descending": "Descending"
+  "descending": "Descending",
+  "familyTree": "Family Tree",
+  "createNewFamilyTree": "Create New Family Tree",
+  "create": "Create",
+  "enterTreeName": "Enter Tree Name",
+  "createNew": "Create New",
+  "noTreeYet": "No Family Tree Yet",
+  "noTreeYetDescription": "Create your first family tree to get started."
 }

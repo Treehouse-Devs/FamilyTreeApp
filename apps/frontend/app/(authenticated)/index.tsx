@@ -1,181 +1,173 @@
 import { useTranslation } from 'react-i18next'
-import { StyleSheet, Text, View, TouchableOpacity, FlatList, ActivityIndicator } from 'react-native'
-import { useAuth } from '@/hooks/useAuth'
-import { useFamilyTree } from '@/hooks/useFamilyTree'
-import { router } from 'expo-router'
+import { useFetchTrees } from './useFetchTrees'
+import { useCallback, useEffect, useState } from 'react'
+import { useFetchUser } from './useFetchUser'
+import { ActivityIndicator, FlatList, useWindowDimensions, View } from 'react-native'
+import { ActionBar } from '@/components/custom/action-bar'
+import { Avatar, AvatarFallbackText, AvatarImage } from '@/components/ui/avatar'
+import { NoTree } from '@/components/custom/main-page/no-tree'
 import { Tree } from '@/store/slices/treeSlice'
-import { TreeService } from '@/services/treeService'
-import { useEffect, useState } from 'react'
-import { useStore } from '@/store/store'
+import { BasicCard } from '@/components/custom/cards/basic-card'
+import { router } from 'expo-router'
+import { VStack } from '@/components/ui/vstack'
+import DUMMY_FAMILY from '@/assets/images/dummy-family.webp'
+import { Image } from '@/components/ui/image'
+import { Text } from '@/components/ui/text'
+import { Plus } from 'lucide-react-native'
+import Modal from '@/components/custom/modals/modal'
+import { Input, InputField } from '@/components/ui/input'
+import { Button, ButtonIcon } from '@/components/ui/button'
 
-export default function App() {
+const getNumColumns = (width: number) => {
+  if (width >= 1280) return 4
+  if (width >= 1024) return 3
+
+  return 2
+}
+
+const App = () => {
   const { t } = useTranslation()
-  const { logout } = useAuth()
-  const { trees } = useFamilyTree()
-  const setTrees = useStore(state => state.setTrees)
-  const [loading, setLoading] = useState(true)
+  const [isLoading, setIsLoading] = useState(true)
+  const [isTreeFetched, setIsTreeFetched] = useState(false)
+  const [isUserFetched, setIsUserFetched] = useState(false)
+  const { trees, createTree } = useFetchTrees({ setIsTreeFetched })
+  const { user } = useFetchUser({ setIsUserFetched })
+  const [isCreateTreeModalVisible, setIsCreateTreeModalVisible] = useState(false)
+  const [newTreeName, setNewTreeName] = useState('')
+  const [isCreateTreeModalLoading, setIsCreateTreeModalLoading] = useState(false)
 
   useEffect(() => {
-    // Only fetch if store is empty
-    if (trees.length > 0) {
-      setLoading(false)
-      return
+    if (isTreeFetched && isUserFetched) {
+      setIsLoading(false)
     }
+  }, [isTreeFetched, isUserFetched])
 
-    const fetchTrees = async () => {
-      try {
-        const treesData = await TreeService.fetchTrees()
-        setTrees(treesData)
-      } catch (error) {
-        console.error('Failed to fetch trees:', error)
-      } finally {
-        setLoading(false)
-      }
-    }
+  const createNewTree = useCallback(() => {
+    setIsCreateTreeModalVisible(true)
+  }, [])
 
-    void fetchTrees()
-  }, [trees.length, setTrees])
-
-  const handleLogout = () => {
-    try {
-      logout()
-      router.replace('/signin')
-    } catch (error) {
-      console.error('Logout failed:', error)
-    }
-  }
-
-  const navigateToTree = (treeId: string) => {
-    router.push(`/tree/${treeId}/tree-screen`)
-  }
-
-  const renderTreeItem = ({ item }: { item: Tree }) => (
-    <TouchableOpacity
-      style={styles.treeItem}
-      onPress={() => navigateToTree(item.id)}
-    >
-      <Text style={styles.treeName}>{item.name}</Text>
-      <Text style={styles.treeDate}>
-        Created:
-        {' '}
-        {new Date(item.createdAt).toLocaleDateString()}
-      </Text>
-    </TouchableOpacity>
+  const avatarIcon = (
+    <Avatar>
+      <AvatarFallbackText>{user?.name}</AvatarFallbackText>
+      <AvatarImage source={{ uri: user?.avatarUrl }} />
+    </Avatar>
   )
 
-  if (loading) {
+  const { width } = useWindowDimensions()
+  const numColumns = getNumColumns(width)
+
+  const navigateToDetail = useCallback((id: string) => {
+    router.push(`/tree/${id}`)
+  }, [])
+
+  const onCreateTreePressed = useCallback(() => {
+    setIsCreateTreeModalLoading(true)
+    createTree(newTreeName).then((tree) => {
+      if (tree) {
+        navigateToDetail(tree.id)
+      }
+    }).catch((error) => {
+      console.error('Failed to create tree:', error)
+    }).finally(() => {
+      setIsCreateTreeModalLoading(false)
+      setIsCreateTreeModalVisible(false)
+    })
+  }, [createTree, newTreeName, navigateToDetail])
+
+  const renderTreeCard = (tree: Tree | 'create') => {
+    const imageSource = tree === 'create' ? '' : tree.familyImageUrl || DUMMY_FAMILY
+
     return (
-      <View style={[styles.container, styles.centered]}>
-        <ActivityIndicator size="large" />
-        <Text style={styles.loadingText}>Loading trees...</Text>
+      <View style={{ width: `${100 / numColumns}%` }}>
+        <BasicCard
+          onPress={() => {
+            if (tree === 'create') {
+              createNewTree()
+            } else {
+              navigateToDetail(tree.id)
+            }
+          }}
+          className={`py-4 px-2 ${tree === 'create' ? 'border-dashed' : ''}`}
+        >
+          <VStack className="items-center gap-3">
+            {/* Family Tree Image */}
+            <View className="w-14 h-14 overflow-hidden flex items-center justify-center">
+              {tree === 'create'
+                ? (
+                    <Button className="w-10 h-10 flex bg-secondary-500 items-center justify-center rounded-full" action="secondary">
+                      <ButtonIcon as={Plus} className="text-secondary-50 w-9 h-9" />
+                    </Button>
+                  )
+                : (
+                    <Image
+                      source={imageSource}
+                      className="w-14 h-14 rounded-full"
+                      resizeMode="cover"
+                      alt="Family Tree"
+                    />
+                  )}
+            </View>
+
+            {/* Family Name */}
+            <Text className="text-secondary-900 font-heading text-base text-center" numberOfLines={1}>
+              {tree === 'create' ? t('createNew') : tree.name}
+            </Text>
+          </VStack>
+        </BasicCard>
       </View>
     )
   }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.welcomeText}>{t('welcomeMessage')}</Text>
-
-      <Text style={styles.sectionTitle}>Your Family Trees</Text>
-
-      {trees.length === 0
+    <View className="flex-1 bg-primary-0">
+      <ActionBar
+        title={t('familyTree')}
+        rightIconSlot={avatarIcon}
+        className="px-6 mb-8"
+      />
+      {isLoading
         ? (
-            <Text style={styles.emptyText}>No family trees yet</Text>
+            <View className="flex-1 items-center justify-center">
+              <ActivityIndicator />
+            </View>
           )
-        : (
-            <FlatList
-              data={trees}
-              keyExtractor={item => item.id}
-              renderItem={renderTreeItem}
-              style={styles.list}
-            />
-          )}
-
-      <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-        <Text style={styles.logoutButtonText}>Logout</Text>
-      </TouchableOpacity>
+        : trees.length === 0
+          ? (
+              <NoTree createNewTree={createNewTree} />
+            )
+          : (
+              <FlatList
+                data={[...trees, 'create']}
+                renderItem={({ item }) => renderTreeCard(item)}
+                keyExtractor={(item: Tree | 'create') => item === 'create' ? 'create' : item.id}
+                numColumns={numColumns}
+                contentContainerStyle={{ paddingHorizontal: 10, gap: 12, paddingBottom: 24 }}
+              />
+            )}
+      {isCreateTreeModalVisible && (
+        <Modal
+          visible={isCreateTreeModalVisible}
+          onClose={() => setIsCreateTreeModalVisible(false)}
+          title={t('createNewFamilyTree')}
+          button={{
+            text: t('create'),
+            onPress: onCreateTreePressed,
+            isDisabled: !newTreeName || newTreeName.trim().length === 0 || isCreateTreeModalLoading,
+          }}
+        >
+          <VStack className="w-full items-center px-4" space="lg">
+            <Input>
+              <InputField
+                value={newTreeName}
+                onChangeText={setNewTreeName}
+                placeholder={t('enterTreeName')}
+              />
+            </Input>
+          </VStack>
+        </Modal>
+      )}
     </View>
   )
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'flex-start',
-    paddingTop: 60,
-    paddingHorizontal: 20,
-  },
-  centered: {
-    justifyContent: 'center',
-  },
-  loadingText: {
-    marginTop: 10,
-    fontSize: 14,
-    color: '#666',
-  },
-  welcomeText: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 30,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    marginBottom: 15,
-    alignSelf: 'flex-start',
-  },
-  list: {
-    width: '100%',
-    flexGrow: 0,
-    maxHeight: 300,
-  },
-  treeItem: {
-    backgroundColor: '#f5f5f5',
-    padding: 15,
-    borderRadius: 10,
-    marginBottom: 10,
-    width: '100%',
-  },
-  treeName: {
-    fontSize: 16,
-    fontWeight: '500',
-  },
-  treeDate: {
-    fontSize: 12,
-    color: '#666',
-    marginTop: 5,
-  },
-  emptyText: {
-    fontSize: 14,
-    color: '#999',
-    marginBottom: 20,
-  },
-  demoButton: {
-    backgroundColor: '#4a90d9',
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    borderRadius: 8,
-    marginTop: 20,
-    marginBottom: 15,
-  },
-  demoButtonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  logoutButton: {
-    backgroundColor: '#ff4444',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 5,
-    marginTop: 'auto',
-    marginBottom: 30,
-  },
-  logoutButtonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-})
+export default App

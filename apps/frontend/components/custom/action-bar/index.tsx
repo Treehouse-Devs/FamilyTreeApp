@@ -8,13 +8,14 @@ import { cn } from '@gluestack-ui/utils/nativewind-utils'
 
 interface ActionBarProps {
   title: string
-  onBack: () => void
+  onBack?: () => void
   thumbnailSource?: ImageSourcePropType | { uri: string }
   showThumbnail?: boolean
   className?: string
+  rightIconSlot?: React.ReactNode
 }
 
-export const ActionBar = ({ title, onBack, thumbnailSource, showThumbnail = false, className = '' }: ActionBarProps) => {
+export const ActionBar = ({ title, onBack, thumbnailSource, showThumbnail = false, className = '', rightIconSlot }: ActionBarProps) => {
   const thumbnailAnimatedStyle = useAnimatedStyle(() => {
     return {
       opacity: withTiming(showThumbnail ? 1 : 0, { duration: 150 }),
@@ -49,9 +50,11 @@ export const ActionBar = ({ title, onBack, thumbnailSource, showThumbnail = fals
         elevation: 8,
       }}
     >
-      <Button onPress={onBack} variant="link" className="p-0 shrink-0">
-        <ButtonIcon as={ChevronLeft} className="text-primary-700 w-10 h-10" />
-      </Button>
+      {onBack && (
+        <Button onPress={onBack} variant="link" className="p-0 shrink-0">
+          <ButtonIcon as={ChevronLeft} className="text-primary-700 w-10 h-10" />
+        </Button>
+      )}
       {thumbnailSource && (
         <Animated.View
           style={[
@@ -81,6 +84,9 @@ export const ActionBar = ({ title, onBack, thumbnailSource, showThumbnail = fals
           {title}
         </Text>
       </Animated.View>
+      <HStack className="ml-auto">
+        {rightIconSlot}
+      </HStack>
     </HStack>
   )
 }

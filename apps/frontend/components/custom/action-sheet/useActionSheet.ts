@@ -1,4 +1,4 @@
-import { PanResponder } from 'react-native'
+import { PanResponder, Keyboard } from 'react-native'
 import { useEffect, useRef, useState } from 'react'
 import { useSharedValue, useAnimatedStyle, withTiming, Easing } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -14,7 +14,22 @@ export const useActionSheet = ({ isOpen, onClose, onOpen }: UseActionSheetOption
   const [visible, setVisible] = useState(false)
   const backdropOpacity = useSharedValue(0)
   const translateY = useSharedValue(300)
+  const keyboardOffset = useSharedValue(0)
   const { bottom: bottomInset } = useSafeAreaInsets()
+
+  useEffect(() => {
+    const showSub = Keyboard.addListener('keyboardDidShow', (e) => {
+      keyboardOffset.value = withTiming(-e.endCoordinates.height, { duration: 250, easing: Easing.ease })
+    })
+    const hideSub = Keyboard.addListener('keyboardDidHide', () => {
+      keyboardOffset.value = 0
+    })
+
+    return () => {
+      showSub.remove()
+      hideSub.remove()
+    }
+  }, [])
 
   useEffect(() => {
     if (isOpen) {
@@ -37,7 +52,7 @@ export const useActionSheet = ({ isOpen, onClose, onOpen }: UseActionSheetOption
   }))
 
   const contentStyle = useAnimatedStyle(() => ({
-    transform: [{ translateY: translateY.value }],
+    transform: [{ translateY: translateY.value + keyboardOffset.value }],
   }))
 
   const panResponder = useRef(

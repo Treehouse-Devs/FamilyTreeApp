@@ -198,7 +198,7 @@ const PersonDetailScreen = () => {
     : undefined
 
   return (
-    <View className="flex-1 bg-primary-0">
+    <View className="flex-1 bg-primary-0 pb-6">
       <ActionBar
         title={t('personDetail', { name: personDetail?.name ?? 'Person' })}
         onBack={() => router.back()}
@@ -220,6 +220,7 @@ const PersonDetailScreen = () => {
                       source={personDetail?.fullImageUrl ? { uri: personDetail.fullImageUrl } : (personDetail?.gender === 'female' ? DUMMY_FEMALE : DUMMY_MALE)}
                       className="w-36 h-36"
                       resizeMode="cover"
+                      alt="Profile"
                     />
                   </View>
                 </Pressable>

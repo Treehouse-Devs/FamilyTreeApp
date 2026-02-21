@@ -4,6 +4,7 @@ import { AuthSlice, createAuthSlice } from './slices/authSlice'
 import { AppSlice, createAppSlice } from './slices/appSlice'
 import { persist, StorageValue } from 'zustand/middleware'
 import { createTreeSlice, TreeSlice } from './slices/treeSlice'
+import { createUserSlice, UserSlice } from './slices/userSlice'
 
 // Add hydration state to the store
 interface HydrationState {
@@ -11,7 +12,7 @@ interface HydrationState {
   setHydrated: (state: boolean) => void
 }
 
-export type StoreState = HydrationState & AppSlice & AuthSlice & TreeSlice
+export type StoreState = HydrationState & AppSlice & AuthSlice & TreeSlice & UserSlice
 
 export const useStore = create<StoreState>()(
   persist(
@@ -19,6 +20,7 @@ export const useStore = create<StoreState>()(
       ...createAuthSlice(set, ...a),
       ...createAppSlice(set, ...a),
       ...createTreeSlice(set, ...a),
+      ...createUserSlice(set, ...a),
       // Hydration state
       hydrated: false,
       setHydrated: (state: boolean) => {
@@ -30,6 +32,7 @@ export const useStore = create<StoreState>()(
       storage: {
         getItem: async (name: string) => {
           const value = await AsyncStorage.getItem(name)
+
           return value ? (JSON.parse(value) as StorageValue<StoreState>) : null
         },
         setItem: async (name: string, value: StorageValue<StoreState>) => {

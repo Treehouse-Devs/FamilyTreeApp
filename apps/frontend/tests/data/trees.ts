@@ -1,7 +1,9 @@
 import { Tree, DetailedPerson } from '@/store/slices/treeSlice'
+import { v4 as uuidv4 } from 'uuid'
 
 type TreeMock = {
   trees: Tree[]
+  createTree: (name: string) => Tree
 }
 
 export type TreeMockWithParams = {
@@ -18,6 +20,19 @@ export const treeMocks: TreeMock = {
       updatedAt: Date.now(),
     },
   ],
+  createTree: (name: string) => {
+    const id = uuidv4()
+    const newTree: Tree = {
+      ...treeMocksWithParams.fetchTreeById(id),
+      id,
+      name,
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+    }
+    treeMocks.trees.push(newTree)
+
+    return newTree
+  },
 }
 
 export const treeMocksWithParams: TreeMockWithParams = {
