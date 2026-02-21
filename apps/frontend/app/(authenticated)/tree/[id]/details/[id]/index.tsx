@@ -1,30 +1,34 @@
 import { ActivityIndicator, View, Image, Pressable } from 'react-native'
 import { ActionBar } from '@/components/custom/action-bar'
 import { router, useLocalSearchParams } from 'expo-router'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { TreeService } from '@/services/treeService'
 import { useFamilyTree } from '@/hooks/useFamilyTree'
 import type { DetailedPerson } from '@/store/slices/treeSlice'
-import { mapPersonToListItem, PersonDetailListItems, handleImageUpload } from './utils'
+import { handleImageUpload } from './utils'
 import { ListItems } from '@/components/custom/list-item'
 import { BasicCard } from '@/components/custom/cards/basic-card'
 import { VStack } from '@/components/ui/vstack'
 import { ScrollView } from 'react-native'
-import { Input, InputField } from '@/components/ui/input'
-import { Button, ButtonText } from '@/components/ui/button'
-import Modal from '@/components/custom/modal'
-import { ThemedDatePicker } from '@/components/custom/date-picker'
+import Modal from '@/components/custom/modals/modal'
 import { ImageEditModal } from '@/components/custom/modals/image-edit-modal'
 import DUMMY_MALE from '@/assets/images/dummy-profile-male.webp'
 import DUMMY_FEMALE from '@/assets/images/dummy-profile-female.webp'
+import { usePersonDetail } from './usePersonDetail'
+import { useListItem } from './useListItem'
+import { useCompressImage } from '@/hooks/useCompressImage'
+import { DatePickerContent } from './dialog-content/date-picker-content'
+import { InputContent } from './dialog-content/input-content'
 
 interface ModalConfig {
+  type: 'input' | 'date'
   title: string
-  content: React.ReactNode
+  prop: string
+  category?: Category
+  keyboardType?: 'default' | 'numeric' | 'email-address' | 'phone-pad'
 }
 
-type Category = 'location' | 'occupation' | 'contact'
+export type Category = 'location' | 'occupation' | 'contact'
 type PersonDetail = Pick<DetailedPerson, Category>
 
 const blankPersonDetail: PersonDetail = {
@@ -43,40 +47,9 @@ const blankPersonDetail: PersonDetail = {
   },
 }
 
-const DatePickerContent = ({
-  initialDate,
-  onSave,
-  t,
-}: {
-  initialDate?: number
-  onSave: (timestamp: number) => void
-  t: (key: string) => string
-}) => {
-  const [selectedDate, setSelectedDate] = useState(initialDate ? new Date(initialDate) : new Date())
-
-  const handleDateChange = (date: Date) => {
-    setSelectedDate(date)
-  }
-
-  return (
-    <VStack className="w-full items-center" space="lg">
-      <ThemedDatePicker
-        value={selectedDate}
-        onChange={handleDateChange}
-      />
-      <Button onPress={() => onSave(selectedDate.getTime())} className="w-[6rem] mx-4">
-        <ButtonText>{t('save')}</ButtonText>
-      </Button>
-    </VStack>
-  )
-}
-
 const PersonDetailScreen = () => {
-  const [isLoading, setIsLoading] = useState(true)
-  const [personDetail, setPersonDetail] = useState<DetailedPerson | null>(null)
-  const [listItems, setListItems] = useState<PersonDetailListItems>([])
   const { id } = useLocalSearchParams<{ id: string }>()
-  const { selectedTreeId, getPerson, setPerson } = useFamilyTree()
+  const { selectedTreeId, setPerson } = useFamilyTree()
   const { t } = useTranslation()
   const [isModalVisible, setIsModalVisible] = useState(false)
   const [modalConfig, setModalConfig] = useState<ModalConfig | null>(null)
@@ -84,7 +57,9 @@ const PersonDetailScreen = () => {
   const [selectedImageUri, setSelectedImageUri] = useState<string | undefined>()
   const [isUploading, setIsUploading] = useState(false)
   const [showThumbnailInActionBar, setShowThumbnailInActionBar] = useState(false)
-  const inputValueRef = useRef('')
+  const { compressImage } = useCompressImage()
+  const [selectedDate, setSelectedDate] = useState(new Date())
+  const [inputValue, setInputValue] = useState<string>('')
 
   if (!selectedTreeId) {
     router.replace('/(authenticated)')
@@ -92,62 +67,7 @@ const PersonDetailScreen = () => {
     return
   }
 
-  useEffect(() => {
-    const fetchPerson = async () => {
-      const person = getPerson(selectedTreeId, id)
-      if (person && (person.location || person.occupation || person.contact)) {
-        setPersonDetail(person)
-      } else {
-        const treePerson = getPerson(selectedTreeId, id)
-        const { person: fetchedPerson } = await TreeService.fetchPersonById(selectedTreeId, id)
-        // Merge fetched data with tree person to preserve gender and other tree fields
-        const mergedPerson = { ...fetchedPerson, gender: treePerson?.gender }
-        setPersonDetail(mergedPerson)
-        setPerson(selectedTreeId, id, mergedPerson)
-      }
-      setIsLoading(false)
-    }
-    void fetchPerson()
-  }, [selectedTreeId])
-
-  const sendUpdate = async (prop: string, category: Category | undefined, value: string | number) => {
-    if (personDetail) {
-      try {
-        let editedPersonDetail: DetailedPerson
-
-        if (category) {
-          // Nested property (location, contact, occupation)
-          editedPersonDetail = {
-            ...personDetail,
-            [category]: {
-              ...personDetail[category],
-              [prop]: value,
-            },
-          }
-        } else {
-          // Top-level property (name, gender, birthDate, etc.)
-          if (prop === 'isStillAliveQ') {
-            // change deathDate to undefined if value is stillAlive and to today date if set to notAlive
-            editedPersonDetail = {
-              ...personDetail,
-              deathDate: value === 'stillAlive' ? undefined : new Date().getTime(),
-            }
-          } else {
-            editedPersonDetail = {
-              ...personDetail,
-              [prop]: value,
-            }
-          }
-        }
-
-        setPersonDetail(editedPersonDetail)
-        setPerson(selectedTreeId, id, editedPersonDetail)
-        await TreeService.patchPersonById(selectedTreeId, id, editedPersonDetail)
-      } catch (error) {
-        console.error('Patch API error:', error)
-      }
-    }
-  }
+  const { personDetail, setPersonDetail, isLoading, sendUpdate } = usePersonDetail(id, selectedTreeId)
 
   const findCategoryForProp = (prop: string): Category | undefined => {
     return (Object.keys(blankPersonDetail) as Category[]).find((key) => {
@@ -164,6 +84,7 @@ const PersonDetailScreen = () => {
     const isDateField = prop === 'birthDate' || prop === 'deathDate'
 
     if (selectedId != null) {
+      // Changing from radio buttons, e.g. gender
       console.log('prop:', prop, 'selectedId', selectedId)
       void sendUpdate(prop, currCategory, selectedId)
     } else {
@@ -182,56 +103,44 @@ const PersonDetailScreen = () => {
           : ''
       }
 
-      inputValueRef.current = currValueStr
-
       if (isDateField) {
-        // Date picker modal
         const currentDate = currValueStr ? Number(currValueStr) : undefined
-
-        const onSaveDatePress = (timestamp: number) => {
-          void sendUpdate(prop, currCategory, timestamp)
-          setIsModalVisible(false)
-        }
-
+        setSelectedDate(currentDate ? new Date(currentDate) : new Date())
         setModalConfig({
+          type: 'date',
           title: t(prop),
-          content: (
-            <DatePickerContent
-              initialDate={currentDate}
-              onSave={onSaveDatePress}
-              t={t}
-            />
-          ),
+          prop,
+          category: currCategory,
         })
       } else {
-        // Text input modal
-        const onSaveButtonPress = () => {
-          void sendUpdate(prop, currCategory, inputValueRef.current)
-          setIsModalVisible(false)
-        }
-
+        setInputValue(currValueStr)
         setModalConfig({
+          type: 'input',
           title: t(prop),
-          content: (
-            <VStack className="w-full items-center px-4" space="lg">
-              <Input className="w-full">
-                <InputField
-                  className="w-full"
-                  keyboardType={prop === 'phoneNumber' || prop === 'homeNumber' ? 'phone-pad' : 'default'}
-                  defaultValue={currValueStr}
-                  onChangeText={(text) => { inputValueRef.current = text }}
-                />
-              </Input>
-              <Button onPress={onSaveButtonPress} className="w-[6rem] mx-4">
-                <ButtonText>{t('save')}</ButtonText>
-              </Button>
-            </VStack>
-          ),
+          prop,
+          category: currCategory,
+          keyboardType: prop === 'phoneNumber' || prop === 'homeNumber' ? 'phone-pad' : 'default',
         })
       }
       setIsModalVisible(true)
     }
   }, [personDetail, t])
+
+  const handleModalSave = useCallback(() => {
+    if (!modalConfig) return
+
+    const { prop, category } = modalConfig
+
+    if (modalConfig.type === 'date') {
+      void sendUpdate(prop, category, selectedDate.getTime())
+    } else {
+      const valueToSend = prop === 'phoneNumber' || prop === 'homeNumber' ? parseInt(inputValue) : inputValue
+      void sendUpdate(prop, category, valueToSend)
+    }
+    setIsModalVisible(false)
+  }, [modalConfig, selectedDate, inputValue, sendUpdate])
+
+  const listItems = useListItem({ personDetail, t, onDetailPress })
 
   const openImagePicker = useCallback(() => {
     setSelectedImageUri(personDetail?.fullImageUrl)
@@ -245,6 +154,7 @@ const PersonDetailScreen = () => {
       treeId: selectedTreeId,
       personId: id,
       t,
+      compressImage,
       onImageSelect: (uri: string) => setSelectedImageUri(uri),
       onUploadStart: () => setIsUploading(true),
       onUploadSuccess: (fullImageUrl: string, imageThumbnailUrl: string) => {
@@ -265,13 +175,6 @@ const PersonDetailScreen = () => {
     })
   }, [personDetail, selectedTreeId, id, setPerson, t])
 
-  useEffect(() => {
-    if (personDetail) {
-      const processedListItems = mapPersonToListItem(personDetail, t, onDetailPress)
-      setListItems(processedListItems)
-    }
-  }, [personDetail, t])
-
   const handleScroll = useCallback((event: { nativeEvent: { contentOffset: { y: number } } }) => {
     const scrollY = event.nativeEvent.contentOffset.y
     // Show thumbnail when scrolled past approximately 135px (profile image height + margin)
@@ -285,6 +188,14 @@ const PersonDetailScreen = () => {
   const modalImageSource = selectedImageUri
     ? { uri: selectedImageUri }
     : thumbnailSource
+
+  const modalButton = modalConfig
+    ? {
+        text: t('save'),
+        onPress: handleModalSave,
+        isDisabled: modalConfig.type === 'input' && inputValue === '',
+      }
+    : undefined
 
   return (
     <View className="flex-1 bg-primary-0">
@@ -326,8 +237,22 @@ const PersonDetailScreen = () => {
         visible={isModalVisible}
         onClose={() => setIsModalVisible(false)}
         title={modalConfig?.title}
+        button={modalButton}
       >
-        {modalConfig?.content}
+        {modalConfig?.type === 'date' && (
+          <DatePickerContent
+            selectedDate={selectedDate}
+            setSelectedDate={setSelectedDate}
+          />
+        )}
+        {modalConfig?.type === 'input' && (
+          <InputContent
+            inputValue={inputValue}
+            setInputValue={setInputValue}
+            placeholder={modalConfig.title}
+            keyboardType={modalConfig.keyboardType}
+          />
+        )}
       </Modal>
       <ImageEditModal
         visible={imageEditModalVisible}

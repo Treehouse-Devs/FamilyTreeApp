@@ -2,6 +2,8 @@ import React, { ReactNode } from 'react'
 import { Modal as RNModal, Pressable, View } from 'react-native'
 import Animated, { Easing, FadeIn, FadeOut, LinearTransition } from 'react-native-reanimated'
 import { Text } from '@/components/ui/text'
+import { VStack } from '@/components/ui/vstack'
+import { Button, ButtonText } from '@/components/ui/button'
 
 export const sharedViewClassName = 'bg-secondary-0 rounded-2xl border-2 border-secondary-500 px-[0.75rem] py-[0.625rem] items-center shadow-lg elevation-lg'
 
@@ -14,6 +16,11 @@ export interface ModalProps {
   TitleComponent?: ReactNode
   /** Additional className for the content container */
   contentClassName?: string
+  button?: {
+    text: string
+    onPress: () => void
+    isDisabled: boolean
+  }
 }
 
 export const Modal: React.FC<ModalProps> = ({
@@ -23,6 +30,7 @@ export const Modal: React.FC<ModalProps> = ({
   children,
   TitleComponent,
   contentClassName = '',
+  button,
 }) => {
   return (
     <RNModal
@@ -54,7 +62,14 @@ export const Modal: React.FC<ModalProps> = ({
                 </View>
               )}
               {/* Content */}
-              {children}
+              <VStack className="w-full items-center" space="lg">
+                {children}
+                {button && (
+                  <Button onPress={button.onPress} className="w-[6rem] mx-4" isDisabled={button.isDisabled}>
+                    <ButtonText>{button.text}</ButtonText>
+                  </Button>
+                )}
+              </VStack>
             </Animated.View>
           </Pressable>
         </Animated.View>

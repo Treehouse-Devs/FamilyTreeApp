@@ -1,12 +1,7 @@
-import { ListItemType } from '@/components/custom/list-item/types'
 import { DetailedPerson } from '@/store/slices/treeSlice'
 import type { TFunction } from 'i18next'
 import * as ImagePicker from 'expo-image-picker'
-
-export type PersonDetailListItems = {
-  category: string
-  items: ListItemType[]
-}[]
+import { PersonDetailListItems } from './useListItem'
 
 export function mapPersonToListItem(person: DetailedPerson, t: TFunction, onDetailPress: (id: string, selectedId?: string) => void): PersonDetailListItems {
   const listItems: PersonDetailListItems = []
@@ -110,6 +105,7 @@ export async function handleImageUpload({
   treeId,
   personId,
   t,
+  compressImage,
   onImageSelect,
   onUploadStart,
   onUploadSuccess,
@@ -119,6 +115,7 @@ export async function handleImageUpload({
   treeId: string
   personId: string
   t: TFunction
+  compressImage: (uri: string) => Promise<string>
   onImageSelect: (uri: string) => void
   onUploadStart: () => void
   onUploadSuccess: (fullImageUrl: string, imageThumbnailUrl: string) => void
@@ -149,10 +146,11 @@ export async function handleImageUpload({
     onUploadStart()
     try {
       const { TreeService } = await import('@/services/treeService')
+      const compressedUri = await compressImage(imageUri)
       const response = await TreeService.updatePersonImageById(
         treeId,
         personId,
-        imageUri,
+        compressedUri,
       )
 
       onUploadSuccess(response.fullImageUrl, response.imageThumbnailUrl)

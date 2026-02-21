@@ -3,7 +3,7 @@ import Animated, { FadeIn, FadeOut } from 'react-native-reanimated'
 import { useTranslation } from 'react-i18next'
 
 import { getYear, getAge } from '@/utils/date'
-import { Modal } from '@/components/custom/modal'
+import { Modal } from '@/components/custom/modals/modal'
 
 import { ContentView, MemberType, PersonTooltipProps } from './types'
 import { MainContentView } from './main'

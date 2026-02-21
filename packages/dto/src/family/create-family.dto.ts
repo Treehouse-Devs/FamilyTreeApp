@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty } from 'class-validator'
+import { IsString, IsNotEmpty, IsOptional } from 'class-validator'
 
 export class CreateFamilyDto {
   @IsString()
@@ -7,4 +7,8 @@ export class CreateFamilyDto {
 
   @IsString()
   createdByUid!: string
+
+  @IsString()
+  @IsOptional()
+  image?: string
 }
