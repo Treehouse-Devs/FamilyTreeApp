@@ -1,5 +1,6 @@
 import { authMocks } from './data/auth'
 import { treeMocks, treeMocksWithParams } from './data/trees'
+import { userMocks } from './data/user'
 
 const DELAY_MS = 500 // Default delay for mock responses
 const uuidRegex = /\b[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\b/
@@ -10,6 +11,7 @@ const delay = (ms: number) =>
 const mockResponseMap: Record<string, unknown> = {
   ...authMocks,
   ...treeMocks,
+  ...userMocks,
 }
 
 export const mockApi = async (url: string, method: string): Promise<unknown> => {

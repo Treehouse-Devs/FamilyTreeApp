@@ -87,5 +87,12 @@
   "sortByName": "Nama",
   "sortByBirthYear": "Tahun Lahir",
   "ascending": "A-Z",
-  "descending": "Z-A"
+  "descending": "Z-A",
+  "familyTree": "Pohon Keluarga",
+  "createNewFamilyTree": "Buat Pohon Keluarga Baru",
+  "create": "Buat",
+  "enterTreeName": "Masukkan Nama Pohon Keluarga",
+  "createNew": "Buat Baru",
+  "noTreeYet": "Belum Ada Pohon Keluarga",
+  "noTreeYetDescription": "Buat pohon keluarga pertamamu untuk memulai."
 }

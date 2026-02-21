@@ -28,6 +28,13 @@ export interface FlatTreeDto {
 }
 
 /**
+ * Response from fetching all trees.
+ */
+export interface TreesDto {
+  trees: Omit<FlatTreeDto, 'persons' | 'rootId'>[]
+}
+
+/**
  * A person node in the nested (composed) tree structure.
  */
 export interface PersonDto {

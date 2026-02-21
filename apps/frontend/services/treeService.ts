@@ -9,15 +9,22 @@ export class TreeService extends BaseService {
     return this.get<Tree[]>('/trees')
   }
 
-  static async createTree(tree: Tree) {
-    return this.post<Tree>('/trees', tree)
+  static async createTree(name: string) {
+    const flatTree = await this.post<FlatTree>('/trees', { name })
+    const tree = composeTreeFromFlat(flatTree)
+    // Store the tree in Zustand store
+    useStore.getState().setTree(tree)
+
+    return tree
   }
 
   static async updateTree(tree: Tree) {
-    // update tree in zustand store
-    useStore.getState().setTree(tree)
+    const response = await this.put<{ success: boolean }>(`/trees/${tree.id}`, tree)
+    if (response.success) {
+      useStore.getState().setTree(tree)
+    }
 
-    return this.put<Tree>(`/trees/${tree.id}`, tree)
+    return response
   }
 
   static async deleteTree(treeId: string) {
@@ -39,30 +46,6 @@ export class TreeService extends BaseService {
 
   static async patchPersonById(treeId: string, personId: string, person: Partial<DetailedPerson>) {
     return this.patch<{ person: DetailedPerson }>(`/trees/${treeId}/person/${personId}`, person)
-  }
-
-  private static async uploadImage<T>(
-    endpoint: string,
-    imageUri: string,
-    defaultFilename: string = 'image.webp',
-  ): Promise<T> {
-    const formData = new FormData()
-
-    // Extract filename from URI and change extension to .webp
-    const originalFilename = imageUri.split('/').pop() || defaultFilename
-    const filename = originalFilename.replace(/\.[^.]+$/, '.webp')
-
-    // imageUri is expected to already be compressed to WebP by the caller
-    // (e.g. via the useCompressImage hook) before passing here.
-    const fileBlob = {
-      uri: imageUri,
-      type: 'image/webp',
-      name: filename,
-    }
-
-    formData.append('image', fileBlob as unknown as Blob)
-
-    return await this.postFormData<T>(endpoint, formData)
   }
 
   static async updatePersonImageById(

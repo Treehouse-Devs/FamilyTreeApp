@@ -44,7 +44,7 @@ export const createTreeSlice: StateCreator<TreeSlice, [], [], TreeSlice> = (set,
   memberSortDirection: 'asc',
 
   setTrees: (trees) => {
-    set({ trees })
+    set(state => ({ trees: [...state.trees, ...trees] }))
   },
 
   addTree: (tree) => {

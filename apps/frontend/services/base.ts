@@ -62,4 +62,28 @@ export class BaseService {
 
     return response.data
   }
+
+  protected static async uploadImage<T>(
+    endpoint: string,
+    imageUri: string,
+    defaultFilename: string = 'image.webp',
+  ): Promise<T> {
+    const formData = new FormData()
+
+    // Extract filename from URI and change extension to .webp
+    const originalFilename = imageUri.split('/').pop() || defaultFilename
+    const filename = originalFilename.replace(/\.[^.]+$/, '.webp')
+
+    // imageUri is expected to already be compressed to WebP by the caller
+    // (e.g. via the useCompressImage hook) before passing here.
+    const fileBlob = {
+      uri: imageUri,
+      type: 'image/webp',
+      name: filename,
+    }
+
+    formData.append('image', fileBlob as unknown as Blob)
+
+    return await this.postFormData<T>(endpoint, formData)
+  }
 }

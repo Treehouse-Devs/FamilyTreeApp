@@ -2,6 +2,7 @@ import { useStore } from '@/store/store'
 
 export const useFamilyTree = () => {
   const trees = useStore(state => state.trees)
+  const setTrees = useStore(state => state.setTrees)
   const addTree = useStore(state => state.addTree)
   const removeTree = useStore(state => state.removeTree)
   const setTree = useStore(state => state.setTree)
@@ -26,6 +27,7 @@ export const useFamilyTree = () => {
 
   return {
     trees,
+    setTrees,
     addTree,
     removeTree,
     setTree,
