@@ -34,7 +34,7 @@ export const ActionSheet = ({ isOpen, onClose, onOpen, children }: ActionSheetPr
         >
           <Pressable className="flex-1" onPress={onClose} />
         </Animated.View>
-        <Animated.View style={[contentStyle, { paddingBottom: bottomInset }]} className="bg-primary-0 rounded-t-3xl p-5 pt-2">
+        <Animated.View style={[contentStyle, { paddingBottom: bottomInset + 16 }]} className="bg-primary-0 rounded-t-3xl p-5 pt-2">
           <View {...panResponder.panHandlers} className="py-2">
             <ActionsheetDragIndicator className="self-center" />
           </View>
@@ -48,7 +48,7 @@ export const ActionSheet = ({ isOpen, onClose, onOpen, children }: ActionSheetPr
 export const ActionSheetItemWithIcon = ({ icon, text, onPress, destructive }: { icon: ElementType, text: string, onPress: () => void, destructive?: boolean }) => {
   return (
     <ActionsheetItem
-      className={`py-3 flex flex-row gap-3 rounded-lg ${destructive ? 'data-[active=true]:bg-red-300/30' : 'data-[active=true]:bg-primary-50'}`}
+      className={`py-3 flex flex-row gap-3 rounded-lg data-[active=true]:scale-95 transition-transform duration-200 ease-in-out ${destructive ? 'data-[active=true]:bg-red-300/30' : 'data-[active=true]:bg-primary-50'}`}
       onPress={onPress}
     >
       <ActionsheetItemIcon as={icon} className={destructive ? 'text-red-700' : 'text-primary-700'} size="xl" />

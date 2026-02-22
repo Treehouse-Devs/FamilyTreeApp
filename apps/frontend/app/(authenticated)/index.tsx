@@ -17,6 +17,8 @@ import { Plus } from 'lucide-react-native'
 import Modal from '@/components/custom/modals/modal'
 import { Input, InputField } from '@/components/ui/input'
 import { Button, ButtonIcon } from '@/components/ui/button'
+import { MainPageActionSheet } from '@/components/custom/main-page/action-sheet'
+import { Pressable } from '@/components/ui/pressable'
 
 const getNumColumns = (width: number) => {
   if (width >= 1280) return 4
@@ -35,6 +37,7 @@ const App = () => {
   const [isCreateTreeModalVisible, setIsCreateTreeModalVisible] = useState(false)
   const [newTreeName, setNewTreeName] = useState('')
   const [isCreateTreeModalLoading, setIsCreateTreeModalLoading] = useState(false)
+  const [isActionSheetOpen, setIsActionSheetOpen] = useState(false)
 
   useEffect(() => {
     if (isTreeFetched && isUserFetched) {
@@ -47,10 +50,12 @@ const App = () => {
   }, [])
 
   const avatarIcon = (
-    <Avatar>
-      <AvatarFallbackText>{user?.name}</AvatarFallbackText>
-      <AvatarImage source={{ uri: user?.avatarUrl }} />
-    </Avatar>
+    <Pressable onPress={() => setIsActionSheetOpen(true)} className="data-[active=true]:scale-95 transition-transform duration-200 ease-in-out">
+      <Avatar>
+        <AvatarFallbackText>{user?.name}</AvatarFallbackText>
+        <AvatarImage source={{ uri: user?.avatarUrl }} />
+      </Avatar>
+    </Pressable>
   )
 
   const { width } = useWindowDimensions()
@@ -94,7 +99,7 @@ const App = () => {
             <View className="w-14 h-14 overflow-hidden flex items-center justify-center">
               {tree === 'create'
                 ? (
-                    <Button className="w-10 h-10 flex bg-secondary-500 items-center justify-center rounded-full" action="secondary">
+                    <Button onPress={createNewTree} className="w-10 h-10 flex bg-secondary-500 items-center justify-center rounded-full" action="secondary">
                       <ButtonIcon as={Plus} className="text-secondary-50 w-9 h-9" />
                     </Button>
                   )
@@ -166,6 +171,7 @@ const App = () => {
           </VStack>
         </Modal>
       )}
+      <MainPageActionSheet isOpen={isActionSheetOpen} onClose={() => setIsActionSheetOpen(false)} />
     </View>
   )
 }
