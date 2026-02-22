@@ -105,8 +105,8 @@ export function useTreeGestures({
     .onBegin((event) => {
       'worklet'
       const { x, y } = event
-      const adjustedX = x / scale
-      const adjustedY = y / scale
+      const adjustedX = x
+      const adjustedY = y
 
       // Find which node is being pressed
       for (const node of nodes) {
@@ -132,8 +132,8 @@ export function useTreeGestures({
       const { x, y } = event
 
       // Adjust tap coordinates based on current scale
-      const adjustedX = x / scale
-      const adjustedY = y / scale
+      const adjustedX = x
+      const adjustedY = y
 
       // Find which node was tapped
       for (const node of nodes) {
