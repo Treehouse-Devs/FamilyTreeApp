@@ -94,5 +94,8 @@
   "enterTreeName": "Enter Tree Name",
   "createNew": "Create New",
   "noTreeYet": "No Family Tree Yet",
-  "noTreeYetDescription": "Create your first family tree to get started."
+  "noTreeYetDescription": "Create your first family tree to get started.",
+  "profileSettings": "Profile Settings",
+  "appSettings": "App Settings",
+  "logout": "Log Out"
 }

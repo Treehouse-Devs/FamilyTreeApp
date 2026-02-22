@@ -94,5 +94,8 @@
   "enterTreeName": "Masukkan Nama Pohon Keluarga",
   "createNew": "Buat Baru",
   "noTreeYet": "Belum Ada Pohon Keluarga",
-  "noTreeYetDescription": "Buat pohon keluarga pertamamu untuk memulai."
+  "noTreeYetDescription": "Buat pohon keluarga pertamamu untuk memulai.",
+  "profileSettings": "Pengaturan Profil",
+  "appSettings": "Pengaturan Aplikasi",
+  "logout": "Log Keluar"
 }
