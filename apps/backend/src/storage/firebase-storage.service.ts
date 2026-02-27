@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common'
-import { ConfigService } from '@nestjs/config'
 import { admin } from '../config/firebase.config'
 import { StorageService, UploadResult } from './storage.service'
+import { ConfigService } from '@nestjs/config'
 
 @Injectable()
 export class FirebaseStorageService extends StorageService {
