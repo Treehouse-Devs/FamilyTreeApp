@@ -30,6 +30,39 @@ export class FamilyMember {
   @Column({ type: 'date', nullable: true })
   deathDate!: Date
 
+  @Column({ type: 'boolean', nullable: false, default: false })
+  isBloodRelated!: boolean
+
+  @Column({ type: 'varchar', nullable: true })
+  imageThumbnailUrl!: string | null
+
+  @Column({ type: 'varchar', nullable: true })
+  fullImageUrl!: string | null
+
+  // Location fields
+  @Column({ type: 'varchar', nullable: true })
+  nationality!: string | null
+
+  @Column({ type: 'varchar', nullable: true })
+  hometown!: string | null
+
+  @Column({ type: 'varchar', nullable: true })
+  domicile!: string | null
+
+  // Contact fields
+  @Column({ type: 'bigint', nullable: true })
+  phoneNumber!: number | null
+
+  @Column({ type: 'bigint', nullable: true })
+  homeNumber!: number | null
+
+  // Occupation fields
+  @Column({ type: 'varchar', nullable: true })
+  occupation!: string | null
+
+  @Column({ type: 'varchar', nullable: true })
+  officeAddress!: string | null
+
   @CreateDateColumn()
   createdAt!: Date
 

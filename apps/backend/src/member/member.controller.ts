@@ -26,8 +26,8 @@ export class MemberController {
   }
 
   @Patch(':id')
-  async update(@Param('id') id: string, @Body() updateFamilyMemberDto: PatchFamilyMemberDto, @GetUser() user: UserFromToken): Promise<FamilyMember | null> {
-    return await this.memberService.update(id, updateFamilyMemberDto, user.uid)
+  async update(@Param('id') id: string, @Body() patchFamilyMemberDto: PatchFamilyMemberDto, @GetUser() user: UserFromToken): Promise<FamilyMember | null> {
+    return await this.memberService.update(id, patchFamilyMemberDto, user.uid)
   }
 
   @Delete(':id')

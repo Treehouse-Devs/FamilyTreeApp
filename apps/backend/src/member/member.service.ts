@@ -22,35 +22,26 @@ export class MemberService {
       throw new ForbiddenException('This family is not belong to this user')
     }
 
-    const { familyId, fullName, gender, birthDate, deathDate, relatedMemberId, relationType } = createFamilyMemberDto
+    const { familyId, fullName, gender, birthDate, deathDate } = createFamilyMemberDto
 
-    // TODO: use Gender enum on CreateFamilyMemberDto
-    let dtoGender: Gender
-    if (gender == 'male') {
-      dtoGender = Gender.MALE
-    } else {
-      dtoGender = Gender.FEMALE
-    }
+    const dtoGender = gender === 'male' ? Gender.MALE : Gender.FEMALE
 
     return await this.dataSource.transaction(async (manager) => {
       const member = manager.create(FamilyMember, { familyId, fullName, gender: dtoGender, birthDate, deathDate })
       await manager.save(FamilyMember, member)
 
       const memberCount = await manager.count(FamilyMember, { where: { familyId } })
-      const hasRelationship = relatedMemberId && relationType
+      console.log('member', memberCount)
+      const hasRelationship = createFamilyMemberDto.relatedMemberId && createFamilyMemberDto.relationType
+      console.log('membercount:', memberCount)
       if (memberCount > 1 && !hasRelationship) {
         throw new BadRequestException('Relationship must exist')
       }
 
       if (hasRelationship) {
         // TODO: Use RelationType enum on DTO
-        const relatedMember = await manager.findOne(FamilyMember, { where: { id: relatedMemberId } })
-        if (!relatedMember) {
-          throw new BadRequestException('Related member not found!')
-        }
-
-        const relationTypeParsed = relationType === 'PARENT' ? RelationType.PARENT : RelationType.SPOUSE
-        const relationship = manager.create(FamilyRelationship, { familyId, sourceMemberId: relatedMemberId, targetMemberId: member.id, relationType: relationTypeParsed })
+        const relationType = createFamilyMemberDto.relationType === 'PARENT' ? RelationType.PARENT : RelationType.SPOUSE
+        const relationship = manager.create(FamilyRelationship, { familyId, sourceMemberId: createFamilyMemberDto.relatedMemberId, targetMemberId: member.id, relationType })
         await manager.save(FamilyRelationship, relationship)
       }
 
@@ -72,9 +63,8 @@ export class MemberService {
     return member
   }
 
-  async update(id: string, updateFamilyMemberDto: PatchFamilyMemberDto, userId: string): Promise<FamilyMember | null> {
-    const { name, birthDate, deathDate } = updateFamilyMemberDto
-    const gender = updateFamilyMemberDto.gender === 'male' ? Gender.MALE : Gender.FEMALE
+  async update(id: string, patchFamilyMemberDto: PatchFamilyMemberDto, userId: string): Promise<FamilyMember | null> {
+    const { name, gender, birthDate, deathDate } = patchFamilyMemberDto
 
     await this.findOne(id, userId)
 
