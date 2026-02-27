@@ -19,7 +19,7 @@ export class FamilyService {
   }
 
   async findAll(search: string, userId: string) {
-    return await this.familyRepo.find({ where: { createdByUid: userId, name: ILike(`%${search}%`) } })
+    return await this.familyRepo.find({ where: { createdByUid: userId, name: ILike(`%${search ?? ''}%`) } })
   }
 
   async findOne(id: string, userId: string) {

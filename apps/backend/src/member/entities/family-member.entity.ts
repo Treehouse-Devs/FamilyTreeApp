@@ -50,11 +50,11 @@ export class FamilyMember {
   domicile!: string | null
 
   // Contact fields
-  @Column({ type: 'bigint', nullable: true })
-  phoneNumber!: number | null
+  @Column({ type: 'varchar', nullable: true })
+  phoneNumber!: string | null
 
-  @Column({ type: 'bigint', nullable: true })
-  homeNumber!: number | null
+  @Column({ type: 'varchar', nullable: true })
+  homeNumber!: string | null
 
   // Occupation fields
   @Column({ type: 'varchar', nullable: true })

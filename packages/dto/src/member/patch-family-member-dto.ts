@@ -17,13 +17,13 @@ class LocationDto {
 }
 
 class ContactDto {
-  @IsNumber()
+  @IsString()
   @IsOptional()
-  phoneNumber?: number | null
+  phoneNumber?: string | null
 
-  @IsNumber()
+  @IsString()
   @IsOptional()
-  homeNumber?: number | null
+  homeNumber?: string | null
 }
 
 class OccupationDto {
