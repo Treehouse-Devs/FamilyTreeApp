@@ -10,8 +10,8 @@ export interface DetailedPersonDto extends PersonDto {
     domicile: string
   }
   contact?: {
-    phoneNumber: number | null
-    homeNumber: number | null
+    phoneNumber: string | null
+    homeNumber: string | null
   }
   occupation?: {
     occupation: string
