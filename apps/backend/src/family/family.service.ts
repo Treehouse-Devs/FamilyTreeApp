@@ -12,8 +12,8 @@ export class FamilyService {
     private readonly familyRepo: Repository<Family>,
   ) { }
 
-  async create(createFamilyDto: CreateFamilyDto) {
-    const family = this.familyRepo.create(createFamilyDto)
+  async create(createFamilyDto: CreateFamilyDto, createdByUid: string) {
+    const family = this.familyRepo.create({ ...createFamilyDto, createdByUid })
 
     return await this.familyRepo.save(family)
   }

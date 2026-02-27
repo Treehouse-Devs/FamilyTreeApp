@@ -6,15 +6,15 @@ import { GetUser } from 'src/auth/get-user.decorator'
 import { UserFromToken } from 'src/auth/auth.types'
 import { UpdateFamilyDto } from '@treely/dto/family/update-family.dto'
 
-@Controller('family')
+@Controller('trees')
 @UsePipes(new ValidationPipe({ transform: true }))
 @UseGuards(JwtAuthGuard)
 export class FamilyController {
   constructor(private readonly familyService: FamilyService) { }
 
   @Post()
-  async create(@Body() createFamilyDto: CreateFamilyDto) {
-    return await this.familyService.create(createFamilyDto)
+  async create(@Body() createFamilyDto: CreateFamilyDto, @GetUser() user: UserFromToken) {
+    return await this.familyService.create(createFamilyDto, user.uid)
   }
 
   @Get()
