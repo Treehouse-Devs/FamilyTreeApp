@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useWindowDimensions } from 'react-native'
 import { Gesture } from 'react-native-gesture-handler'
 import { useSharedValue, useAnimatedStyle, withTiming } from 'react-native-reanimated'
@@ -47,6 +47,7 @@ export function useTreeGestures({
 
   // Track pressed node for visual feedback
   const [pressedNodeId, setPressedNodeId] = useState<string | null>(null)
+  const hasInitialized = useRef(false)
 
   // Get viewport dimensions for view-center zoom
   const { width: viewportWidth, height: viewportHeight } = useWindowDimensions()
@@ -58,9 +59,11 @@ export function useTreeGestures({
     }
   }
 
-  // Auto-center on initial load (at default 1.0 scale)
+  // Auto-center on initial load only
   useEffect(() => {
-    const initialScale = 1.0
+    if (hasInitialized.current) return
+
+    const initialScale = scale
 
     // Calculate actual content dimensions
     const contentWidth = (contentMaxX - contentMinX) * initialScale
@@ -93,6 +96,8 @@ export function useTreeGestures({
     translateY.value = initialTranslateY
     savedTranslateX.value = initialTranslateX
     savedTranslateY.value = initialTranslateY
+
+    hasInitialized.current = true
 
     // Notify parent of initial zoom
     if (onZoomChange) {

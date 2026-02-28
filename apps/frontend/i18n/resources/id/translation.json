@@ -95,7 +95,19 @@
   "createNew": "Buat Baru",
   "noTreeYet": "Belum Ada Pohon Keluarga",
   "noTreeYetDescription": "Buat pohon keluarga pertamamu untuk memulai.",
-  "profileSettings": "Pengaturan Profil",
-  "appSettings": "Pengaturan Aplikasi",
-  "logout": "Log Keluar"
+  "logout": "Log Keluar",
+  "settings": "Pengaturan",
+  "accountSettings": "Pengaturan Akun",
+  "applicationSettings": "Pengaturan Aplikasi",
+  "language": "Bahasa",
+  "en": "Inggris",
+  "id": "Indonesia",
+  "emailCannotBeChanged": "Email belum bisa diubah saat ini",
+  "newPassword": "Kata Sandi Baru",
+  "currentPassword": "Kata Sandi Saat Ini",
+  "updateFailed": "Gagal memperbarui. Coba lagi ya!",
+  "colorTheme": "Tema Warna",
+  "light": "Terang",
+  "dark": "Gelap",
+  "system": "Sistem"
 }

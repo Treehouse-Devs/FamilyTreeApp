@@ -26,7 +26,7 @@
     "migration:revert:prod": "typeorm migration:revert -d dist/src/config/typeorm.config.js"
   },
   "dependencies": {
-    "@myorg/dto": "*",
+    "@treely/dto": "*",
     "@nestjs/common": "^11.0.1",
     "@nestjs/config": "^4.0.2",
     "@nestjs/core": "^11.0.1",

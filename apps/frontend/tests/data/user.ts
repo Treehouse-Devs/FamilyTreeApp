@@ -5,6 +5,9 @@ export const mockUser: User = {
   name: 'Ahmad Naufal',
   email: 'ahmad@example.com',
   avatarUrl: 'https://picsum.photos/200',
+  createdAt: '2022-01-01',
+  updatedAt: '2022-01-01',
+  language: 'en',
 }
 
 export const userMocks: Record<string, unknown> = {

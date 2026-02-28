@@ -1,10 +1,11 @@
 import { View, Image, Text } from 'react-native'
-import { User, Settings, LogOut } from 'lucide-react-native'
+import { Settings, LogOut } from 'lucide-react-native'
 import { useTranslation } from 'react-i18next'
 import { ActionSheet, ActionSheetItemWithIcon } from '@/components/custom/action-sheet'
 import { useUser } from '@/hooks/useUser'
 import { useAuth } from '@/hooks/useAuth'
 import DUMMY_MALE from '@/assets/images/dummy-profile-male.webp'
+import { router } from 'expo-router'
 
 export const MainPageActionSheet = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) => {
   const { t } = useTranslation()
@@ -15,17 +16,11 @@ export const MainPageActionSheet = ({ isOpen, onClose }: { isOpen: boolean, onCl
 
   const actionItems = [
     {
-      icon: User,
-      text: t('profileSettings'),
-      onPress: () => {
-        onClose()
-      },
-    },
-    {
       icon: Settings,
-      text: t('appSettings'),
+      text: t('settings'),
       onPress: () => {
         onClose()
+        router.push('/settings')
       },
     },
     {
