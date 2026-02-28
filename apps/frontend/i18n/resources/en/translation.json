@@ -95,7 +95,19 @@
   "createNew": "Create New",
   "noTreeYet": "No Family Tree Yet",
   "noTreeYetDescription": "Create your first family tree to get started.",
-  "profileSettings": "Profile Settings",
-  "appSettings": "App Settings",
-  "logout": "Log Out"
+  "logout": "Log Out",
+  "settings": "Settings",
+  "accountSettings": "Account Settings",
+  "applicationSettings": "Application Settings",
+  "language": "Language",
+  "en": "English",
+  "id": "Indonesian",
+  "emailCannotBeChanged": "Email cannot be changed at this time",
+  "newPassword": "New Password",
+  "currentPassword": "Current Password",
+  "updateFailed": "Update failed. Please try again.",
+  "colorTheme": "Color Theme",
+  "light": "Light",
+  "dark": "Dark",
+  "system": "System"
 }

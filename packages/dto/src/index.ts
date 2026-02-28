@@ -20,3 +20,16 @@ export type {
   DetailedPersonDto,
   UploadMemberImageResponseDto,
 } from './member/member-response.dto'
+
+// Auth DTOs
+export { RegisterUserDto } from './auth/register-user.dto'
+export { LoginUserDto } from './auth/login-user.dto'
+export { ResetPasswordDto } from './auth/reset-password.dto'
+export type {
+  LoginResponseDto,
+  UserInfo,
+  UserResponse,
+} from './auth/login-user.dto'
+
+// User DTOs
+export type { UserResponseDto } from './user/user-response.dto'

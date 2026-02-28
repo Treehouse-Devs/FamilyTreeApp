@@ -1,12 +1,13 @@
 import { useUser } from '@/hooks/useUser'
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { UserService } from '@/services/userService'
 
 export const useFetchUser = ({ setIsUserFetched }: { setIsUserFetched: (value: boolean) => void }) => {
   const { user, setUser } = useUser()
+  const hasFetched = useRef(false)
 
   useEffect(() => {
-    if (user) {
+    if (hasFetched.current) {
       setIsUserFetched(true)
 
       return
@@ -14,17 +15,18 @@ export const useFetchUser = ({ setIsUserFetched }: { setIsUserFetched: (value: b
 
     const fetchUser = async () => {
       try {
-        const user = await UserService.getProfile()
-        setUser(user)
+        const freshUser = await UserService.getProfile()
+        setUser(freshUser)
       } catch (error) {
         console.error('Failed to fetch user:', error)
       } finally {
+        hasFetched.current = true
         setIsUserFetched(true)
       }
     }
 
     void fetchUser()
-  }, [user, setUser, setIsUserFetched])
+  }, [setUser, setIsUserFetched])
 
   return { user }
 }

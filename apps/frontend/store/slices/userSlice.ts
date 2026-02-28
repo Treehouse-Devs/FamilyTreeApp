@@ -1,12 +1,7 @@
 import { StateCreator } from 'zustand'
+import { UserResponseDto } from '@treely/dto'
 
-// TODO use DTO
-export type User = {
-  id: string
-  name: string
-  email: string
-  avatarUrl?: string
-}
+export type User = UserResponseDto
 
 type UserStates = {
   user: User | null

@@ -48,11 +48,11 @@ export const ActionSheet = ({ isOpen, onClose, onOpen, children }: ActionSheetPr
 export const ActionSheetItemWithIcon = ({ icon, text, onPress, destructive }: { icon: ElementType, text: string, onPress: () => void, destructive?: boolean }) => {
   return (
     <ActionsheetItem
-      className={`py-3 flex flex-row gap-3 rounded-lg data-[active=true]:scale-95 transition-transform duration-200 ease-in-out ${destructive ? 'data-[active=true]:bg-red-300/30' : 'data-[active=true]:bg-primary-50'}`}
+      className={`py-3 flex flex-row gap-3 rounded-lg data-[active=true]:scale-95 transition-transform duration-200 ease-in-out ${destructive ? 'data-[active=true]:bg-error-300/30' : 'data-[active=true]:bg-primary-50'}`}
       onPress={onPress}
     >
-      <ActionsheetItemIcon as={icon} className={destructive ? 'text-red-700' : 'text-primary-700'} size="xl" />
-      <ActionsheetItemText size="lg" className={destructive ? 'text-red-700' : 'text-primary-700'}>{text}</ActionsheetItemText>
+      <ActionsheetItemIcon as={icon} className={destructive ? 'text-error-500' : 'text-primary-700'} size="xl" />
+      <ActionsheetItemText size="lg" className={destructive ? 'text-error-500' : 'text-primary-700'}>{text}</ActionsheetItemText>
     </ActionsheetItem>
   )
 }

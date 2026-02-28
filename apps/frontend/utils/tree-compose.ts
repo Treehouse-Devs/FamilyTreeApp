@@ -1,5 +1,5 @@
 import { Person, Tree } from '@/store/slices/treeSlice'
-import type { FlatPersonDto, FlatTreeDto } from '@myorg/dto'
+import type { FlatPersonDto, FlatTreeDto } from '@treely/dto'
 
 export type FlatPerson = FlatPersonDto
 export type FlatTree = FlatTreeDto

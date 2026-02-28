@@ -16,12 +16,13 @@ import { Person } from '@/store/slices/treeSlice'
 import { ButtonIcon } from '@/components/ui/button'
 import { FamilyMenuActionSheet } from '@/components/custom/family-tree/action-sheet'
 import { MemberType, PersonTooltip } from '@/components/custom/family-tree/tooltip'
+import { useZoomLevel } from '@/hooks/useZoomLevel'
 
 const TreeScreen = () => {
   const { id } = useLocalSearchParams<{ id: string }>()
   const { selectTree, selectedRoot, setRoot, setTree, trees } = useFamilyTree()
   const [loading, setLoading] = useState(true)
-  const [zoomLevel, setZoomLevel] = useState(1)
+  const { zoomLevel, setZoomLevel } = useZoomLevel()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [selectedPerson, setSelectedPerson] = useState<Person | null>(null)
 

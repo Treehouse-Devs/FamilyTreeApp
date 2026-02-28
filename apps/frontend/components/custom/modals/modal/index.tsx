@@ -65,7 +65,7 @@ export const Modal: React.FC<ModalProps> = ({
               <VStack className="w-full items-center" space="lg">
                 {children}
                 {button && (
-                  <Button onPress={button.onPress} className="w-[6rem] mx-4" isDisabled={button.isDisabled}>
+                  <Button key={`btn-${button.isDisabled}`} onPress={button.onPress} className="w-[6rem] mx-4" isDisabled={button.isDisabled}>
                     <ButtonText>{button.text}</ButtonText>
                   </Button>
                 )}

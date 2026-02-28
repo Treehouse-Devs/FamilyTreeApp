@@ -1,6 +1,6 @@
 import { collectAllPersons, findPersonById, setPerson } from '@/utils/tree-slice-utils'
 import { StateCreator } from 'zustand'
-import type { PersonDto, DetailedPersonDto, TreeDto } from '@myorg/dto'
+import type { PersonDto, DetailedPersonDto, TreeDto } from '@treely/dto'
 
 export type Person = PersonDto
 export type DetailedPerson = DetailedPersonDto
