@@ -1,33 +1,30 @@
 import {
-  ConflictException,
   ForbiddenException,
+  HttpException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common'
-import { RegisterUserDto } from '@myorg/dto/src/user/register-user.dto'
-import { LoginResponseDto, LoginUserDto } from '@myorg/dto/src/user/login-user.dto'
-import { GoogleAuthDto } from '@myorg/dto/src/user/google-auth.dto'
-import { HttpRequestService } from '@app/http-request'
+import { RegisterUserDto } from '@treely/dto/src/user/register-user.dto'
+import { LoginResponseDto, LoginUserDto } from '@treely/dto/src/user/login-user.dto'
+import { GoogleAuthDto } from '@treely/dto/src/user/google-auth.dto'
 import { FirebaseService } from './firebase.service'
 import { TokenService } from './token.service'
-import { UserFromToken } from './user.types'
+import { UserFromToken } from './auth.types'
 import { FirebaseError } from 'firebase/app'
 import { UserRecord } from 'firebase-admin/lib/auth/user-record'
-import { AxiosResponse } from 'axios'
 import { MailerService } from 'src/mailer/mailer.service'
-import { ForgotPasswordDto } from '@myorg/dto/auth/forgot-password.dto'
-import { EmailVerificationDto } from '@myorg/dto/auth/email-verification.dto'
+import { ForgotPasswordDto } from '@treely/dto/auth/forgot-password.dto'
+import { EmailVerificationDto } from '@treely/dto/auth/email-verification.dto'
 
 @Injectable()
-export class UserService {
+export class AuthService {
   constructor(
-    private httpRequestService: HttpRequestService,
     private firebaseService: FirebaseService,
     private tokenService: TokenService,
     private mailerService: MailerService,
-  ) {}
+  ) { }
 
   async signUp(registerUserDto: RegisterUserDto): Promise<UserRecord | undefined> {
     const { name, email, password } = registerUserDto
@@ -55,7 +52,7 @@ export class UserService {
     const { email, password } = loginUserDto
 
     try {
-      await this.signInWithEmailAndPassword(email, password)
+      await this.firebaseService.signInWithEmailAndPassword(email, password)
       const userRecord = await this.firebaseService.getUserByEmail(email)
 
       if (!userRecord.emailVerified) {
@@ -84,9 +81,8 @@ export class UserService {
       } as LoginResponseDto
     }
     catch (error: unknown) {
-      console.log('ERROR:', JSON.stringify(error))
-      if (error instanceof Error && error.message && error.message.includes('INVALID_LOGIN_CREDENTIALS')) {
-        throw new UnauthorizedException('Invalid credentials.')
+      if (error instanceof HttpException) {
+        throw error
       }
       else if (error instanceof Error) {
         throw new InternalServerErrorException(error.message)
@@ -172,28 +168,6 @@ export class UserService {
       }
       else {
         throw new InternalServerErrorException('Google authentication failed')
-      }
-    }
-  }
-
-  private async signInWithEmailAndPassword(email: string, password: string): Promise<AxiosResponse> {
-    const url = `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${process.env.FB_API_KEY}`
-    try {
-      return await this.httpRequestService.sendPostRequest(url, {
-        email,
-        password,
-        returnSecureToken: true,
-      })
-    }
-    catch (error: unknown) {
-      if (typeof error === 'object' && error !== null && 'message' in error && error.message === 'INVALID_LOGIN_CREDENTIALS') {
-        throw new ConflictException('Invalid login credentials')
-      }
-      else if (error instanceof Error) {
-        throw new InternalServerErrorException(error.message)
-      }
-      else {
-        throw new InternalServerErrorException('Unexpected error occured.')
       }
     }
   }

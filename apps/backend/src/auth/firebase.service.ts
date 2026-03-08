@@ -1,6 +1,8 @@
 import { Injectable, UnauthorizedException, NotFoundException, InternalServerErrorException, ConflictException } from '@nestjs/common'
 import * as admin from 'firebase-admin'
 import { FirebaseError } from 'firebase/app'
+import { signInWithEmailAndPassword as firebaseSignIn } from 'firebase/auth'
+import { auth } from '../config/firebase.config'
 
 interface FirebaseUserData {
   displayName: string
@@ -103,6 +105,21 @@ export class FirebaseService {
         throw new UnauthorizedException('Invalid Google ID token')
       }
       throw new InternalServerErrorException('Google authentication failed')
+    }
+  }
+
+  async signInWithEmailAndPassword(email: string, password: string) {
+    try {
+      return await firebaseSignIn(auth, email, password)
+    }
+    catch (error: unknown) {
+      if (error instanceof FirebaseError) {
+        if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found') {
+          throw new UnauthorizedException('Invalid login credentials')
+        }
+        throw new UnauthorizedException(error.message)
+      }
+      throw new InternalServerErrorException('Sign-in failed')
     }
   }
 

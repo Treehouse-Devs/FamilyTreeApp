@@ -1,16 +1,16 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common'
 import { FamilyService } from './family.service'
-import { JwtAuthGuard } from 'src/user/jwt-auth.guard'
-import { CreateFamilyDto } from '@myorg/dto/family/create-family.dto'
-import { GetUser } from 'src/user/get-user.decorator'
-import { UserFromToken } from 'src/user/user.types'
-import { UpdateFamilyDto } from '@myorg/dto/family/update-family.dto'
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard'
+import { CreateFamilyDto } from '@treely/dto/family/create-family.dto'
+import { GetUser } from 'src/auth/get-user.decorator'
+import { UserFromToken } from 'src/auth/auth.types'
+import { UpdateFamilyDto } from '@treely/dto/family/update-family.dto'
 
 @Controller('family')
 @UsePipes(new ValidationPipe({ transform: true }))
 @UseGuards(JwtAuthGuard)
 export class FamilyController {
-  constructor(private readonly familyService: FamilyService) {}
+  constructor(private readonly familyService: FamilyService) { }
 
   @Post()
   async create(@Body() createFamilyDto: CreateFamilyDto, @GetUser() user: UserFromToken) {

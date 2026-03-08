@@ -2,7 +2,7 @@ import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common'
 import { TypeOrmModule } from '@nestjs/typeorm'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import { typeOrmConfig } from './config/database.config'
-import { UserModule } from './user/user.module'
+import { AuthModule } from './auth/auth.module'
 import configuration from './config/configuration'
 import { LoggerMiddleware } from './logger/logger.middleware'
 import { MailerModule } from './mailer/mailer.module'
@@ -23,7 +23,7 @@ import { MemberModule } from './member/member.module'
     }),
     FamilyModule,
     MemberModule,
-    UserModule,
+    AuthModule,
     MailerModule,
   ],
   controllers: [],
