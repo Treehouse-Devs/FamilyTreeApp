@@ -2,19 +2,19 @@ import { BadRequestException, ConflictException, ForbiddenException, Injectable 
 import { DataSource, Repository } from 'typeorm'
 import { FamilyMember, Gender } from './entities/family-member.entity'
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm'
-import { CreateFamilyMemberDto } from '@myorg/dto/member/create-family-member.dto'
+import { CreateFamilyMemberDto } from '@treely/dto/member/create-family-member.dto'
 import { FamilyService } from 'src/family/family.service'
-import { UpdateFamilyMemberDto } from '@myorg/dto/member/update-family-member-dto'
+import { UpdateFamilyMemberDto } from '@treely/dto/member/update-family-member-dto'
 import { FamilyRelationship, RelationType } from './entities/family-relationship.entity'
 
 @Injectable()
 export class MemberService {
   constructor(
-        @InjectRepository(FamilyMember) private readonly memberRepository: Repository<FamilyMember>,
-        @InjectRepository(FamilyRelationship) private readonly relationshipRepository: Repository<FamilyRelationship>,
-        @InjectDataSource() private dataSource: DataSource,
-        private familyService: FamilyService,
-  ) {}
+    @InjectRepository(FamilyMember) private readonly memberRepository: Repository<FamilyMember>,
+    @InjectRepository(FamilyRelationship) private readonly relationshipRepository: Repository<FamilyRelationship>,
+    @InjectDataSource() private dataSource: DataSource,
+    private familyService: FamilyService,
+  ) { }
 
   async create(createFamilyMemberDto: CreateFamilyMemberDto, userId: string): Promise<FamilyMember> {
     const family = await this.familyService.findOne(createFamilyMemberDto.familyId, userId)

@@ -30,6 +30,9 @@ export type {
   UserInfo,
   UserResponse,
 } from './auth/login-user.dto'
+export { GoogleAuthDto } from './auth/google-auth.dto'
+export { ForgotPasswordDto } from './auth/forgot-password.dto'
+export { EmailVerificationDto } from './auth/email-verification.dto'
 
 // User DTOs
 export type { UserResponseDto } from './user/user-response.dto'

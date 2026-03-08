@@ -7,7 +7,6 @@ import { loginSchema, LoginSchema } from '../../validator/auth/authValidation'
 import { useTranslation } from 'react-i18next'
 import { AuthService } from '@/services/authService'
 import { useApi } from '@/hooks/useApi'
-import { router } from 'expo-router'
 import { useAuth } from '@/hooks/useAuth'
 import { FormControlErrorText, FormControlLabel, FormControlLabelText } from '@/components/ui/form-control'
 import { Input, InputField, InputIcon, InputSlot } from '@/components/ui/input'
@@ -43,7 +42,7 @@ export default function SignInScreen() {
     if (res) {
       console.log('Login successful:', res)
       login(res.user, res.token)
-      router.replace('/(authenticated)')
+      // Navigation is handled declaratively by index.tsx via <Redirect> when isLoggedIn becomes true
     } else if (error) {
       console.error('Login failed:', error)
       Alert.alert(t('loginFailed'), t('loginErrorMessage'))
