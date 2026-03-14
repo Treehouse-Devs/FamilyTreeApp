@@ -1,4 +1,5 @@
 import i18n from '@/i18n/index'
+import { Gender } from '@treely/dto'
 import { z } from 'zod'
 
 export const loginSchema = z.object({
@@ -8,17 +9,27 @@ export const loginSchema = z.object({
 
 export type LoginSchema = z.infer<typeof loginSchema>
 
-export const registerSchema = z.object({
+export const registerStep1Schema = z.object({
   email: z.string().email({ message: i18n.t('emailInvalid') }).min(1, { message: i18n.t('emailRequired') }),
   password: z.string().min(8, { message: i18n.t('passwordSignupMinLength') }),
-  name: z.string().min(1, { message: i18n.t('nameRequired') }),
   confirmPassword: z.string(),
 }).refine(data => data.password === data.confirmPassword, {
   message: i18n.t('passwordsDoNotMatch'),
   path: ['confirmPassword'],
 })
 
-export type RegisterSchema = z.infer<typeof registerSchema>
+export const registerStep2Schema = z.object({
+  name: z.string().min(1, { message: i18n.t('nameRequired') }),
+  gender: z.enum([Gender.MALE, Gender.FEMALE]),
+  birthDate: z.coerce
+    .number({ invalid_type_error: i18n.t('birthDateInvalid') })
+    .int({ message: i18n.t('birthDateInvalid') })
+    .positive({ message: i18n.t('birthDateRequired') })
+    .finite({ message: i18n.t('birthDateInvalid') })
+    .max(Date.now(), { message: i18n.t('birthDateInFuture') }),
+})
+
+export type RegisterSchema = z.infer<typeof registerStep1Schema> & z.infer<typeof registerStep2Schema>
 
 export const forgotPasswordSchema = z.object({
   email: z.string().email({ message: i18n.t('emailInvalid') }).min(1, { message: i18n.t('emailRequired') }),

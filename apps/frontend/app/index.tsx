@@ -1,5 +1,5 @@
 import { router, Redirect } from 'expo-router'
-import React, { useEffect } from 'react'
+import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { useApp } from '@/hooks/useApp'
 import { useAuth } from '@/hooks/useAuth'
@@ -7,7 +7,9 @@ import { VStack } from '@/components/ui/vstack'
 import { Text } from '@/components/ui/text'
 import { Button, ButtonText } from '@/components/ui/button'
 import { Image } from '@/components/ui/image'
-import welcomeImage from '@/assets/images/welcome.webp'
+import welcomeImage from '@/assets/images/welcome2.webp'
+import welcomeBackground from '@/assets/images/welcome-background.webp'
+import { Image as NativeImage, StyleSheet } from 'react-native'
 
 export default function WelcomeScreen() {
   const { t } = useTranslation()
@@ -23,21 +25,22 @@ export default function WelcomeScreen() {
   //   return <Redirect href="/auth/signin" />
   // }
 
-  useEffect(() => {
-    console.log('WelcomeScreen mounted')
-  }, [])
-
   const handleSignIn = () => {
     setHasSeenWelcome(true)
     router.push('/auth/signin')
   }
 
   return (
-    <VStack className="flex-1 items-center justify-center bg-background-00 mt-[50%] py-4 px-8">
-      <Text className="font-heading text-4xl font-bold mb-4">
+    <VStack className="flex-1 items-center justify-center py-4 px-8">
+      <NativeImage
+        source={welcomeBackground}
+        style={[StyleSheet.absoluteFillObject, { zIndex: -1 }]}
+        resizeMode="cover"
+      />
+      <Text className="font-heading text-4xl font-bold mt-[50%] mb-4">
         {t('welcomeMessage')}
       </Text>
-      <Text className="font-sans text-lg mb-6">
+      <Text className="font-sans text-lg mb-8">
         {t('welcomeDescription')}
       </Text>
       <Image

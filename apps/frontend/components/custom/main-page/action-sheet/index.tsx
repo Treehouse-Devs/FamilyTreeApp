@@ -29,6 +29,7 @@ export const MainPageActionSheet = ({ isOpen, onClose }: { isOpen: boolean, onCl
       onPress: () => {
         onClose()
         logout()
+        router.replace('/auth/signin')
       },
       destructive: true,
     },

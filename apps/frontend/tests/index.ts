@@ -29,6 +29,12 @@ export const mockApi = async (url: string, method: string): Promise<unknown> => 
       }
     }
 
+    // Special handling for auth endpoints - return proper mock data
+    const authKey = url.replace(/^\//, '')
+    if (mockResponseMap[authKey]) {
+      return mockResponseMap[authKey]
+    }
+
     return { success: true }
   }
 

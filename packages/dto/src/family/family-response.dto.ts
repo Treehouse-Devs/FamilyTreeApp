@@ -1,3 +1,5 @@
+import { Gender } from '../auth/login-user.dto'
+
 /**
  * Flat person data as returned by the API (before tree composition).
  */
@@ -6,7 +8,7 @@ export interface FlatPersonDto {
   name: string
   birthDate: number
   isBloodRelated: boolean
-  gender?: 'male' | 'female'
+  gender: Gender
   deathDate?: number
   spouseId?: string
   fatherId?: string
@@ -47,7 +49,7 @@ export interface PersonDto {
   spouse?: PersonDto
   spouseId?: string
   imageThumbnailUrl?: string
-  gender?: 'male' | 'female'
+  gender: Gender
 }
 
 /**

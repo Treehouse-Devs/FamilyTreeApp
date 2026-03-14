@@ -13,10 +13,11 @@ export function useApi<TService extends BaseService, TResult = unknown>(serviceC
   // Create a proxy that wraps each method
   const api = useMemo(() => {
     const handler: ProxyHandler<TService> = {
-      get(target, prop, receiver) {
+      get(target, prop, _receiver) {
         console.log(`[useApi.${String(prop)}] processing API...`)
         const orig = target[prop as keyof TService]
         if (typeof orig !== 'function') return orig
+
         return async (...args: unknown[]): Promise<TResult> => {
           setLoading(true)
           setError(null)
@@ -24,17 +25,26 @@ export function useApi<TService extends BaseService, TResult = unknown>(serviceC
             const data = await (orig as (...args: unknown[]) => Promise<TResult>).apply(target, args)
             setResult(data)
             setLoading(false)
+
             return data
-          }
-          catch (err: unknown) {
+          } catch (err: unknown) {
             console.error(`[useApi.${String(prop)}] API Error:`, err)
-            setError(err instanceof Error ? err : new Error(String(err)))
+            // Extract the backend's error message from the axios response if available
+            const axiosError = err as { response?: { data?: { message?: string }, status?: number } }
+            const serverMessage = axiosError.response?.data?.message
+            const status = axiosError.response?.status
+            const message = serverMessage
+              ? (status ? `${status}: ${serverMessage}` : serverMessage)
+              : (err instanceof Error ? err.message : String(err))
+            setError(new Error(message))
             setLoading(false)
+
             return null as unknown as TResult
           }
         }
       },
     }
+
     return new Proxy(serviceClass, handler)
   }, [serviceClass])
 

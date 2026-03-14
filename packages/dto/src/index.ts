@@ -22,9 +22,10 @@ export type {
 } from './member/member-response.dto'
 
 // Auth DTOs
-export { RegisterUserDto } from './auth/register-user.dto'
+export { RegisterUserDto, RegisterResponseDto } from './auth/register-user.dto'
 export { LoginUserDto } from './auth/login-user.dto'
 export { ResetPasswordDto } from './auth/reset-password.dto'
+export { Gender } from './auth/login-user.dto'
 export type {
   LoginResponseDto,
   UserInfo,

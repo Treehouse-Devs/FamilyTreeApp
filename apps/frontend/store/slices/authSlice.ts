@@ -2,11 +2,12 @@ import { StateCreator } from 'zustand'
 
 interface AuthState {
   user: unknown // Replace 'unknown' with User type
-  token: string | null
+  accessToken: string | null
+  refreshToken: string | null
 }
 
 interface AuthActions {
-  login: (user: unknown, token: string) => void
+  login: (user: unknown, accessToken: string, refreshToken?: string) => void
   logout: () => void
 }
 
@@ -19,13 +20,14 @@ export const createAuthSlice: StateCreator<
   AuthSlice
 > = set => ({
   user: null,
-  token: null,
+  accessToken: null,
+  refreshToken: null,
 
-  login: (user, token) => {
-    set({ user, token })
+  login: (user, accessToken, refreshToken) => {
+    set({ user, accessToken, refreshToken: refreshToken ?? null })
   },
 
   logout: () => {
-    set({ user: null, token: null })
+    set({ user: null, accessToken: null, refreshToken: null })
   },
 })

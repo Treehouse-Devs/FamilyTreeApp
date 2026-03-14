@@ -1,5 +1,6 @@
 import { IsEnum, IsNumber, IsOptional, IsString, ValidateNested } from 'class-validator'
 import { Type } from 'class-transformer'
+import { Gender } from '../auth/login-user.dto'
 
 class LocationDto {
   @IsString()
@@ -40,9 +41,9 @@ export class PatchFamilyMemberDto {
   @IsOptional()
   name?: string
 
-  @IsEnum(['male', 'female'])
+  @IsEnum(Gender)
   @IsOptional()
-  gender?: 'male' | 'female'
+  gender?: Gender
 
   @IsNumber()
   @IsOptional()

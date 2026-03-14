@@ -20,6 +20,11 @@ export class LoginResponseDto {
   message!: string
 }
 
+export enum Gender {
+  MALE = 'male',
+  FEMALE = 'female',
+}
+
 export class UserInfo {
   uid!: string
   displayName!: string
