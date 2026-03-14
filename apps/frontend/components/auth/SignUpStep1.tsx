@@ -1,62 +1,39 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { EyeIcon, EyeOffIcon } from 'lucide-react-native'
-import { Alert } from 'react-native'
 import { Controller, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { loginSchema, LoginSchema } from '../../validator/auth/authValidation'
+import { registerStep1Schema } from '@/validator/auth/authValidation'
+import type { z } from 'zod'
 import { useTranslation } from 'react-i18next'
-import { AuthService } from '@/services/authService'
-import { useApi } from '@/hooks/useApi'
-import { useAuth } from '@/hooks/useAuth'
 import { FormControlErrorText, FormControlLabel, FormControlLabelText } from '@/components/ui/form-control'
 import { Input, InputField, InputIcon, InputSlot } from '@/components/ui/input'
 import { Pressable } from '@/components/ui/pressable'
 import { Button, ButtonText } from '@/components/ui/button'
 import { buttonStyle, buttonTextStyle, inputStyle } from '@/components/auth/shared-styles'
-import { useAlert } from './_layout'
 
-export default function SignInScreen() {
+export type Step1Data = z.infer<typeof registerStep1Schema>
+
+type SignUpStep1Props = {
+  onNext: (data: Step1Data) => void
+}
+
+export default function SignUpStep1({ onNext }: SignUpStep1Props) {
   const { t } = useTranslation()
-  const { setAlert } = useAlert()
+  const [showPassword, setShowPassword] = useState(false)
+
   const {
     control,
     handleSubmit,
     formState: { errors, isValid },
-  } = useForm<LoginSchema>({
-    resolver: zodResolver(loginSchema),
+  } = useForm<Step1Data>({
+    resolver: zodResolver(registerStep1Schema),
     mode: 'onChange',
     defaultValues: {
       email: '',
       password: '',
+      confirmPassword: '',
     },
   })
-
-  const {
-    loading,
-    error,
-    api,
-  } = useApi(AuthService)
-  const { login } = useAuth()
-
-  const [showPassword, setShowPassword] = useState(false)
-
-  useEffect(() => {
-    if (error) {
-      setAlert({ type: 'error', message: error.message.startsWith('403') ? t('emailNotVerified') : error.message })
-    }
-  }, [error])
-
-  const onSubmitSignIn = async (data: LoginSchema) => {
-    const res = await api.login(data.email, data.password)
-    if (res?.accessToken) {
-      console.log('Login successful:', res)
-      login(res.user, res.accessToken, res.refreshToken)
-      // Navigation is handled declaratively by index.tsx via <Redirect> when isLoggedIn becomes true
-    } else if (error) {
-      console.error('Login failed:', error)
-      Alert.alert(t('loginFailed'), t('loginErrorMessage'))
-    }
-  }
 
   return (
     <>
@@ -96,6 +73,7 @@ export default function SignInScreen() {
                 placeholder={t('passwordPlaceholder')}
                 type={showPassword ? 'text' : 'password'}
                 className="font-sans"
+                autoCapitalize="none"
               />
               <InputSlot className="pe-3">
                 <Pressable onPress={() => setShowPassword(!showPassword)}>
@@ -109,8 +87,40 @@ export default function SignInScreen() {
       >
       </Controller>
 
-      <Button action="secondary" onPress={() => void handleSubmit(onSubmitSignIn)()} className={buttonStyle(loading || !isValid)}>
-        <ButtonText className={buttonTextStyle(loading || !isValid)}>{t('signin')}</ButtonText>
+      <Controller
+        control={control}
+        name="confirmPassword"
+        render={({ field: { onChange, onBlur, value } }) => (
+          <>
+            <FormControlLabel className="mt-4"><FormControlLabelText>{t('confirmPassword')}</FormControlLabelText></FormControlLabel>
+            <Input className={inputStyle(!!errors.confirmPassword)}>
+              <InputField
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+                placeholder={t('confirmPasswordPlaceholder')}
+                type={showPassword ? 'text' : 'password'}
+                className="font-sans"
+                autoCapitalize="none"
+              />
+              <InputSlot className="pe-3">
+                <Pressable onPress={() => setShowPassword(!showPassword)}>
+                  <InputIcon as={showPassword ? EyeOffIcon : EyeIcon} />
+                </Pressable>
+              </InputSlot>
+            </Input>
+            {errors.confirmPassword && <FormControlErrorText className="mt-1">{errors.confirmPassword.message}</FormControlErrorText>}
+          </>
+        )}
+      >
+      </Controller>
+
+      <Button
+        action="secondary"
+        onPress={() => void handleSubmit(onNext)()}
+        className={buttonStyle(!isValid)}
+      >
+        <ButtonText className={buttonTextStyle(!isValid)}>{t('next')}</ButtonText>
       </Button>
     </>
   )

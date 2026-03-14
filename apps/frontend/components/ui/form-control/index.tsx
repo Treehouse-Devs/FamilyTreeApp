@@ -10,6 +10,7 @@ import {
 import { cssInterop } from 'nativewind'
 import type { VariantProps } from '@gluestack-ui/nativewind-utils'
 import { PrimitiveIcon, UIIcon } from '@gluestack-ui/icon'
+import { cn } from '@gluestack-ui/utils/nativewind-utils'
 
 const SCOPE = 'FORM_CONTROL'
 
@@ -394,7 +395,7 @@ const FormControlLabelText = React.forwardRef<
       className={formControlLabelTextStyle({
         parentVariants: { size: parentSize },
         size,
-        class: className,
+        class: cn('text-secondary-700', className),
       })}
       ref={ref}
       {...props}

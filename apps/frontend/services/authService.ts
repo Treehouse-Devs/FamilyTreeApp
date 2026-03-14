@@ -1,17 +1,18 @@
+import { LoginResponseDto, RegisterResponseDto, RegisterUserDto } from '@treely/dto'
 import { BaseService } from './base'
 
 export class AuthService extends BaseService {
   static async login(email: string, password: string) {
-    return this.post<{ token: string, user: unknown }>( // TODO: Define a proper User type
+    return this.post<LoginResponseDto>(
       '/auth/login',
       { email, password },
     )
   }
 
-  static async register(email: string, password: string, name: string) {
-    return this.post(
+  static async register(data: RegisterUserDto) {
+    return this.post<RegisterResponseDto>(
       '/auth/register',
-      { email, password, name },
+      data,
     )
   }
 

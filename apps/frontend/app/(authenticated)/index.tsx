@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next'
 import { useFetchTrees } from './useFetchTrees'
 import { useCallback, useEffect, useState } from 'react'
 import { useFetchUser } from './useFetchUser'
-import { ActivityIndicator, FlatList, useWindowDimensions, View } from 'react-native'
+import { FlatList, useWindowDimensions, View } from 'react-native'
 import { ActionBar } from '@/components/custom/action-bar'
 import { Avatar, AvatarFallbackText, AvatarImage } from '@/components/ui/avatar'
 import { NoTree } from '@/components/custom/main-page/no-tree'
@@ -11,6 +11,7 @@ import { BasicCard } from '@/components/custom/cards/basic-card'
 import { router } from 'expo-router'
 import { VStack } from '@/components/ui/vstack'
 import DUMMY_FAMILY from '@/assets/images/dummy-family.webp'
+import DUMMY_MALE from '@/assets/images/dummy-profile-male.webp'
 import { Image } from '@/components/ui/image'
 import { Text } from '@/components/ui/text'
 import { Plus } from 'lucide-react-native'
@@ -19,6 +20,7 @@ import { Input, InputField } from '@/components/ui/input'
 import { Button, ButtonIcon } from '@/components/ui/button'
 import { MainPageActionSheet } from '@/components/custom/main-page/action-sheet'
 import { Pressable } from '@/components/ui/pressable'
+import { Skeleton, SkeletonText } from '@/components/ui/skeleton'
 
 const getNumColumns = (width: number) => {
   if (width >= 1280) return 4
@@ -49,11 +51,15 @@ const App = () => {
     setIsCreateTreeModalVisible(true)
   }, [])
 
+  const avatarSource = user?.avatarUrl
+    ? { uri: user.avatarUrl }
+    : (!user?.name || user.name.trim() === '' ? DUMMY_MALE : undefined)
+
   const avatarIcon = (
     <Pressable onPress={() => setIsActionSheetOpen(true)} className="data-[active=true]:scale-95 transition-transform duration-200 ease-in-out">
       <Avatar>
         <AvatarFallbackText>{user?.name}</AvatarFallbackText>
-        <AvatarImage source={{ uri: user?.avatarUrl }} />
+        <AvatarImage source={avatarSource} />
       </Avatar>
     </Pressable>
   )
@@ -79,7 +85,22 @@ const App = () => {
     })
   }, [createTree, newTreeName, navigateToDetail])
 
-  const renderTreeCard = (tree: Tree | 'create') => {
+  const renderTreeCard = (tree: Tree | 'create' | 'loading') => {
+    if (tree === 'loading') {
+      return (
+        <View style={{ width: `${100 / numColumns}%` }}>
+          <BasicCard className="py-4 px-2">
+            <VStack className="items-center gap-3">
+              {/* Skeleton Circle Image */}
+              <Skeleton variant="circular" className="w-14 h-14 rounded-full" />
+              {/* Skeleton Text */}
+              <SkeletonText _lines={1} className="h-5 w-24 rounded-md mt-1" />
+            </VStack>
+          </BasicCard>
+        </View>
+      )
+    }
+
     const imageSource = tree === 'create' ? '' : tree.familyImageUrl || DUMMY_FAMILY
 
     return (
@@ -132,9 +153,13 @@ const App = () => {
       />
       {isLoading
         ? (
-            <View className="flex-1 items-center justify-center">
-              <ActivityIndicator />
-            </View>
+            <FlatList
+              data={['loading-1', 'loading-2'] as const}
+              renderItem={() => renderTreeCard('loading')}
+              keyExtractor={item => item}
+              numColumns={numColumns}
+              contentContainerStyle={{ paddingHorizontal: 10, gap: 12, paddingBottom: 24 }}
+            />
           )
         : trees.length === 0
           ? (

@@ -1,6 +1,7 @@
 import axios from 'axios'
+import { useStore } from '@/store/store'
 
-const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000'
+const API_BASE_URL = (process.env.EXPO_PUBLIC_API_URL as string) || 'http://localhost:3000'
 const TIMEOUT = 10000 // 10 seconds
 
 const api = axios.create({
@@ -12,12 +13,11 @@ const handleError = (error: unknown) => {
   return error instanceof Error ? error : new Error(typeof error === 'string' ? error : JSON.stringify(error))
 }
 
-// Optional: Interceptors (auth, error logging, etc.)
 api.interceptors.request.use(
   (config) => {
-    // Example: Add token if available
-    // const token = AuthStore.getState().token;
-    // if (token) config.headers.Authorization = `Bearer ${token}`;
+    const accessToken = useStore.getState().accessToken
+    if (accessToken) config.headers.Authorization = `Bearer ${accessToken}`
+
     return config
   },
   error => Promise.reject(handleError(error)),

@@ -1,0 +1,26 @@
+# Antigravity Hardened Token-Saving Protocol
+
+## 1. Zero-Waste Communication
+- **Silent Planning:** Skip all conversational filler, "pacing" remarks, and meta-commentary.
+- **Diffs Only:** Never output full files. Use `diff` format for all code changes. 
+- **No Summary:** Do not summarize what you just did unless explicitly asked. Assume the code changes speak for themselves.
+
+## 2. Monorepo Context Isolation
+- **Scope Locking:** You must stay within the directory of the current task (/apps/backend, /apps/frontend, or /packages/dto). 
+- **Lazy Indexing:** Do not re-scan the entire workspace. Search for specific files or symbols using `grep` or `find` before reading file contents.
+- **DTO First:** For cross-app changes, read `packages/dto` once, store the types in your volatile memory, and do not re-read the folder unless the schema changes.
+
+## 3. Yarn Workspace Efficiency
+- **Scoped Commands:** Always use `yarn workspace <package> <cmd>`. 
+- **Cache Awareness:** Assume the root `node_modules` is already indexed; do not check dependency versions unless a build error occurs.
+
+## 4. Anti-Reset Strategy
+- **Checkpointing:** Before executing a multi-step task, write a 1-sentence state summary to `.agent_state`. If you crash or reset, read this file first to avoid a full workspace re-scan.
+- **Model Switching:** Use Gemini Flash for all terminal operations and simple file reads. Only invoke Gemini Pro/Claude for complex logic implementation.
+
+## 5. Execution Logic (Optimized for Flash)
+1. **Target:** Specify [Backend | Frontend | DTO].
+2. **Technical Plan:** Provide a maximum of 5 bullet points. 
+3. **Explicit Detail:** For each point, include specific file paths and function/type names to be modified.
+4. **No Guesses:** If a file path is unknown, the plan must first include a step to `find` or `grep` the file before proposing the edit.
+5. **Execute:** Direct code application only after user approval.

@@ -45,7 +45,7 @@ export const useStore = create<StoreState>()(
       // Only persist certain fields
       partialize: state => ({
         user: state.user,
-        token: state.token,
+        accessToken: state.accessToken,
         hasSeenWelcome: state.hasSeenWelcome,
         colorMode: state.colorMode,
       } as unknown as StoreState),

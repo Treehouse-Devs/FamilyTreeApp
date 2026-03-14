@@ -27,6 +27,10 @@ const themedClassNames = {
   // Outside days
   outside_label: 'text-typography-400',
 
+  // Disabled days (beyond minDate/maxDate)
+  disabled: 'opacity-30',
+  disabled_label: 'opacity-30',
+
   // Month/Year picker styles
   month_label: 'text-typography-900',
   year_label: 'text-typography-900',

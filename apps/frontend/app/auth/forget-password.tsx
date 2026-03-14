@@ -10,13 +10,14 @@ import { router } from 'expo-router'
 import { FormControlErrorText, FormControlLabel, FormControlLabelText } from '@/components/ui/form-control'
 import { Input, InputField } from '@/components/ui/input'
 import { Button, ButtonText } from '@/components/ui/button'
+import { buttonStyle, buttonTextStyle, inputStyle } from './_layout'
 
 export default function ForgetPasswordScreen() {
   const { t } = useTranslation()
   const {
     control,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isValid },
   } = useForm<ForgotPasswordSchema>({
     resolver: zodResolver(forgotPasswordSchema),
     mode: 'onChange',
@@ -37,8 +38,7 @@ export default function ForgetPasswordScreen() {
     if (res) {
       console.log('Reset password successful:', res)
       router.replace({ pathname: '/auth/signin', params: { from: 'resetPassword' } })
-    }
-    else if (error) {
+    } else if (error) {
       console.error('Reset password failed:', error)
       Alert.alert(t('resetPasswordFailed'), t('resetPasswordErrorMessage'))
     }
@@ -52,7 +52,7 @@ export default function ForgetPasswordScreen() {
         render={({ field: { onChange, onBlur, value } }) => (
           <>
             <FormControlLabel><FormControlLabelText>{t('email')}</FormControlLabelText></FormControlLabel>
-            <Input className={`w-4/5 d-flex max-w-80 rounded-md ${errors.email ? 'border-red-500' : 'border-primary-50'}`}>
+            <Input className={inputStyle(!!errors.email)}>
               <InputField
                 value={value}
                 onChangeText={onChange}
@@ -68,8 +68,8 @@ export default function ForgetPasswordScreen() {
         )}
       />
 
-      <Button onPress={() => void handleSubmit(onSubmitForgetPassword)()} isDisabled={loading || !!Object.keys(errors).length} className="mt-6 w-fit py-2 px-6 mx-auto rounded-md">
-        <ButtonText>{t('resetPassword')}</ButtonText>
+      <Button onPress={() => void handleSubmit(onSubmitForgetPassword)()} isDisabled={loading || !isValid} className={buttonStyle(loading || !isValid)}>
+        <ButtonText className={buttonTextStyle(loading || !isValid)}>{t('resetPassword')}</ButtonText>
       </Button>
     </>
   )
