@@ -1,15 +1,17 @@
 import { ConflictException, Injectable } from '@nestjs/common'
-import { InjectRepository } from '@nestjs/typeorm'
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm'
 import { Family } from './entities/family.entity'
-import { ILike, Repository } from 'typeorm'
+import { DataSource, ILike, Repository } from 'typeorm'
 import { CreateFamilyDto } from '@myorg/dto/family/create-family.dto'
 import { UpdateFamilyDto } from '@myorg/dto/family/update-family.dto'
+import { FamilyMember } from 'src/member/entities/family-member.entity'
 
 @Injectable()
 export class FamilyService {
   constructor(
         @InjectRepository(Family)
         private readonly familyRepo: Repository<Family>,
+        @InjectDataSource() private dataSource: DataSource,
   ) {}
 
   async create(createFamilyDto: CreateFamilyDto) {
@@ -42,6 +44,9 @@ export class FamilyService {
   async delete(id: string, userId: string) {
     await this.findOne(id, userId)
 
-    await this.familyRepo.softDelete(id)
+    await this.dataSource.transaction(async (manager) => {
+      await manager.softDelete(FamilyMember, { familyId: id })
+      await manager.softDelete(Family, { id })
+    })
   }
 }
