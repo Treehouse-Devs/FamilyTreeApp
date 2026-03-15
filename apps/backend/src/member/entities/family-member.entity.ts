@@ -24,6 +24,9 @@ export class FamilyMember {
   @Column({ type: 'enum', enum: Gender, nullable: false })
   gender!: Gender
 
+  @Column({ type: 'boolean' })
+  isBloodRelated!: boolean
+
   @Column({ type: 'date', nullable: false })
   birthDate!: Date
 

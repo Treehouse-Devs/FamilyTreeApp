@@ -58,7 +58,7 @@ export class MemberService {
     })
   }
 
-  async findOne(id: string, userId: string): Promise<FamilyMember | null> {
+  async findOne(id: string, userId: string): Promise<FamilyMember> {
     const member = await this.memberRepository.findOneBy({ id })
     if (!member) {
       throw new ConflictException('member not found')
@@ -84,7 +84,12 @@ export class MemberService {
   }
 
   async delete(id: string, userId: string): Promise<void> {
-    await this.findOne(id, userId)
+    const member = await this.findOne(id, userId)
+
+    const totalFamilyMembers = await this.memberRepository.count({ where: { familyId: member.familyId } })
+    if (totalFamilyMembers <= 1) {
+      throw new ConflictException('Cannot delete the last member of a family')
+    }
 
     await this.memberRepository.softDelete(id)
   }
