@@ -36,3 +36,8 @@ export { EmailVerificationDto } from './auth/email-verification.dto'
 
 // User DTOs
 export type { UserResponseDto } from './user/user-response.dto'
+
+// Profile DTOs
+export { UpdateProfileDto } from './profile/update-profile.dto'
+export { UserGender } from './profile/user-gender.enum'
+export type { ProfileResponseDto } from './profile/profile-response.dto'

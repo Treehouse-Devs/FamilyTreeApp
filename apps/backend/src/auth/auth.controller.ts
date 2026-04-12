@@ -8,15 +8,15 @@ import {
   Delete,
 } from '@nestjs/common'
 import { AuthService } from './auth.service'
-import { RegisterUserDto } from '@treely/dto/src/user/register-user.dto'
-import { LoginUserDto } from '@treely/dto/src/user/login-user.dto'
-import { GoogleAuthDto } from '@treely/dto/src/user/google-auth.dto'
-import { ResetPasswordDto } from '@treely/dto/src/user/reset-password.dto'
+import { RegisterUserDto } from '@treely/dto/auth/register-user.dto'
+import { LoginUserDto } from '@treely/dto/auth/login-user.dto'
+import { GoogleAuthDto } from '@treely/dto/auth/google-auth.dto'
+import { ResetPasswordDto } from '@treely/dto/auth/reset-password.dto'
+import { ForgotPasswordDto } from '@treely/dto/auth/forgot-password.dto'
+import { EmailVerificationDto } from '@treely/dto/auth/email-verification.dto'
 import { JwtAuthGuard } from './jwt-auth.guard'
 import { GetUser } from './get-user.decorator'
 import { UserFromToken } from './auth.types'
-import { ForgotPasswordDto } from '@myorg/dto/src/auth/forgot-password.dto'
-import { EmailVerificationDto } from '@myorg/dto/src/auth/email-verification.dto'
 
 @Controller('auth')
 @UsePipes(new ValidationPipe({ transform: true }))

@@ -1,11 +1,12 @@
 import { Module } from '@nestjs/common'
 import { AuthService } from './auth.service'
-import { UserController } from './user.controller'
+import { AuthController } from './auth.controller'
 import { JwtModule } from '@nestjs/jwt'
 import { JwtStrategy } from './jwt-auth.guard'
 import { FirebaseService } from './firebase.service'
 import { TokenService } from './token.service'
 import { MailerService } from 'src/mailer/mailer.service'
+import { ProfileModule } from 'src/profile/profile.module'
 
 @Module({
   imports: [
@@ -13,8 +14,9 @@ import { MailerService } from 'src/mailer/mailer.service'
       secret: process.env.JWT_SECRET || 'defaultSecret',
       signOptions: { expiresIn: '1h' },
     }),
+    ProfileModule,
   ],
-  controllers: [UserController],
+  controllers: [AuthController],
   providers: [AuthService, JwtStrategy, FirebaseService, TokenService, MailerService],
   exports: [AuthService],
 })

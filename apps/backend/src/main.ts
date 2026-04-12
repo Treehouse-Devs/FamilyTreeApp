@@ -1,22 +1,21 @@
 import { NestFactory } from '@nestjs/core'
 import { AppModule } from './app.module'
 import * as firebaseAdmin from 'firebase-admin'
-import * as fs from 'fs'
 
 async function bootstrap() {
-  const firebaseKeyPath = 'firebase.json'
-  const firebaseServiceAccount = JSON.parse(
-    fs.readFileSync(firebaseKeyPath).toString(),
-  ) as string
-
   if (firebaseAdmin.apps.length === 0) {
     console.log(`Initialize Firebase Application`)
     firebaseAdmin.initializeApp({
-      credential: firebaseAdmin.credential.cert(firebaseServiceAccount),
+      credential: firebaseAdmin.credential.cert({
+        projectId: process.env.FB_PROJECT_ID,
+        privateKey: process.env.FB_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+        clientEmail: process.env.FB_CLIENT_EMAIL,
+      }),
     })
   }
 
   const app = await NestFactory.create(AppModule)
   await app.listen(process.env.PORT ?? 3000)
 }
-bootstrap()
+
+void bootstrap()

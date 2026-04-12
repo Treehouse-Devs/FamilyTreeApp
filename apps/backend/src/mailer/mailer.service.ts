@@ -20,7 +20,7 @@ export class MailerService {
   async sendTemplateEmail(to: string, subject: string, templateName: string, context: Record<string, string>) {
     const templatePath = path.join(
       __dirname,
-      '../src/mailer/templates',
+      'src/mailer/templates',
       `${templateName}.mjml`,
     )
 
@@ -43,8 +43,7 @@ export class MailerService {
       })
 
       console.log('Email sent:', info.messageId)
-    }
-    catch (error) {
+    } catch (error) {
       console.error('Failed to send email:', error)
       throw new InternalServerErrorException('Email sending failed')
     }
