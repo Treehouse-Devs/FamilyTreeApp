@@ -12,35 +12,17 @@ interface FirebaseUserData {
 
 @Injectable()
 export class FirebaseService {
-  // TODO: setting up actionCodeSettings
-  private actionCodeSettings = {
-    // set this on firebase console
-    url: 'https://www.example.com/finishSignUp?cartId=1234',
-    handleCodeInApp: true,
-    iOS: {
-      bundleId: 'com.example.ios',
-    },
-    android: {
-      packageName: 'com.example.android',
-      installApp: true,
-      minimumVersion: '12',
-    },
-    // The domain must be configured in Firebase Hosting and owned by the project.
-    linkDomain: 'custom-domain.com',
-  }
-
   async createUser({ displayName, email, password }: { displayName: string, email: string, password?: string }) {
     try {
       const userData: FirebaseUserData = { displayName, email }
       if (password) userData.password = password
+
       return await admin.auth().createUser(userData)
-    }
-    catch (error: unknown) {
+    } catch (error: unknown) {
       const firebaseError = error as { errorInfo?: { code?: string, message?: string } }
       if (firebaseError.errorInfo?.code === 'auth/email-already-exists') {
         throw new ConflictException(firebaseError.errorInfo.message)
-      }
-      else {
+      } else {
         throw new InternalServerErrorException('Failed to register user')
       }
     }
@@ -49,8 +31,7 @@ export class FirebaseService {
   async getUserByEmail(email: string) {
     try {
       return await admin.auth().getUserByEmail(email)
-    }
-    catch (error: unknown) {
+    } catch (error: unknown) {
       if (error instanceof FirebaseError && error.code === 'auth/user-not-found') {
         throw new NotFoundException('User not found')
       }
@@ -61,8 +42,7 @@ export class FirebaseService {
   async getUser(uid: string) {
     try {
       return await admin.auth().getUser(uid)
-    }
-    catch (error: unknown) {
+    } catch (error: unknown) {
       if (error instanceof FirebaseError && error.code === 'auth/user-not-found') {
         throw new NotFoundException('User not found')
       }
@@ -73,12 +53,10 @@ export class FirebaseService {
   async updateUserPassword(uid: string, password: string) {
     try {
       return await admin.auth().updateUser(uid, { password })
-    }
-    catch (error: unknown) {
+    } catch (error: unknown) {
       if (error instanceof Error) {
         throw new InternalServerErrorException(error)
-      }
-      else {
+      } else {
         throw new InternalServerErrorException('Failed to reset password')
       }
     }
@@ -87,8 +65,7 @@ export class FirebaseService {
   async deleteUser(uid: string) {
     try {
       await admin.auth().deleteUser(uid)
-    }
-    catch (error: unknown) {
+    } catch (error: unknown) {
       if (error instanceof FirebaseError && error.code === 'auth/user-not-found') {
         throw new NotFoundException('User not found')
       }
@@ -99,8 +76,7 @@ export class FirebaseService {
   async verifyIdToken(idToken: string) {
     try {
       return await admin.auth().verifyIdToken(idToken)
-    }
-    catch (error: unknown) {
+    } catch (error: unknown) {
       if (error instanceof FirebaseError && error.code === 'auth/invalid-id-token') {
         throw new UnauthorizedException('Invalid Google ID token')
       }
@@ -111,8 +87,7 @@ export class FirebaseService {
   async signInWithEmailAndPassword(email: string, password: string) {
     try {
       return await firebaseSignIn(auth, email, password)
-    }
-    catch (error: unknown) {
+    } catch (error: unknown) {
       if (error instanceof FirebaseError) {
         if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found') {
           throw new UnauthorizedException('Invalid login credentials')
@@ -127,15 +102,12 @@ export class FirebaseService {
     try {
       // TODO: codeActionSettings
       return admin.auth().generateEmailVerificationLink(email)
-    }
-    catch (error) {
+    } catch (error) {
       if (error instanceof FirebaseError) {
         throw new InternalServerErrorException(error.message)
-      }
-      else if (error instanceof Error) {
+      } else if (error instanceof Error) {
         throw new InternalServerErrorException(error)
-      }
-      else {
+      } else {
         throw new InternalServerErrorException('Unexpected error occured')
       }
     }
@@ -145,15 +117,12 @@ export class FirebaseService {
     try {
       // TODO: actionCodeSettings
       return admin.auth().generatePasswordResetLink(email)
-    }
-    catch (error) {
+    } catch (error) {
       if (error instanceof FirebaseError) {
         throw new InternalServerErrorException(error.message)
-      }
-      else if (error instanceof Error) {
+      } else if (error instanceof Error) {
         throw new InternalServerErrorException(error)
-      }
-      else {
+      } else {
         throw new InternalServerErrorException('Unexpected error occured')
       }
     }

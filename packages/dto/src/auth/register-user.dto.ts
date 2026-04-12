@@ -1,15 +1,25 @@
-import { IsEmail, IsNotEmpty, IsString, Length } from "class-validator";
+import { IsEmail, IsEnum, IsInt, IsNotEmpty, IsNumber, IsString, Length } from 'class-validator'
+import { UserGender } from '../profile/user-gender.enum'
 
 export class RegisterUserDto {
   @IsNotEmpty()
   @IsEmail()
-  email!: string;
+  email!: string
 
   @IsNotEmpty()
   @Length(8, 20)
-  password!: string;
+  password!: string
 
   @IsNotEmpty()
   @IsString()
-  name!: string;
+  name!: string
+
+  @IsNotEmpty()
+  @IsNumber()
+  @IsInt()
+  birthDate!: number
+
+  @IsNotEmpty()
+  @IsEnum(UserGender)
+  gender!: UserGender
 }

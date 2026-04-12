@@ -2,7 +2,7 @@ import { ConflictException, Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Family } from './entities/family.entity'
 import { ILike, Repository } from 'typeorm'
-import { CreateFamilyDto } from '@treelys/dto/family/create-family.dto'
+import { CreateFamilyDto } from '@treely/dto/family/create-family.dto'
 import { UpdateFamilyDto } from '@treely/dto/family/update-family.dto'
 
 @Injectable()
@@ -14,6 +14,7 @@ export class FamilyService {
 
   async create(createFamilyDto: CreateFamilyDto) {
     const family = this.familyRepo.create(createFamilyDto)
+
     return await this.familyRepo.save(family)
   }
 

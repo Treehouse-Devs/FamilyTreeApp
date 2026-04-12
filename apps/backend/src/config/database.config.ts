@@ -1,5 +1,5 @@
-import { TypeOrmModuleOptions } from '@nestjs/typeorm';
-import { ConfigService } from '@nestjs/config';
+import { TypeOrmModuleOptions } from '@nestjs/typeorm'
+import { ConfigService } from '@nestjs/config'
 
 export const typeOrmConfig = (configService: ConfigService): TypeOrmModuleOptions => {
   return ({
@@ -11,5 +11,5 @@ export const typeOrmConfig = (configService: ConfigService): TypeOrmModuleOption
     database: configService.get<string>('config.db.database'),
     autoLoadEntities: true,
     synchronize: false,
-  });
+  })
 }

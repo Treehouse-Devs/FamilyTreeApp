@@ -1,14 +1,9 @@
-import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
-import * as admin from "firebase-admin";
-import * as dotenv from "dotenv";
-import * as fs from "fs";
-import * as path from "path";
+import { initializeApp } from 'firebase/app'
+import { getAuth } from 'firebase/auth'
+import * as admin from 'firebase-admin'
+import * as dotenv from 'dotenv'
 
-dotenv.config();
-
-const firebaseServiceAccountPath = path.join(__dirname, '../firebase.json');
-const firebaseServiceAccount = JSON.parse(fs.readFileSync(firebaseServiceAccountPath, 'utf8'));
+dotenv.config()
 
 const firebaseConfig = {
   apiKey: process.env.FB_API_KEY,
@@ -18,19 +13,19 @@ const firebaseConfig = {
   messagingSenderId: process.env.FB_MESSAGING_SENDER_ID,
   appId: process.env.FB_APP_ID,
   measurementId: process.env.FB_MEASURMENT_ID,
-};
+}
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
+const app = initializeApp(firebaseConfig)
+const auth = getAuth(app)
 
 if (!admin.apps.length) {
   admin.initializeApp({
     credential: admin.credential.cert({
-      projectId: firebaseServiceAccount.project_id,
-      clientEmail: firebaseServiceAccount.client_email,
-      privateKey: firebaseServiceAccount.private_key,
+      projectId: process.env.FB_PROJECT_ID,
+      clientEmail: process.env.FB_CLIENT_EMAIL,
+      privateKey: process.env.FB_PRIVATE_KEY?.replace(/\\n/g, '\n'),
     }),
-  });
+  })
 }
 
-export { app, auth, admin };
+export { app, auth, admin }

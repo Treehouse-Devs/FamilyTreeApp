@@ -1,4 +1,5 @@
 import {
+  ConflictException,
   ForbiddenException,
   HttpException,
   Injectable,
@@ -6,9 +7,9 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common'
-import { RegisterUserDto } from '@treely/dto/src/user/register-user.dto'
-import { LoginResponseDto, LoginUserDto } from '@treely/dto/src/user/login-user.dto'
-import { GoogleAuthDto } from '@treely/dto/src/user/google-auth.dto'
+import { RegisterUserDto } from '@treely/dto/auth/register-user.dto'
+import { LoginResponseDto, LoginUserDto } from '@treely/dto/auth/login-user.dto'
+import { GoogleAuthDto } from '@treely/dto/auth/google-auth.dto'
 import { FirebaseService } from './firebase.service'
 import { TokenService } from './token.service'
 import { UserFromToken } from './auth.types'
@@ -17,6 +18,8 @@ import { UserRecord } from 'firebase-admin/lib/auth/user-record'
 import { MailerService } from 'src/mailer/mailer.service'
 import { ForgotPasswordDto } from '@treely/dto/auth/forgot-password.dto'
 import { EmailVerificationDto } from '@treely/dto/auth/email-verification.dto'
+import { ProfileService } from 'src/profile/profile.service'
+import { ProfileResponseDto } from '@treely/dto/index'
 
 @Injectable()
 export class AuthService {
@@ -24,24 +27,58 @@ export class AuthService {
     private firebaseService: FirebaseService,
     private tokenService: TokenService,
     private mailerService: MailerService,
+    private profileService: ProfileService,
   ) { }
 
+  private buildUserResponse(userRecord: UserRecord, profile: ProfileResponseDto) {
+    return {
+      uid: userRecord.uid,
+      email: userRecord.email || '',
+      displayName: userRecord.displayName || '',
+      providerData: userRecord.providerData.map(p => ({
+        uid: p.uid,
+        displayName: p.displayName || '',
+        email: p.email || '',
+        providerId: p.providerId,
+        birthDate: profile.birthDate,
+        gender: profile.gender,
+        language: profile.language,
+      })),
+    }
+  }
+
   async signUp(registerUserDto: RegisterUserDto): Promise<UserRecord | undefined> {
-    const { name, email, password } = registerUserDto
+    const { name, email, password, birthDate, gender } = registerUserDto
     let userRecord: UserRecord | null = null
     try {
       userRecord = await this.firebaseService.createUser({ displayName: name, email, password })
+      await this.profileService.createProfile(userRecord.uid, name, birthDate, gender)
       await this.sendVerificationEmail({ email: userRecord.email || '' })
+
       return userRecord
-    }
-    catch (error) {
+    } catch (error) {
       if (userRecord?.uid) {
         try {
           await this.firebaseService.deleteUser(userRecord.uid)
-        }
-        catch (deleteError) {
-          console.error('Rollback failed:', deleteError)
-          throw error
+        } catch (error: unknown) {
+          if (userRecord?.uid) {
+            try {
+              await this.firebaseService.deleteUser(userRecord.uid)
+            } catch (deleteError) {
+              console.error('Rollback failed:', deleteError)
+            }
+          }
+          if (error instanceof HttpException) {
+            throw error
+          }
+          const err = error as Error & { code?: string }
+          if (err.code === 'auth/email-already-exists') {
+            throw new ConflictException('An account with this email already exists')
+          }
+          if (err.code?.startsWith('auth/')) {
+            throw new HttpException(err.message, 400)
+          }
+          throw new InternalServerErrorException(err.message || 'Unexpected error occurred during signup')
         }
       }
       throw error
@@ -66,28 +103,22 @@ export class AuthService {
       }
 
       const { accessToken, expiredAt, refreshToken, refreshTokenExpiredAt } = this.tokenService.createJwtTokens(tokenPayload)
+      const profile = await this.profileService.getProfile(tokenPayload)
+
       return {
-        user: {
-          uid: userRecord.uid,
-          email: userRecord.email || '',
-          displayName: userRecord.displayName || '',
-          providerData: userRecord.providerData,
-        },
+        user: this.buildUserResponse(userRecord, profile),
         accessToken,
         refreshToken,
         refreshTokenExpiredAt,
         expiredAt,
         message: 'Login successful',
       } as LoginResponseDto
-    }
-    catch (error: unknown) {
+    } catch (error: unknown) {
       if (error instanceof HttpException) {
         throw error
-      }
-      else if (error instanceof Error) {
+      } else if (error instanceof Error) {
         throw new InternalServerErrorException(error.message)
-      }
-      else {
+      } else {
         throw new InternalServerErrorException('Unexpected error occured.')
       }
     }
@@ -125,8 +156,7 @@ export class AuthService {
           throw new UnauthorizedException('Email not found in Google token')
         }
         userRecord = await this.firebaseService.getUserByEmail(decodedToken.email)
-      }
-      catch (error: unknown) {
+      } catch (error: unknown) {
         if (error instanceof FirebaseError && error.code === 'auth/user-not-found') {
           if (!decodedToken.email) {
             throw new UnauthorizedException('Email not found in Google token')
@@ -135,8 +165,7 @@ export class AuthService {
             email: decodedToken.email,
             displayName: decodedToken.name as string,
           })
-        }
-        else {
+        } else {
           throw error
         }
       }
@@ -148,25 +177,20 @@ export class AuthService {
       }
 
       const { accessToken, expiredAt, refreshToken, refreshTokenExpiredAt } = this.tokenService.createJwtTokens(tokenPayload)
+      const profile = await this.profileService.getProfile(tokenPayload)
+
       return {
-        user: {
-          uid: userRecord.uid,
-          email: userRecord.email || '',
-          displayName: userRecord.displayName || '',
-          providerData: userRecord.providerData,
-        },
+        user: this.buildUserResponse(userRecord, profile),
         accessToken,
         refreshToken,
         refreshTokenExpiredAt,
         expiredAt,
         message: 'Google authentication successful',
       } as LoginResponseDto
-    }
-    catch (error: unknown) {
+    } catch (error: unknown) {
       if (error instanceof FirebaseError && error.code === 'auth/invalid-id-token') {
         throw new UnauthorizedException('Invalid Google ID token')
-      }
-      else {
+      } else {
         throw new InternalServerErrorException('Google authentication failed')
       }
     }
@@ -176,13 +200,12 @@ export class AuthService {
     try {
       const userRecord = await this.firebaseService.getUserByEmail(email)
       await this.firebaseService.updateUserPassword(userRecord.uid, newPassword)
+
       return { message: 'Password reset successful' }
-    }
-    catch (error: unknown) {
+    } catch (error: unknown) {
       if (error instanceof FirebaseError && error.code === 'auth/user-not-found') {
         throw new NotFoundException('User not found')
-      }
-      else {
+      } else {
         throw new InternalServerErrorException('Failed to reset password')
       }
     }
@@ -198,16 +221,13 @@ export class AuthService {
     }
 
     const { accessToken, expiredAt } = this.tokenService.createJwtTokens(tokenPayload)
+    const profile = await this.profileService.getProfile(tokenPayload)
+
     return {
       accessToken,
       expiredAt,
       refreshTokenExpiredAt: stored.expiredAt,
-      user: {
-        uid: userRecord.uid,
-        email: userRecord.email || '',
-        displayName: userRecord.displayName || '',
-        providerData: userRecord.providerData,
-      },
+      user: this.buildUserResponse(userRecord, profile),
       message: 'Token refreshed successfully',
     } as LoginResponseDto
   }
@@ -216,13 +236,12 @@ export class AuthService {
     try {
       await this.firebaseService.deleteUser(uid)
       this.tokenService.deleteRefreshToken(uid)
+
       return { message: 'User deleted successfully' }
-    }
-    catch (error: unknown) {
+    } catch (error: unknown) {
       if (error instanceof FirebaseError && error.code === 'auth/user-not-found') {
         throw new NotFoundException('User not found')
-      }
-      else {
+      } else {
         throw new InternalServerErrorException('Failed to delete user')
       }
     }
