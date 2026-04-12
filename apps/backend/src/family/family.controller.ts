@@ -13,8 +13,7 @@ export class FamilyController {
   constructor(private readonly familyService: FamilyService) { }
 
   @Post()
-  async create(@Body() createFamilyDto: CreateFamilyDto, @GetUser() user: UserFromToken) {
-    createFamilyDto.createdByUid = user.uid
+  async create(@Body() createFamilyDto: CreateFamilyDto) {
     return await this.familyService.create(createFamilyDto)
   }
 
