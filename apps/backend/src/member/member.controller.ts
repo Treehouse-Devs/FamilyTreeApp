@@ -1,11 +1,11 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common'
 import { MemberService } from './member.service'
 import { CreateFamilyMemberDto } from '@treely/dto/member/create-family-member.dto'
-import { GetUser } from 'src/user/get-user.decorator'
-import { UserFromToken } from 'src/user/user.types'
-import { JwtAuthGuard } from 'src/user/jwt-auth.guard'
+import { GetUser } from 'src/auth/get-user.decorator'
+import { UserFromToken } from 'src/auth/auth.types'
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard'
 import { FamilyMember } from './entities/family-member.entity'
-import { UpdateFamilyMemberDto } from '@treely/dto/member/update-family-member-dto'
+import { PatchFamilyMemberDto } from '@treely/dto/member/patch-family-member-dto'
 
 @Controller('family-member')
 @UsePipes(new ValidationPipe({ transform: true }))
@@ -26,7 +26,7 @@ export class MemberController {
   }
 
   @Patch(':id')
-  async update(@Param('id') id: string, @Body() updateFamilyMemberDto: UpdateFamilyMemberDto, @GetUser() user: UserFromToken): Promise<FamilyMember | null> {
+  async update(@Param('id') id: string, @Body() updateFamilyMemberDto: PatchFamilyMemberDto, @GetUser() user: UserFromToken): Promise<FamilyMember | null> {
     return await this.memberService.update(id, updateFamilyMemberDto, user.uid)
   }
 

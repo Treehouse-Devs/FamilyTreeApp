@@ -4,7 +4,7 @@ import { FamilyMember, Gender } from './entities/family-member.entity'
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm'
 import { CreateFamilyMemberDto } from '@treely/dto/member/create-family-member.dto'
 import { FamilyService } from 'src/family/family.service'
-import { UpdateFamilyMemberDto } from '@treely/dto/member/update-family-member-dto'
+import { PatchFamilyMemberDto } from '@treely/dto/member/patch-family-member-dto'
 import { FamilyRelationship, RelationType } from './entities/family-relationship.entity'
 
 @Injectable()
@@ -28,8 +28,7 @@ export class MemberService {
     let dtoGender: Gender
     if (gender == 'male') {
       dtoGender = Gender.MALE
-    }
-    else {
+    } else {
       dtoGender = Gender.FEMALE
     }
 
@@ -54,6 +53,7 @@ export class MemberService {
         const relationship = manager.create(FamilyRelationship, { familyId, sourceMemberId: relatedMemberId, targetMemberId: member.id, relationType: relationTypeParsed })
         await manager.save(FamilyRelationship, relationship)
       }
+
       return member
     })
   }
@@ -72,13 +72,13 @@ export class MemberService {
     return member
   }
 
-  async update(id: string, updateFamilyMemberDto: UpdateFamilyMemberDto, userId: string): Promise<FamilyMember | null> {
-    const { fullName, birthDate, deathDate } = updateFamilyMemberDto
+  async update(id: string, updateFamilyMemberDto: PatchFamilyMemberDto, userId: string): Promise<FamilyMember | null> {
+    const { name, birthDate, deathDate } = updateFamilyMemberDto
     const gender = updateFamilyMemberDto.gender === 'male' ? Gender.MALE : Gender.FEMALE
 
     await this.findOne(id, userId)
 
-    await this.memberRepository.update(id, { fullName, gender, birthDate, deathDate })
+    await this.memberRepository.update(id, { fullName: name, gender, birthDate, deathDate })
 
     return await this.memberRepository.findOneBy({ id })
   }

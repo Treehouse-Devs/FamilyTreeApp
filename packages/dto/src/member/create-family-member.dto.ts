@@ -1,39 +1,27 @@
-import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, IsUUID, IsBoolean } from 'class-validator'
-
+import { IsDateString, IsEnum, IsNotEmpty, IsOptional, IsString, IsUUID } from 'class-validator'
 export class CreateFamilyMemberDto {
   @IsUUID()
   familyId!: string
 
   @IsString()
   @IsNotEmpty()
-  name!: string
+  fullName!: string
 
   @IsEnum(['male', 'female'])
   gender!: 'male' | 'female'
 
-  @IsNumber()
-  birthDate!: number
+  @IsDateString()
+  birthDate!: string
 
-  @IsBoolean()
-  isBloodRelated!: boolean
-
-  @IsNumber()
+  @IsDateString()
   @IsOptional()
-  deathDate?: number
+  deathDate?: string
 
+  @IsOptional()
   @IsUUID()
-  @IsOptional()
-  spouseId?: string
+  relatedMemberId?: string
 
-  @IsUUID()
   @IsOptional()
-  fatherId?: string
-
-  @IsUUID()
-  @IsOptional()
-  motherId?: string
-
-  @IsString()
-  @IsOptional()
-  imageThumbnailUrl?: string
+  @IsEnum(['PARENT', 'SPOUSE'])
+  relationType?: 'PARENT' | 'SPOUSE'
 }
