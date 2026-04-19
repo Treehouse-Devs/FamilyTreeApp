@@ -1,5 +1,5 @@
 import { IsEmail, IsNotEmpty, Length } from 'class-validator'
-import { UserGender } from '../profile/user-gender.enum'
+import type { UserGender } from '../profile/user-gender.enum'
 
 export class LoginUserDto {
   @IsNotEmpty()

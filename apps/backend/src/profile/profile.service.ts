@@ -34,15 +34,16 @@ export class ProfileService {
     name: string,
     birthDate: number,
     gender: UserGender,
-  ): Promise<User> {
+  ): Promise<ProfileResponseDto> {
     const user = this.userRepository.create({
       firebaseUid: uid,
       name,
       birthDate,
       gender,
     })
+    await this.userRepository.save(user)
 
-    return this.userRepository.save(user)
+    return this.toResponseDto(user, { uid, email: '' })
   }
 
   async getProfile(userFromToken: UserFromToken): Promise<ProfileResponseDto> {

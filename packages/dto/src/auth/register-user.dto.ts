@@ -1,5 +1,6 @@
 import { IsEmail, IsEnum, IsInt, IsNotEmpty, IsNumber, IsString, Length } from 'class-validator'
 import { UserGender } from '../profile/user-gender.enum'
+import type { UserResponse } from './login-user.dto'
 
 export class RegisterUserDto {
   @IsNotEmpty()
@@ -22,4 +23,8 @@ export class RegisterUserDto {
   @IsNotEmpty()
   @IsEnum(UserGender)
   gender!: UserGender
+}
+
+export class RegisterResponseDto {
+  user!: UserResponse
 }
