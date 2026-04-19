@@ -1,4 +1,4 @@
-import type { Gender } from '../auth/login-user.dto'
+import type { Gender } from '../profile'
 
 export interface UserResponseDto {
   id: string

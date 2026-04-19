@@ -1,12 +1,13 @@
-import { Test, TestingModule } from '@nestjs/testing'
+import { Test } from '@nestjs/testing'
 import { NotFoundException } from '@nestjs/common'
 import { getRepositoryToken } from '@nestjs/typeorm'
 import { ProfileService } from './profile.service'
 import { User } from './entities/user.entity'
 import { StorageService } from 'src/storage/storage.service'
-import { UserFromToken } from 'src/auth/auth.types'
-import { UpdateProfileDto } from '@treely/dto/profile/update-profile.dto'
-import { UserGender } from '@treely/dto/index'
+import { Gender } from '@treely/dto/index'
+import type { TestingModule } from '@nestjs/testing'
+import type { UpdateProfileDto } from '@treely/dto/profile/update-profile.dto'
+import type { UserFromToken } from 'src/auth/auth.types'
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -17,7 +18,7 @@ function makeUser(overrides: Partial<User> = {}): User {
     name: 'John Doe',
     avatarUrl: null,
     birthDate: 0,
-    gender: UserGender.MALE,
+    gender: Gender.MALE,
     language: 'en',
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -101,7 +102,7 @@ describe('ProfileService', () => {
         firebaseUid: userFromToken.uid,
         name: userFromToken.displayName,
         birthDate: '0',
-        gender: UserGender.MALE,
+        gender: Gender.MALE,
       })
       expect(userRepository.save).toHaveBeenCalledWith(createdUser)
       expect(result).toEqual({
@@ -152,7 +153,7 @@ describe('ProfileService', () => {
   // ─── updateProfile ─────────────────────────────────────────────────────────
 
   describe('updateProfile', () => {
-    const updateDto: UpdateProfileDto = { name: 'Jane Doe', gender: UserGender.FEMALE }
+    const updateDto: UpdateProfileDto = { name: 'Jane Doe', gender: Gender.FEMALE }
 
     it('should throw NotFoundException when user does not exist', async () => {
       userRepository.findOneBy.mockResolvedValue(null)
@@ -165,14 +166,14 @@ describe('ProfileService', () => {
 
     it('should update user fields and return updated profile DTO', async () => {
       const user = makeUser()
-      const savedUser = makeUser({ name: 'Jane Doe', gender: UserGender.FEMALE })
+      const savedUser = makeUser({ name: 'Jane Doe', gender: Gender.FEMALE })
       userRepository.findOneBy.mockResolvedValue(user)
       userRepository.save.mockResolvedValue(savedUser)
 
       const result = await service.updateProfile(makeUserFromToken(), updateDto)
 
       expect(userRepository.save).toHaveBeenCalledWith(
-        expect.objectContaining({ id: 'user-1', name: 'Jane Doe', gender: UserGender.FEMALE }),
+        expect.objectContaining({ id: 'user-1', name: 'Jane Doe', gender: Gender.FEMALE }),
       )
       expect(result).toEqual({
         id: savedUser.id,

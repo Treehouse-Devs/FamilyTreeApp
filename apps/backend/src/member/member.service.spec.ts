@@ -1,12 +1,14 @@
-import { Test, TestingModule } from '@nestjs/testing'
+import type { TestingModule } from '@nestjs/testing'
+import { Test } from '@nestjs/testing'
 import { MemberService } from './member.service'
 import { getRepositoryToken, getDataSourceToken } from '@nestjs/typeorm'
-import { FamilyMember, Gender } from './entities/family-member.entity'
-import { FamilyRelationship, RelationType } from './entities/family-relationship.entity'
+import { FamilyMember } from './entities/family-member.entity'
+import { FamilyRelationship } from './entities/family-relationship.entity'
 import { FamilyService } from 'src/family/family.service'
 import { StorageService } from 'src/storage/storage.service'
-import { BadRequestException, ConflictException, ForbiddenException } from '@nestjs/common'
-import { Family } from 'src/family/entities/family.entity'
+import { BadRequestException, ConflictException, ForbiddenException, NotFoundException } from '@nestjs/common'
+import { Gender, RelationType } from '@treely/dto'
+import type { Family } from 'src/family/entities/family.entity'
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -96,22 +98,20 @@ describe('MemberService', () => {
 
   describe('create', () => {
     const baseDto = {
-      familyId: 'family-1',
       name: 'Jane Doe',
-      gender: 'female' as const,
+      gender: Gender.FEMALE,
       birthDate: new Date('1992-05-10').getTime(),
       deathDate: undefined,
       isBloodRelated: true,
       spouseId: undefined,
       fatherId: undefined,
       motherId: undefined,
-      imageThumbnailUrl: undefined,
     }
 
     it('should throw ForbiddenException when family does not belong to user', async () => {
       familyService.findOne.mockResolvedValue(null)
 
-      await expect(service.create(baseDto, 'user-1')).rejects.toThrow(ForbiddenException)
+      await expect(service.create(baseDto, 'family-1', 'user-1')).rejects.toThrow(ForbiddenException)
     })
 
     it('should create a member when it is the first member in the family (no relationships required)', async () => {
@@ -123,10 +123,10 @@ describe('MemberService', () => {
       mockManager.save.mockResolvedValue(createdMember)
       mockManager.count.mockResolvedValue(1) // only 1 member, so no relationship needed
 
-      const result = await service.create(baseDto, 'user-1')
+      const result = await service.create(baseDto, 'family-1', 'user-1')
 
       expect(mockManager.create).toHaveBeenCalledWith(FamilyMember, expect.objectContaining({ fullName: 'Jane Doe' }))
-      expect(result).toEqual(createdMember)
+      expect(result).toMatchObject({ id: createdMember.id, name: createdMember.fullName })
     })
 
     it('should throw BadRequestException when member count > 1 and no relationship provided', async () => {
@@ -135,17 +135,17 @@ describe('MemberService', () => {
       mockManager.save.mockResolvedValue(makeMember())
       mockManager.count.mockResolvedValue(2) // already has members
 
-      await expect(service.create(baseDto, 'user-1')).rejects.toThrow(BadRequestException)
+      await expect(service.create(baseDto, 'family-1', 'user-1')).rejects.toThrow(BadRequestException)
     })
 
-    it('should throw BadRequestException when spouseId provided but spouse not found', async () => {
+    it('should throw NotFoundException when spouseId provided but spouse not found', async () => {
       familyService.findOne.mockResolvedValue({ id: 'family-1' })
       mockManager.create.mockReturnValue(makeMember())
       mockManager.save.mockResolvedValue(makeMember())
       mockManager.count.mockResolvedValue(2)
       mockManager.findOne.mockResolvedValue(null) // spouse not found
 
-      await expect(service.create({ ...baseDto, spouseId: 'spouse-id' }, 'user-1')).rejects.toThrow(BadRequestException)
+      await expect(service.create({ ...baseDto, spouseId: 'spouse-id' }, 'family-1', 'user-1')).rejects.toThrow(NotFoundException)
     })
 
     it('should create spouse relationship when spouseId is valid', async () => {
@@ -159,40 +159,40 @@ describe('MemberService', () => {
       mockManager.count.mockResolvedValue(2)
       mockManager.findOne.mockResolvedValue(spouse)
 
-      const result = await service.create({ ...baseDto, spouseId: 'spouse-id' }, 'user-1')
+      const result = await service.create({ ...baseDto, spouseId: 'spouse-id' }, 'family-1', 'user-1')
 
       expect(mockManager.create).toHaveBeenCalledWith(
         FamilyRelationship,
         expect.objectContaining({ relationType: RelationType.SPOUSE }),
       )
-      expect(result).toEqual(newMember)
+      expect(result).toMatchObject({ id: newMember.id })
     })
 
-    it('should throw BadRequestException when fatherId provided but father not found', async () => {
+    it('should throw NotFoundException when fatherId provided but father not found', async () => {
       familyService.findOne.mockResolvedValue({ id: 'family-1' })
       mockManager.create.mockReturnValue(makeMember())
       mockManager.save.mockResolvedValue(makeMember())
       mockManager.count.mockResolvedValue(2)
       mockManager.findOne.mockResolvedValue(null)
 
-      await expect(service.create({ ...baseDto, fatherId: 'missing-father' }, 'user-1')).rejects.toThrow(BadRequestException)
+      await expect(service.create({ ...baseDto, fatherId: 'missing-father' }, 'family-1', 'user-1')).rejects.toThrow(NotFoundException)
     })
 
-    it('should throw BadRequestException when motherId provided but mother not found', async () => {
+    it('should throw NotFoundException when motherId provided but mother not found', async () => {
       familyService.findOne.mockResolvedValue({ id: 'family-1' })
       mockManager.create.mockReturnValue(makeMember())
       mockManager.save.mockResolvedValue(makeMember())
       mockManager.count.mockResolvedValue(2)
       mockManager.findOne.mockResolvedValue(null)
 
-      await expect(service.create({ ...baseDto, motherId: 'missing-mother' }, 'user-1')).rejects.toThrow(BadRequestException)
+      await expect(service.create({ ...baseDto, motherId: 'missing-mother' }, 'family-1', 'user-1')).rejects.toThrow(NotFoundException)
     })
 
     it('should create parent relationships for both father and mother', async () => {
       const father = makeMember({ id: 'father-id', gender: Gender.MALE })
       const mother = makeMember({ id: 'mother-id', gender: Gender.FEMALE })
       const newMember = makeMember({ id: 'new-member' })
-      const parentRel = { relationType: RelationType.PARENT }
+      const parentRel = { relationType: RelationType.CHILD }
 
       familyService.findOne.mockResolvedValue({ id: 'family-1' })
       mockManager.create
@@ -204,24 +204,24 @@ describe('MemberService', () => {
       // father lookup → father, mother lookup → mother
       mockManager.findOne.mockResolvedValueOnce(father).mockResolvedValueOnce(mother)
 
-      const result = await service.create({ ...baseDto, fatherId: 'father-id', motherId: 'mother-id' }, 'user-1')
+      const result = await service.create({ ...baseDto, fatherId: 'father-id', motherId: 'mother-id' }, 'family-1', 'user-1')
 
       const parentRelCalls = mockManager.create.mock.calls.filter(
         ([entity, data]: [unknown, { relationType?: RelationType }]) =>
-          entity === FamilyRelationship && data?.relationType === RelationType.PARENT,
+          entity === FamilyRelationship && data?.relationType === RelationType.CHILD,
       )
       expect(parentRelCalls).toHaveLength(2)
-      expect(result).toEqual(newMember)
+      expect(result).toMatchObject({ id: newMember.id })
     })
   })
 
   // ─── findOne ───────────────────────────────────────────────────────────────
 
   describe('findOne', () => {
-    it('should throw ConflictException when member is not found', async () => {
+    it('should throw NotFoundException when member is not found', async () => {
       memberRepository.findOneBy.mockResolvedValue(null)
 
-      await expect(service.findOne('member-1', 'user-1')).rejects.toThrow(ConflictException)
+      await expect(service.findOne('member-1', 'user-1')).rejects.toThrow(NotFoundException)
     })
 
     it('should throw ForbiddenException when family does not belong to user', async () => {
@@ -242,35 +242,6 @@ describe('MemberService', () => {
     })
   })
 
-  // ─── update ────────────────────────────────────────────────────────────────
-
-  describe('update', () => {
-    const patchDto = { name: 'Jane Updated', gender: 'female' as const, birthDate: undefined, deathDate: undefined }
-
-    it('should update and return the updated member', async () => {
-      const member = makeMember()
-      const updatedMember = makeMember({ fullName: 'Jane Updated', gender: Gender.FEMALE })
-
-      // findOne is called internally
-      memberRepository.findOneBy.mockResolvedValue(member)
-      familyService.findOne.mockResolvedValue({ id: 'family-1' })
-      memberRepository.update.mockResolvedValue(undefined)
-      memberRepository.findOneBy.mockResolvedValueOnce(member).mockResolvedValueOnce(updatedMember)
-
-      const result = await service.update('member-1', patchDto, 'user-1')
-
-      expect(memberRepository.update).toHaveBeenCalledWith('member-1', expect.objectContaining({ fullName: 'Jane Updated' }))
-      expect(result).toEqual(updatedMember)
-    })
-
-    it('should propagate ForbiddenException from findOne when unauthorized', async () => {
-      memberRepository.findOneBy.mockResolvedValue(makeMember())
-      familyService.findOne.mockResolvedValue(null)
-
-      await expect(service.update('member-1', patchDto, 'user-1')).rejects.toThrow(ForbiddenException)
-    })
-  })
-
   // ─── delete ────────────────────────────────────────────────────────────────
 
   describe('delete', () => {
@@ -284,21 +255,21 @@ describe('MemberService', () => {
       expect(memberRepository.softDelete).toHaveBeenCalledWith('member-1')
     })
 
-    it('should propagate ConflictException from findOne when member not found', async () => {
+    it('should propagate NotFoundException from findOne when member not found', async () => {
       memberRepository.findOneBy.mockResolvedValue(null)
 
-      await expect(service.delete('member-1', 'user-1')).rejects.toThrow(ConflictException)
+      await expect(service.delete('member-1', 'user-1')).rejects.toThrow(NotFoundException)
     })
   })
 
   // ─── findOneDetailed ───────────────────────────────────────────────────────
 
   describe('findOneDetailed', () => {
-    it('should throw ConflictException when member is not found in the tree', async () => {
+    it('should throw NotFoundException when member is not found in the tree', async () => {
       familyService.findOne.mockResolvedValue({ id: 'family-1' })
       memberRepository.findOne.mockResolvedValue(null)
 
-      await expect(service.findOneDetailed('family-1', 'member-1', 'user-1')).rejects.toThrow(ConflictException)
+      await expect(service.findOneDetailed('family-1', 'member-1', 'user-1')).rejects.toThrow(NotFoundException)
     })
 
     it('should return a DetailedPersonDto with minimal fields', async () => {

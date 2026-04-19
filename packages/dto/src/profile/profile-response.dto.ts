@@ -1,4 +1,4 @@
-import { UserGender } from './user-gender.enum'
+import type { Gender } from './gender.enum'
 
 export interface ProfileResponseDto {
   id: string
@@ -7,6 +7,6 @@ export interface ProfileResponseDto {
   email: string
   avatarUrl: string | null
   birthDate: number
-  gender: UserGender
+  gender: Gender
   language: string
 }

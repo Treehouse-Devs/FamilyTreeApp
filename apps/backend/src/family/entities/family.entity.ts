@@ -14,6 +14,12 @@ export class Family {
   @CreateDateColumn()
   createdAt!: Date
 
+  @Column({ type: 'uuid', nullable: true })
+  rootId!: string | null
+
+  @Column({ type: 'varchar', nullable: true })
+  familyImageUrl!: string | null
+
   @UpdateDateColumn()
   updatedAt!: Date
 

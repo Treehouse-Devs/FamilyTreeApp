@@ -1,10 +1,6 @@
+import { Gender } from '@treely/dto/index'
 import { Family } from '../../family/entities/family.entity'
 import { Column, CreateDateColumn, DeleteDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm'
-
-export enum Gender {
-  MALE = 'male',
-  FEMALE = 'female',
-}
 
 @Entity('family_members')
 export class FamilyMember {
