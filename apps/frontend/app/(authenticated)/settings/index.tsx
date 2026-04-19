@@ -12,15 +12,17 @@ import { InputContent } from '../tree/[id]/details/[id]/dialog-content/input-con
 import { useSettingListItem } from './useSettingListItem'
 import { useCompressImage } from '@/hooks/useCompressImage'
 import { UserService } from '@/services/userService'
+import { ThemedDatePicker } from '@/components/custom/date-picker'
 import DUMMY_MALE from '@/assets/images/dummy-profile-male.webp'
 import * as ImagePicker from 'expo-image-picker'
 import { ActionBar } from '@/components/custom/action-bar'
 import { router } from 'expo-router'
 import type { ColorMode } from '@/store/slices/appSlice'
 import i18n from '@/i18n/index'
+import { changePasswordSchema } from '@/validator/auth/authValidation'
 
 interface ModalConfig {
-  type: 'input' | 'password'
+  type: 'input' | 'password' | 'datepicker'
   title: string
   prop: string
 }
@@ -39,6 +41,7 @@ export default function Settings() {
   const [inputValue, setInputValue] = useState('')
   const [currentPassword, setCurrentPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
 
   if (!user) return null
 
@@ -70,7 +73,11 @@ export default function Settings() {
     } else if (id === 'password') {
       setCurrentPassword('')
       setNewPassword('')
+      setConfirmPassword('')
       setModalConfig({ type: 'password', title: t('password'), prop: 'password' })
+      setIsModalVisible(true)
+    } else if (id === 'birthDate') {
+      setModalConfig({ type: 'datepicker', title: t('birthDate'), prop: 'birthDate' })
       setIsModalVisible(true)
     }
   }, [user, t])
@@ -154,11 +161,18 @@ export default function Settings() {
     ? { uri: selectedImageUri }
     : avatarSource
 
+  const passwordValidation = changePasswordSchema.safeParse({
+    oldPassword: currentPassword,
+    newPassword,
+    confirmPassword,
+  })
+  const passwordErrors = !passwordValidation.success ? passwordValidation.error.flatten().fieldErrors : null
+
   const isSaveDisabled = modalConfig?.type === 'password'
-    ? newPassword === ''
+    ? !passwordValidation.success
     : inputValue === ''
 
-  const modalButton = modalConfig
+  const modalButton = modalConfig && modalConfig.type !== 'datepicker'
     ? {
         text: t('save'),
         onPress: handleModalSave,
@@ -212,13 +226,42 @@ export default function Settings() {
               inputValue={currentPassword}
               setInputValue={setCurrentPassword}
               placeholder={t('currentPassword')}
+              type="password"
+              isInvalid={!!currentPassword && !!passwordErrors?.oldPassword}
+              errorMessage={currentPassword ? passwordErrors?.oldPassword?.[0] : undefined}
             />
             <InputContent
               inputValue={newPassword}
               setInputValue={setNewPassword}
               placeholder={t('newPassword')}
+              type="password"
+              isInvalid={!!newPassword && !!passwordErrors?.newPassword}
+              errorMessage={newPassword ? passwordErrors?.newPassword?.[0] : undefined}
+            />
+            <InputContent
+              inputValue={confirmPassword}
+              setInputValue={setConfirmPassword}
+              placeholder={t('confirmPassword')}
+              type="password"
+              isInvalid={!!confirmPassword && !!passwordErrors?.confirmPassword}
+              errorMessage={confirmPassword ? passwordErrors?.confirmPassword?.[0] : undefined}
             />
           </VStack>
+        )}
+        {modalConfig?.type === 'datepicker' && (
+          <ThemedDatePicker
+            value={user.birthDate ?? Date.now()}
+            onChange={(date) => {
+              void UserService.updateProfile({ birthDate: date.getTime() })
+                .then(setUser)
+                .catch((error) => {
+                  console.error('Update failed:', error)
+                  alert(t('updateFailed'))
+                })
+              setIsModalVisible(false)
+            }}
+            maximumDate={new Date()}
+          />
         )}
       </Modal>
 

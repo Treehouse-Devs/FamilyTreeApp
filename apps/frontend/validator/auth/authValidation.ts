@@ -1,5 +1,5 @@
 import i18n from '@/i18n/index'
-import { Gender } from '@treely/dto'
+import { Gender } from '@/store/slices/userSlice'
 import { z } from 'zod'
 
 export const loginSchema = z.object({
@@ -36,3 +36,14 @@ export const forgotPasswordSchema = z.object({
 })
 
 export type ForgotPasswordSchema = z.infer<typeof forgotPasswordSchema>
+
+export const changePasswordSchema = z.object({
+  oldPassword: z.string().min(8, { message: i18n.t('passwordSigninMinLength') }),
+  newPassword: z.string().min(8, { message: i18n.t('passwordSignupMinLength') }),
+  confirmPassword: z.string(),
+}).refine(data => data.newPassword === data.confirmPassword, {
+  message: i18n.t('passwordsDoNotMatch'),
+  path: ['confirmPassword'],
+})
+
+export type ChangePasswordSchema = z.infer<typeof changePasswordSchema>

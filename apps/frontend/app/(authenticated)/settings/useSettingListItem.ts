@@ -1,8 +1,9 @@
-import { User } from '@/store/slices/userSlice'
-import { ColorMode } from '@/store/slices/appSlice'
+import type { User } from '@/store/slices/userSlice'
+import type { ColorMode } from '@/store/slices/appSlice'
 import { useEffect, useState } from 'react'
 import type { ListItemType } from '@/components/custom/list-item/types'
 import type { TFunction } from 'i18next'
+import dayjs from 'dayjs'
 
 export type SettingListItemType = {
   category: 'accountSettings' | 'applicationSettings'
@@ -27,6 +28,7 @@ export function useSettingListItem({ user, t, colorMode, onPress, onColorModeCha
             id: 'email',
             title: t('email'),
             description: user.email,
+            disabled: true,
             onPress: () => {},
           },
           {
@@ -34,6 +36,31 @@ export function useSettingListItem({ user, t, colorMode, onPress, onColorModeCha
             title: t('password'),
             description: '••••••••',
             onPress: () => onPress('password'),
+          },
+          {
+            id: 'gender',
+            title: t('gender'),
+            radioButtons: {
+              selectedId: user.gender,
+              selections: [
+                {
+                  id: 'male',
+                  label: t('male'),
+                  onPress: () => onPress('gender', 'male'),
+                },
+                {
+                  id: 'female',
+                  label: t('female'),
+                  onPress: () => onPress('gender', 'female'),
+                },
+              ],
+            },
+          },
+          {
+            id: 'birthDate',
+            title: t('birthDate'),
+            description: user.birthDate ? dayjs(user.birthDate).format('DD MMMM YYYY') : '—',
+            onPress: () => onPress('birthDate'),
           },
         ],
       },

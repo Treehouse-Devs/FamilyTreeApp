@@ -24,6 +24,10 @@ const rules = {
   'unused-imports/no-unused-imports': 'warn',
   '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
   '@typescript-eslint/unbound-method': 'off',
+  '@typescript-eslint/consistent-type-imports': [
+    'error',
+    { prefer: 'type-imports', fixStyle: 'separate-type-imports' },
+  ],
   'node/no-unsupported-features/es-syntax': 'off',
   'node/no-missing-import': 'off',
   'react-native/no-inline-styles': 'off',

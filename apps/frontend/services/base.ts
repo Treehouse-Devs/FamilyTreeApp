@@ -1,5 +1,4 @@
 import api from '@/lib/api'
-import { mockApi } from '@/tests/index'
 
 const MOCK_DATA = process.env.EXPO_PUBLIC_MOCK_DATA === 'true'
 
@@ -11,6 +10,8 @@ export class BaseService {
     config?: object,
   ): Promise<T> {
     if (MOCK_DATA) {
+      const { mockApi } = await import('@/tests/index')
+
       return await mockApi(url, method) as T
     }
 
@@ -48,6 +49,8 @@ export class BaseService {
 
   protected static async postFormData<T>(url: string, formData: FormData) {
     if (MOCK_DATA) {
+      const { mockApi } = await import('@/tests/index')
+
       return await mockApi(url, 'post') as T
     }
 

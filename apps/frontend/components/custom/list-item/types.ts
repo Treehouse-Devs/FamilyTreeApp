@@ -10,5 +10,6 @@ export type ListItemType = {
       onPress?: () => void
     }[]
   }
+  disabled?: boolean
   onPress?: () => void
 }

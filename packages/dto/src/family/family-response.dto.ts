@@ -1,4 +1,4 @@
-import { Gender } from '../auth/login-user.dto'
+import type { Gender } from '../auth/login-user.dto'
 
 /**
  * Flat person data as returned by the API (before tree composition).
