@@ -13,19 +13,17 @@ export type {
 
 // Member DTOs
 export { CreateFamilyMemberDto } from './member/create-family-member.dto'
-export { DeleteFamilyMemberDto } from './member/delete-family-member.dto'
 export { PatchFamilyMemberDto } from './member/patch-family-member-dto'
-export { UploadFamilyMemberProfilePictureDto } from './member/upload-family-member-profile-picture.dto'
 export type {
   DetailedPersonDto,
   UploadMemberImageResponseDto,
 } from './member/member-response.dto'
+export { RelationType } from './member/relation-type.enum'
 
 // Auth DTOs
 export { RegisterUserDto, RegisterResponseDto } from './auth/register-user.dto'
 export { LoginUserDto } from './auth/login-user.dto'
 export { ResetPasswordDto } from './auth/reset-password.dto'
-export { Gender } from './auth/login-user.dto'
 export type {
   LoginResponseDto,
   UserInfo,
@@ -40,5 +38,5 @@ export type { UserResponseDto } from './user/user-response.dto'
 
 // Profile DTOs
 export { UpdateProfileDto } from './profile/update-profile.dto'
-export { UserGender } from './profile/user-gender.enum'
+export { Gender } from './profile/gender.enum'
 export type { ProfileResponseDto } from './profile/profile-response.dto'

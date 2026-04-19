@@ -1,5 +1,5 @@
 import { IsEnum, IsInt, IsNumber, IsOptional, IsString } from 'class-validator'
-import { UserGender } from './user-gender.enum'
+import { Gender } from './gender.enum'
 
 export class UpdateProfileDto {
   @IsString()
@@ -11,7 +11,7 @@ export class UpdateProfileDto {
   @IsOptional()
   birthDate?: number
 
-  @IsEnum(UserGender)
+  @IsEnum(Gender)
   @IsOptional()
-  gender?: UserGender
+  gender?: Gender
 }

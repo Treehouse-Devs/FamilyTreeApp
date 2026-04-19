@@ -4,8 +4,9 @@ import { JwtAuthGuard } from 'src/auth/jwt-auth.guard'
 import { GetUser } from 'src/auth/get-user.decorator'
 import { UserFromToken } from 'src/auth/auth.types'
 import { MemberService } from './member.service'
-import { PatchFamilyMemberDto, DetailedPersonDto, UploadMemberImageResponseDto } from '@treely/dto'
+import { CreateFamilyMemberDto, PatchFamilyMemberDto, DetailedPersonDto, UploadMemberImageResponseDto } from '@treely/dto'
 import { memoryStorage } from 'multer'
+import type { FlatPersonDto } from '@treely/dto/family/family-response.dto'
 
 @Controller('trees')
 @UsePipes(new ValidationPipe({ transform: true }))
@@ -13,30 +14,39 @@ import { memoryStorage } from 'multer'
 export class MemberController {
   constructor(private readonly memberService: MemberService) { }
 
-  @Get(':treeId/person/:personId')
+  @Post(':id/person')
+  async createPerson(
+    @Param('id') id: string,
+    @Body() dto: CreateFamilyMemberDto,
+    @GetUser() user: UserFromToken,
+  ): Promise<FlatPersonDto> {
+    return await this.memberService.create({ ...dto }, id, user.uid)
+  }
+
+  @Get(':id/person/:personId')
   async getPerson(
-    @Param('treeId') treeId: string,
+    @Param('id') id: string,
     @Param('personId') personId: string,
     @GetUser() user: UserFromToken,
   ): Promise<{ person: DetailedPersonDto }> {
-    const person = await this.memberService.findOneDetailed(treeId, personId, user.uid)
+    const person = await this.memberService.findOneDetailed(id, personId, user.uid)
 
     return { person }
   }
 
-  @Patch(':treeId/person/:personId')
+  @Patch(':id/person/:personId')
   async patchPerson(
-    @Param('treeId') treeId: string,
+    @Param('id') id: string,
     @Param('personId') personId: string,
     @Body() dto: PatchFamilyMemberDto,
     @GetUser() user: UserFromToken,
   ): Promise<{ person: DetailedPersonDto }> {
-    const person = await this.memberService.updateDetailed(treeId, personId, dto, user.uid)
+    const person = await this.memberService.updateDetailed(id, personId, dto, user.uid)
 
     return { person }
   }
 
-  @Post(':treeId/person/:personId/image')
+  @Post(':id/person/:personId/image')
   @UseInterceptors(
     FileInterceptor('file', {
       storage: memoryStorage(),
@@ -52,7 +62,7 @@ export class MemberController {
     }),
   )
   async uploadPersonImage(
-    @Param('treeId') treeId: string,
+    @Param('id') id: string,
     @Param('personId') personId: string,
     @UploadedFile() file: Express.Multer.File,
     @GetUser() user: UserFromToken,
@@ -61,6 +71,6 @@ export class MemberController {
       throw new BadRequestException('No file uploaded')
     }
 
-    return this.memberService.updateMemberImage(treeId, personId, file, user.uid)
+    return this.memberService.updateMemberImage(id, personId, file, user.uid)
   }
 }

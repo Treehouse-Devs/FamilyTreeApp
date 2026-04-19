@@ -1,5 +1,5 @@
 import { IsEmail, IsNotEmpty, Length } from 'class-validator'
-import type { UserGender } from '../profile/user-gender.enum'
+import type { Gender } from '../profile/gender.enum'
 
 export class LoginUserDto {
   @IsNotEmpty()
@@ -20,18 +20,13 @@ export class LoginResponseDto {
   message!: string
 }
 
-export enum Gender {
-  MALE = 'male',
-  FEMALE = 'female',
-}
-
 export class UserInfo {
   uid!: string
   displayName!: string
   email!: string
   providerId!: string
   birthDate!: number
-  gender!: UserGender
+  gender!: Gender
   language!: string
 }
 

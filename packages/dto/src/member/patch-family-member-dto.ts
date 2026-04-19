@@ -1,6 +1,6 @@
 import { IsEnum, IsNumber, IsOptional, IsString, ValidateNested } from 'class-validator'
 import { Type } from 'class-transformer'
-import { Gender } from '../auth/login-user.dto'
+import { Gender } from '../profile'
 
 class LocationDto {
   @IsString()

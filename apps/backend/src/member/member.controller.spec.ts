@@ -2,9 +2,8 @@ import { Test, TestingModule } from '@nestjs/testing'
 import { MemberController } from './member.controller'
 import { MemberService } from './member.service'
 import { BadRequestException } from '@nestjs/common'
-import { DetailedPersonDto, UploadMemberImageResponseDto } from '@myorg/dto'
-import { Gender } from './entities/family-member.entity'
-import { UserFromToken } from 'src/user/user.types'
+import { Gender, DetailedPersonDto, UploadMemberImageResponseDto } from '@treely/dto/index'
+import { UserFromToken } from 'src/auth/auth.types'
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 

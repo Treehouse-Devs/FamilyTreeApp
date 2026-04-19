@@ -1,5 +1,5 @@
 import { Column, CreateDateColumn, DeleteDateColumn, Entity, Index, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm'
-import { UserGender } from '@treely/dto/profile/user-gender.enum'
+import { Gender } from '@treely/dto'
 
 @Entity('users')
 export class User {
@@ -19,8 +19,8 @@ export class User {
   @Column({ type: 'bigint', nullable: false })
   birthDate!: number
 
-  @Column({ type: 'enum', enum: UserGender, nullable: false })
-  gender!: UserGender
+  @Column({ type: 'enum', enum: Gender, nullable: false })
+  gender!: Gender
 
   @Column({ type: 'varchar', default: 'en' })
   language!: string

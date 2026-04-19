@@ -1,11 +1,7 @@
 import { Family } from '../../family/entities/family.entity'
 import { Column, CreateDateColumn, DeleteDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm'
 import { FamilyMember } from './family-member.entity'
-
-export enum RelationType {
-  PARENT = 'PARENT',
-  SPOUSE = 'SPOUSE',
-}
+import { RelationType } from '@treely/dto'
 
 @Entity('family_relationships')
 export class FamilyRelationship {

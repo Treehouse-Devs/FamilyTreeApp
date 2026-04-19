@@ -1,11 +1,12 @@
-import { Test, TestingModule } from '@nestjs/testing'
+import type { TestingModule } from '@nestjs/testing'
+import { Test } from '@nestjs/testing'
 import { BadRequestException, NotFoundException } from '@nestjs/common'
 import { ProfileController } from './profile.controller'
 import { ProfileService } from './profile.service'
-import { UserFromToken } from 'src/auth/auth.types'
-import { ProfileResponseDto } from '@treely/dto/profile/profile-response.dto'
-import { UpdateProfileDto } from '@treely/dto/profile/update-profile.dto'
-import { UserGender } from '@treely/dto/index'
+import { Gender } from '@treely/dto/index'
+import type { UserFromToken } from 'src/auth/auth.types'
+import type { ProfileResponseDto } from '@treely/dto/profile/profile-response.dto'
+import type { UpdateProfileDto } from '@treely/dto/profile/update-profile.dto'
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -19,7 +20,7 @@ function makeProfileResponse(overrides: Partial<ProfileResponseDto> = {}): Profi
     email: 'john@example.com',
     avatarUrl: null,
     birthDate: 0,
-    gender: UserGender.MALE,
+    gender: Gender.MALE,
     language: 'en',
     ...overrides,
   }
@@ -69,10 +70,10 @@ describe('ProfileController', () => {
   // ─── updateProfile ─────────────────────────────────────────────────────────
 
   describe('updateProfile', () => {
-    const updateDto: UpdateProfileDto = { name: 'Jane Doe', gender: UserGender.FEMALE }
+    const updateDto: UpdateProfileDto = { name: 'Jane Doe', gender: Gender.FEMALE }
 
     it('should return the updated profile from the service', async () => {
-      const updatedProfile = makeProfileResponse({ name: 'Jane Doe', gender: UserGender.FEMALE })
+      const updatedProfile = makeProfileResponse({ name: 'Jane Doe', gender: Gender.FEMALE })
       profileService.updateProfile.mockResolvedValue(updatedProfile)
 
       const result = await controller.updateProfile(mockUser, updateDto)
@@ -92,7 +93,7 @@ describe('ProfileController', () => {
     it('should pass the full DTO to the service unchanged', async () => {
       const fullDto: UpdateProfileDto = {
         name: 'Alice',
-        gender: UserGender.FEMALE,
+        gender: Gender.FEMALE,
         birthDate: 631152000000,
       }
       profileService.updateProfile.mockResolvedValue(makeProfileResponse())

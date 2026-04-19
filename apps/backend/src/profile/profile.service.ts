@@ -5,7 +5,7 @@ import { User } from './entities/user.entity'
 import { UserFromToken } from 'src/auth/auth.types'
 import { UpdateProfileDto } from '@treely/dto/profile/update-profile.dto'
 import { ProfileResponseDto } from '@treely/dto/profile/profile-response.dto'
-import { UserGender } from '@treely/dto/profile/user-gender.enum'
+import { Gender } from '@treely/dto'
 import { StorageService } from 'src/storage/storage.service'
 
 @Injectable()
@@ -33,7 +33,7 @@ export class ProfileService {
     uid: string,
     name: string,
     birthDate: number,
-    gender: UserGender,
+    gender: Gender,
   ): Promise<ProfileResponseDto> {
     const user = this.userRepository.create({
       firebaseUid: uid,
