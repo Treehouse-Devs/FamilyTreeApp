@@ -1,6 +1,6 @@
-import { DetailedPerson, Tree } from '@/store/slices/treeSlice'
+import type { DetailedPerson, Tree } from '@/store/slices/treeSlice'
 import { useStore } from '@/store/store'
-import { composeTreeFromFlat, FlatTree } from '@/utils/tree-compose'
+import { composeTreeFromFlat, type FlatTree } from '@/utils/tree-compose'
 import { BaseService } from './base'
 import type { UploadFamilyImageResponseDto, UploadMemberImageResponseDto } from '@treely/dto'
 

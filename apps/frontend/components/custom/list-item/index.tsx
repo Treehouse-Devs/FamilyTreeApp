@@ -25,7 +25,7 @@ export const ListItem = ({ item }: { item: ListItemType }) => {
   const wrapperClassName = 'w-full px-2 rounded-md'
 
   const content = (
-    <VStack className={`${item.onPress ? '' : 'py-2'} w-full`}>
+    <VStack className={`${item.onPress ? '' : 'py-2'} w-full ${item.disabled ? 'opacity-50' : ''}`}>
       {/* Title/Label */}
       <Text className={`${item.onPress ? '' : 'px-2'} text-secondary-700 text-sm mb-0.5`}>{item.title}</Text>
 
@@ -56,7 +56,7 @@ export const ListItem = ({ item }: { item: ListItemType }) => {
 
   if (item.onPress) {
     return (
-      <Button variant="link" onPress={item.onPress} className={`${wrapperClassName} py-2 data-[active=true]:bg-secondary-100/50 h-fit`}>
+      <Button variant="link" disabled={item.disabled} onPress={item.onPress} className={`${wrapperClassName} py-2 data-[active=true]:bg-secondary-100/50 h-fit`}>
         {content}
       </Button>
     )

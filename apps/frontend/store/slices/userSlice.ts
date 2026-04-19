@@ -1,7 +1,12 @@
-import { StateCreator } from 'zustand'
-import { UserResponseDto } from '@treely/dto'
+import type { StateCreator } from 'zustand'
+import type { UserResponseDto } from '@treely/dto'
 
 export type User = UserResponseDto
+
+export enum Gender {
+  MALE = 'male',
+  FEMALE = 'female',
+}
 
 type UserStates = {
   user: User | null

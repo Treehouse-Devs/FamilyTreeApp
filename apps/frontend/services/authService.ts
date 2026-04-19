@@ -1,4 +1,4 @@
-import { LoginResponseDto, RegisterResponseDto, RegisterUserDto } from '@treely/dto'
+import type { LoginResponseDto, RegisterResponseDto, RegisterUserDto } from '@treely/dto'
 import { BaseService } from './base'
 
 export class AuthService extends BaseService {
