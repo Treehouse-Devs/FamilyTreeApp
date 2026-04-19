@@ -7,7 +7,7 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common'
-import { RegisterUserDto } from '@treely/dto/auth/register-user.dto'
+import { RegisterResponseDto, RegisterUserDto } from '@treely/dto/auth/register-user.dto'
 import { LoginResponseDto, LoginUserDto } from '@treely/dto/auth/login-user.dto'
 import { GoogleAuthDto } from '@treely/dto/auth/google-auth.dto'
 import { FirebaseService } from './firebase.service'
@@ -47,15 +47,19 @@ export class AuthService {
     }
   }
 
-  async signUp(registerUserDto: RegisterUserDto): Promise<UserRecord | undefined> {
+  async signUp(registerUserDto: RegisterUserDto): Promise<RegisterResponseDto> {
     const { name, email, password, birthDate, gender } = registerUserDto
     let userRecord: UserRecord | null = null
     try {
       userRecord = await this.firebaseService.createUser({ displayName: name, email, password })
-      await this.profileService.createProfile(userRecord.uid, name, birthDate, gender)
+      const profile = await this.profileService.createProfile(userRecord.uid, name, birthDate, gender)
       await this.sendVerificationEmail({ email: userRecord.email || '' })
+      profile.email = userRecord.email || ''
+      profile.firebaseUid = userRecord.uid
 
-      return userRecord
+      return {
+        user: this.buildUserResponse(userRecord, profile),
+      }
     } catch (error) {
       if (userRecord?.uid) {
         try {
