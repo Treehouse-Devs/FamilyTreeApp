@@ -6,11 +6,12 @@ import { Text } from '@/components/ui/text'
 import { HStack } from '@/components/ui/hstack'
 import { useFamilyTree } from '@/hooks/useFamilyTree'
 
-import { ActionButtonProps, MainContentViewProps } from './types'
+import type { ActionButtonProps, MainContentViewProps } from './types'
 import { ActionButton } from './base'
 
 import DUMMY_MALE from '@/assets/images/dummy-profile-male.webp'
 import DUMMY_FEMALE from '@/assets/images/dummy-profile-female.webp'
+import { Gender } from '@treely/dto'
 
 export const MainContentView: React.FC<MainContentViewProps> = ({
   treeId,
@@ -18,6 +19,7 @@ export const MainContentView: React.FC<MainContentViewProps> = ({
   year,
   ageText,
   onAddPress,
+  isAddMemberDisabled,
   onDetailsPress,
   onDeletePress,
   t,
@@ -30,6 +32,7 @@ export const MainContentView: React.FC<MainContentViewProps> = ({
       icon: UserPlus,
       label: t('add'),
       onPress: onAddPress,
+      isDisabled: isAddMemberDisabled,
     },
     {
       key: 'details',
@@ -55,7 +58,7 @@ export const MainContentView: React.FC<MainContentViewProps> = ({
       {/* Profile Image */}
       <View className="w-14 h-14 rounded-full bg-secondary-500 overflow-hidden mt-3 mb-1">
         <Image
-          source={person.imageThumbnailUrl ? { uri: person.imageThumbnailUrl } : (person.gender === 'female' ? DUMMY_FEMALE : DUMMY_MALE)}
+          source={person.imageThumbnailUrl ? { uri: person.imageThumbnailUrl } : (person.gender === Gender.FEMALE ? DUMMY_FEMALE : DUMMY_MALE)}
           className="w-14 h-14"
           resizeMode="cover"
         />

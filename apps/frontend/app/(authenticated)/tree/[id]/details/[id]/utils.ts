@@ -1,7 +1,8 @@
-import { DetailedPerson } from '@/store/slices/treeSlice'
+import type { DetailedPerson } from '@/store/slices/tree/types'
 import type { TFunction } from 'i18next'
 import * as ImagePicker from 'expo-image-picker'
-import { PersonDetailListItems } from './useListItem'
+import type { PersonDetailListItems } from './useListItem'
+import { Gender } from '@treely/dto'
 
 export function mapPersonToListItem(person: DetailedPerson, t: TFunction, onDetailPress: (id: string, selectedId?: string) => void): PersonDetailListItems {
   const listItems: PersonDetailListItems = []
@@ -19,17 +20,17 @@ export function mapPersonToListItem(person: DetailedPerson, t: TFunction, onDeta
         id: 'gender',
         title: t('gender'),
         radioButtons: {
-          selectedId: person.gender ?? 'male',
+          selectedId: person.gender ?? Gender.MALE,
           selections: [
             {
-              id: 'male',
+              id: Gender.MALE,
               label: t('male'),
-              onPress: () => onDetailPress('gender', 'male'),
+              onPress: () => onDetailPress('gender', Gender.MALE),
             },
             {
-              id: 'female',
+              id: Gender.FEMALE,
               label: t('female'),
-              onPress: () => onDetailPress('gender', 'female'),
+              onPress: () => onDetailPress('gender', Gender.FEMALE),
             },
           ],
         },

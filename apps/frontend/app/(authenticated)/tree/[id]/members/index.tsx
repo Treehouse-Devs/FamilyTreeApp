@@ -11,9 +11,10 @@ import { Button, ButtonText, ButtonIcon } from '@/components/ui/button'
 import DUMMY_MALE from '@/assets/images/dummy-profile-male.webp'
 import DUMMY_FEMALE from '@/assets/images/dummy-profile-female.webp'
 import { getAgeInfo } from '@/utils/date'
-import type { Person } from '@/store/slices/treeSlice'
+import type { Person } from '@/store/slices/tree/types'
 import { useMemo } from 'react'
 import { ArrowDownAZ, ArrowUpAZ, ArrowDown01, ArrowUp01 } from 'lucide-react-native'
+import { Gender } from '@treely/dto'
 
 const getNumColumns = (width: number) => {
   if (width >= 1280) return 4
@@ -24,14 +25,14 @@ const getNumColumns = (width: number) => {
 
 const MemberListScreen = () => {
   const { id } = useLocalSearchParams<{ id: string }>()
-  const { getArrayOfPersons, memberSortField, memberSortDirection, setMemberSort } = useFamilyTree()
+  const { flatPersons, memberSortField, memberSortDirection, setMemberSort } = useFamilyTree()
   const { t } = useTranslation()
   const { width } = useWindowDimensions()
 
   const numColumns = getNumColumns(width)
 
-  const personsMap = getArrayOfPersons(id)
-  const persons = Object.values(personsMap) as Person[]
+  const personsMap = flatPersons[id]
+  const persons = personsMap ? Object.values(personsMap) as Person[] : []
 
   const sortedPersons = useMemo(() => {
     const sorted = [...persons].sort((a, b) => {
@@ -64,7 +65,7 @@ const MemberListScreen = () => {
   const renderItem = ({ item: person }: { item: Person }) => {
     const imageSource = person.imageThumbnailUrl
       ? { uri: person.imageThumbnailUrl }
-      : person.gender === 'female'
+      : person.gender === Gender.FEMALE
         ? DUMMY_FEMALE
         : DUMMY_MALE
 

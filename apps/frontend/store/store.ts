@@ -1,10 +1,15 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { create } from 'zustand'
-import { AuthSlice, createAuthSlice } from './slices/authSlice'
-import { AppSlice, createAppSlice } from './slices/appSlice'
-import { persist, StorageValue } from 'zustand/middleware'
-import { createTreeSlice, TreeSlice } from './slices/treeSlice'
-import { createUserSlice, UserSlice } from './slices/userSlice'
+import type { AuthSlice } from './slices/auth/types'
+import { createAuthSlice } from './slices/auth/authSlice'
+import type { AppSlice } from './slices/app/types'
+import { createAppSlice } from './slices/app/slice'
+import type { StorageValue } from 'zustand/middleware'
+import { persist } from 'zustand/middleware'
+import type { TreeSlice } from './slices/tree/types'
+import { createTreeSlice } from './slices/tree/slice'
+import type { UserSlice } from './slices/user/types'
+import { createUserSlice } from './slices/user/slice'
 
 // Add hydration state to the store
 interface HydrationState {

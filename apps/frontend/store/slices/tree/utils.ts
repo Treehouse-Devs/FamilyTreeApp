@@ -1,4 +1,4 @@
-import { Person } from '@/store/slices/treeSlice'
+import type { Person } from '@/store/slices/tree/types'
 
 export function findPersonById(root: Person, segmentId: string): Person | undefined {
   if (!root || root.id === segmentId) return root
@@ -10,6 +10,45 @@ export function findPersonById(root: Person, segmentId: string): Person | undefi
   }
 
   return root.spouse && root.spouse.id === segmentId ? root.spouse : undefined
+}
+
+/**
+ * Immutably rebuilds the tree, applying `mutate` to the node whose id matches `targetId`.
+ * Returns the new root (or the original root unchanged if the target wasn't found).
+ */
+export function updatePersonInTree(
+  root: Person,
+  targetId: string,
+  mutate: (node: Person) => Person,
+): Person {
+  if (root.id === targetId) return mutate({ ...root })
+
+  const updatedChildren = root.children
+    ? root.children.map(child => updatePersonInTree(child, targetId, mutate))
+    : undefined
+
+  const updatedSpouse
+    = root.spouse
+      ? root.spouse.id === targetId
+        ? mutate({ ...root.spouse })
+        : updatePersonInTree(root.spouse, targetId, mutate)
+      : undefined
+
+  return { ...root, children: updatedChildren, spouse: updatedSpouse }
+}
+
+export function removePersonFromTree(root: Person, targetId: string): Person {
+  if (root.id === targetId) return { ...root }
+
+  const updatedChildren = root.children
+    ? root.children
+        .filter(child => child.id !== targetId)
+        .map(child => removePersonFromTree(child, targetId))
+    : undefined
+
+  const updatedSpouse = root.spouse && root.spouse.id === targetId ? undefined : root.spouse
+
+  return { ...root, children: updatedChildren, spouse: updatedSpouse }
 }
 
 export function setPerson(root: Person, segment: Pick<Person, 'id' | 'name' | 'birthDate' | 'deathDate' | 'gender'>): Person {

@@ -1,4 +1,5 @@
-import { View, Image, ActivityIndicator, ImageSourcePropType } from 'react-native'
+import type { ImageSourcePropType } from 'react-native'
+import { View, Image, ActivityIndicator } from 'react-native'
 import { VStack } from '@/components/ui/vstack'
 import Modal from '@/components/custom/modals/modal'
 

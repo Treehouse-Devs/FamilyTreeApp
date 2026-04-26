@@ -3,8 +3,9 @@ import { useWindowDimensions } from 'react-native'
 import { Gesture } from 'react-native-gesture-handler'
 import { useSharedValue, useAnimatedStyle, withTiming } from 'react-native-reanimated'
 import { scheduleOnRN } from 'react-native-worklets'
-import { Person } from '@/store/slices/treeSlice'
-import { NODE_W, NODE_H, NodeLayout } from './types'
+import type { Person } from '@/store/slices/tree/types'
+import type { NodeLayout } from './types'
+import { NODE_W, NODE_H } from './types'
 import type { TreeLayout } from './useTreeLayout'
 
 type UseTreeGesturesParams = {
@@ -219,5 +220,33 @@ export function useTreeGestures({
     ],
   }))
 
-  return { composedGesture, animatedStyle, pressedNodeId }
+  const focusOnNode = (nodeId: string) => {
+    const node = nodes.find(n => n.id === nodeId)
+    if (!node) return
+
+    const targetScale = 1
+
+    const screenCenterX = viewportWidth / 2
+    const screenCenterY = viewportHeight / 2
+
+    const nodeCenterX = node.x + NODE_W / 2
+    const nodeCenterY = node.y + NODE_H / 2
+
+    const newTranslateX = screenCenterX - nodeCenterX * targetScale
+    const newTranslateY = screenCenterY - nodeCenterY * targetScale
+
+    translateX.value = withTiming(newTranslateX)
+    translateY.value = withTiming(newTranslateY)
+    scaleValue.value = withTiming(targetScale)
+
+    savedTranslateX.value = newTranslateX
+    savedTranslateY.value = newTranslateY
+    savedScale.value = targetScale
+
+    if (onZoomChange) {
+      onZoomChange(targetScale)
+    }
+  }
+
+  return { composedGesture, animatedStyle, pressedNodeId, focusOnNode }
 }

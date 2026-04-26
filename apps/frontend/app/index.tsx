@@ -21,9 +21,9 @@ export default function WelcomeScreen() {
     return <Redirect href="/(authenticated)" />
   }
 
-  // if (hasSeenWelcome) {
-  //   return <Redirect href="/auth/signin" />
-  // }
+  if (hasSeenWelcome) {
+    return <Redirect href="/auth/signin" />
+  }
 
   const handleSignIn = () => {
     setHasSeenWelcome(true)

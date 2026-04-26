@@ -1,4 +1,4 @@
-import { Person } from '@/store/slices/treeSlice'
+import type { Person } from '@/store/slices/tree/types'
 
 // --- Layout Types ------------------------------------------------------------
 
@@ -20,6 +20,10 @@ export type Edge = {
 }
 
 // --- Component Props ---------------------------------------------------------
+
+export type FamilyTreeSkiaRef = {
+  focusOnNode: (nodeId: string) => void
+}
 
 export type FamilyTreeSkiaProps = {
   root: Person

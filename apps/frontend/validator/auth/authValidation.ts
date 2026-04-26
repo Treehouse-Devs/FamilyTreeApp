@@ -1,5 +1,5 @@
 import i18n from '@/i18n/index'
-import { Gender } from '@/store/slices/userSlice'
+import { Gender } from '@treely/dto'
 import { z } from 'zod'
 
 export const loginSchema = z.object({

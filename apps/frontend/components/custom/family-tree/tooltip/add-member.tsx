@@ -7,45 +7,16 @@ import { HStack } from '@/components/ui/hstack'
 import { VStack } from '@/components/ui/vstack'
 import { useFamilyTree } from '@/hooks/useFamilyTree'
 
-import { ActionButtonProps, AddMemberContentViewProps, MemberType } from './types'
+import type { ActionButtonProps, AddMemberContentViewProps } from './types'
+import { MemberType } from './types'
 import { ActionButton } from './base'
+import type { DetailedPerson } from '@/store/slices/tree/types'
 
 export const AddMemberContentView: React.FC<AddMemberContentViewProps> = ({
-  person,
-  treeId,
   onSelectType,
+  addActions,
   t,
 }) => {
-  if (!person) return null
-
-  const { hasSpouse, isRoot } = useFamilyTree()
-  const addActions: Array<{ key: MemberType } & ActionButtonProps> = [
-    {
-      key: 'parents',
-      icon: Users,
-      label: t('parents'),
-      isDisabled: !isRoot(treeId, person.id),
-    },
-    {
-      key: 'spouse',
-      icon: Heart,
-      label: t('spouse'),
-      isDisabled: hasSpouse(treeId, person.id),
-    },
-    {
-      key: 'sibling',
-      icon: UsersRound,
-      label: t('sibling'),
-      isDisabled: !person.isBloodRelated,
-    },
-    {
-      key: 'child',
-      icon: Baby,
-      label: t('child'),
-      isDisabled: false,
-    },
-  ]
-
   return (
     <View
       className="flex flex-col items-center"
@@ -63,7 +34,7 @@ export const AddMemberContentView: React.FC<AddMemberContentViewProps> = ({
               key={action.key}
               icon={action.icon}
               label={action.label}
-              onPress={() => onSelectType(action.key)}
+              onPress={() => void onSelectType(action.key)}
               isWide
               isDisabled={action.isDisabled}
             />
@@ -75,12 +46,44 @@ export const AddMemberContentView: React.FC<AddMemberContentViewProps> = ({
               key={action.key}
               icon={action.icon}
               label={action.label}
-              onPress={() => onSelectType(action.key)}
+              onPress={() => void onSelectType(action.key)}
               isWide
+              isDisabled={action.isDisabled}
             />
           ))}
         </HStack>
       </VStack>
     </View>
   )
+}
+
+export const getAddMemberActions = (treeId: string, person: DetailedPerson, t: (key: string) => string): Array<{ key: MemberType } & ActionButtonProps> => {
+  const { hasSpouse, isRoot } = useFamilyTree()
+
+  return [
+    {
+      key: MemberType.PARENTS,
+      icon: Users,
+      label: t('parents'),
+      isDisabled: !isRoot(treeId, person.id),
+    },
+    {
+      key: MemberType.SPOUSE,
+      icon: Heart,
+      label: t('spouse'),
+      isDisabled: hasSpouse(treeId, person.id),
+    },
+    {
+      key: MemberType.SIBLING,
+      icon: UsersRound,
+      label: t('sibling'),
+      isDisabled: !person.isBloodRelated,
+    },
+    {
+      key: MemberType.CHILD,
+      icon: Baby,
+      label: t('child'),
+      isDisabled: false,
+    },
+  ]
 }
