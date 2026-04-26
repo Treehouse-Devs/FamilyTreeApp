@@ -8,19 +8,20 @@ export const useFamilyTree = () => {
   const setTree = useStore(state => state.setTree)
   const selectTree = useStore(state => state.selectTree)
   const selectedTreeId = useStore(state => state.selectedTreeId)
-  const setRoot = useStore(state => state.setRoot)
-  const selectedRoot = useStore(state => state.selectedRoot)
   const selectedTree = useStore(state =>
     state.trees.find(tree => tree.id === state.selectedTreeId),
   )
-  const getPerson = useStore(state => state.getPerson)
+  const selectedRoot = useStore(state => state.trees.find(tree => tree.id === state.selectedTreeId)?.root)
+  const flatPersons = useStore(state => state.flatPersons)
+  const getPersonDetails = useStore(state => state.getPersonDetails)
+  const setPersonDetails = useStore(state => state.setPersonDetails)
+  const removePersonAndAllDependents = useStore(state => state.removePersonAndAllDependents)
+  const getPersonFromRoot = useStore(state => state.getPersonFromRoot)
   const addPerson = useStore(state => state.addPerson)
-  const setPerson = useStore(state => state.setPerson)
-  const getArrayOfPerson = useStore(state => state.getArrayOfPerson)
   const hasSpouse = useStore(state => state.hasSpouse)
   const isRoot = useStore(state => state.isRoot)
+  const getParentsIds = useStore(state => state.getParentsIds)
   const collectAllDependents = useStore(state => state.collectAllDependents)
-  const getArrayOfPersons = (treeId: string) => useStore(state => state.persons[treeId] ?? {})
   const memberSortField = useStore(state => state.memberSortField)
   const memberSortDirection = useStore(state => state.memberSortDirection)
   const setMemberSort = useStore(state => state.setMemberSort)
@@ -33,17 +34,18 @@ export const useFamilyTree = () => {
     setTree,
     selectTree,
     selectedTreeId,
-    setRoot,
-    selectedRoot,
     selectedTree,
-    getPerson,
+    selectedRoot,
+    flatPersons,
+    getPersonDetails,
+    setPersonDetails,
+    removePersonAndAllDependents,
+    getPersonFromRoot,
     addPerson,
-    setPerson,
-    getArrayOfPerson,
     hasSpouse,
     isRoot,
+    getParentsIds,
     collectAllDependents,
-    getArrayOfPersons,
     memberSortField,
     memberSortDirection,
     setMemberSort,

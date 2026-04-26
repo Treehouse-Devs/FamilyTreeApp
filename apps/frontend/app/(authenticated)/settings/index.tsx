@@ -17,7 +17,7 @@ import DUMMY_MALE from '@/assets/images/dummy-profile-male.webp'
 import * as ImagePicker from 'expo-image-picker'
 import { ActionBar } from '@/components/custom/action-bar'
 import { router } from 'expo-router'
-import type { ColorMode } from '@/store/slices/appSlice'
+import type { ColorMode } from '@/store/slices/app/types'
 import i18n from '@/i18n/index'
 import { changePasswordSchema } from '@/validator/auth/authValidation'
 

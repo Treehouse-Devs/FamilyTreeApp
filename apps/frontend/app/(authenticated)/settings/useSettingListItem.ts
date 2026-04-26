@@ -1,5 +1,5 @@
-import type { User } from '@/store/slices/userSlice'
-import type { ColorMode } from '@/store/slices/appSlice'
+import type { User } from '@/store/slices/user/types'
+import type { ColorMode } from '@/store/slices/app/types'
 import { useEffect, useState } from 'react'
 import type { ListItemType } from '@/components/custom/list-item/types'
 import type { TFunction } from 'i18next'

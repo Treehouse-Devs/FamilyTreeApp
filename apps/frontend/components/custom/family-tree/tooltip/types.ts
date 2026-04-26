@@ -1,6 +1,11 @@
-import { Person } from '@/store/slices/treeSlice'
+import type { Person } from '@/store/slices/tree/types'
 
-export type MemberType = 'parents' | 'spouse' | 'sibling' | 'child'
+export enum MemberType {
+  PARENTS = 'parents',
+  SPOUSE = 'spouse',
+  SIBLING = 'sibling',
+  CHILD = 'child',
+}
 
 export type ContentView = 'main' | 'addMember' | 'removeMember'
 
@@ -9,7 +14,7 @@ export type PersonTooltipProps = {
   visible: boolean
   treeId: string
   onClose: () => void
-  onAddMember: (type: MemberType) => void
+  onAddMember: (type: MemberType) => Promise<void>
   onViewDetails: () => void
 }
 
@@ -28,15 +33,15 @@ export type MainContentViewProps = {
   year: string
   ageText: string
   onAddPress: () => void
+  isAddMemberDisabled: boolean
   onDetailsPress: () => void
   onDeletePress: () => void
   t: (key: string) => string
 }
 
 export type AddMemberContentViewProps = {
-  person: Person | null
-  treeId: string
-  onSelectType: (type: MemberType) => void
+  onSelectType: (type: MemberType) => Promise<void>
+  addActions: Array<{ key: MemberType } & ActionButtonProps>
   t: (key: string) => string
 }
 

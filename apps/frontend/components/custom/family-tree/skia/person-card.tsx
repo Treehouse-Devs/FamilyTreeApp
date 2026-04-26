@@ -1,19 +1,22 @@
 import React from 'react'
+import type {
+  useFont } from '@shopify/react-native-skia'
 import {
   RoundedRect,
   Text,
-  useFont,
   Group,
   Circle,
   useImage,
   ImageShader,
 } from '@shopify/react-native-skia'
-import { TFunction } from 'i18next'
+import type { TFunction } from 'i18next'
 import { getYear, getAgeInfo } from '@/utils/date'
-import { NodeLayout, NODE_W, NODE_H, THUMB, PADDING, RADIUS } from './types'
+import type { NodeLayout } from './types'
+import { NODE_W, NODE_H, THUMB, PADDING, RADIUS } from './types'
 
 import DUMMY_MALE from '@/assets/images/dummy-profile-male.webp'
 import DUMMY_FEMALE from '@/assets/images/dummy-profile-female.webp'
+import { Gender } from '@treely/dto'
 
 type PersonCardProps = {
   node: NodeLayout
@@ -35,7 +38,7 @@ export const PersonCard: React.FC<PersonCardProps> = ({
   t,
 }) => {
   const { person, x, y } = node
-  const dummyImage = person.gender === 'female' ? DUMMY_FEMALE : DUMMY_MALE
+  const dummyImage = person.gender === Gender.FEMALE ? DUMMY_FEMALE : DUMMY_MALE
   const imageSource = person.imageThumbnailUrl || (dummyImage as number)
 
   const image = useImage(imageSource)

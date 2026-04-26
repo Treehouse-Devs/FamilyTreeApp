@@ -1,4 +1,4 @@
-import type { User } from '@/store/slices/userSlice'
+import type { User } from '@/store/slices/user/types'
 import { BaseService } from './base'
 
 export class UserService extends BaseService {

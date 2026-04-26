@@ -2,7 +2,7 @@ import React from 'react'
 
 import { Text } from '@/components/ui/text'
 import { Button, ButtonIcon } from '@/components/ui/button'
-import { ActionButtonProps } from './types'
+import type { ActionButtonProps } from './types'
 
 export const ActionButton: React.FC<ActionButtonProps> = ({
   icon,

@@ -2,6 +2,14 @@ import { authMocks } from './data/auth'
 import { treeMocks, treeMocksWithParams } from './data/trees'
 import { userMocks } from './data/user'
 
+export const pseudoUuidv4 = () => {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+    const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8)
+
+    return v.toString(16)
+  })
+}
+
 const DELAY_MS = 500 // Default delay for mock responses
 const uuidRegex = /\b[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\b/
 
@@ -27,6 +35,26 @@ export const mockApi = async (url: string, method: string): Promise<unknown> => 
         fullImageUrl: 'https://picsum.photos/400/400',
         imageThumbnailUrl: 'https://picsum.photos/200/200',
       }
+    }
+
+    // Special handling for create person: POST /trees/:treeId/person
+    if (uuidRegex.test(url) && url.includes('/person') && method.toLowerCase() === 'post') {
+      const { Gender } = await import('@treely/dto')
+      const newPerson = {
+        id: pseudoUuidv4(),
+        name: 'New Member',
+        gender: Gender.MALE,
+        birthDate: Date.now(),
+        deathDate: undefined,
+        imageThumbnailUrl: undefined,
+        fullImageUrl: undefined,
+        isBloodRelated: true,
+        location: { nationality: undefined, hometown: undefined, domicile: undefined },
+        contact: { phoneNumber: null, homeNumber: null },
+        occupation: { occupation: undefined, officeAddress: undefined },
+      }
+
+      return { person: newPerson }
     }
 
     // Special handling for auth endpoints - return proper mock data

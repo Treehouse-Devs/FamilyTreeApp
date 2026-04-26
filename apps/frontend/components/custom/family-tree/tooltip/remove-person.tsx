@@ -6,10 +6,11 @@ import { Text } from '@/components/ui/text'
 import { HStack } from '@/components/ui/hstack'
 import { VStack } from '@/components/ui/vstack'
 import { Button, ButtonIcon, ButtonText } from '@/components/ui/button'
-import { Person } from '@/store/slices/treeSlice'
+import type { Person } from '@/store/slices/tree/types'
 import { useFamilyTree } from '@/hooks/useFamilyTree'
 
-import { RemovePersonContentViewProps } from './types'
+import type { RemovePersonContentViewProps } from './types'
+import { TreeService } from '@/services/treeService'
 
 export const RemovePersonContentView: React.FC<RemovePersonContentViewProps> = ({
   person,
@@ -17,17 +18,18 @@ export const RemovePersonContentView: React.FC<RemovePersonContentViewProps> = (
   onClose,
   t,
 }) => {
-  const { collectAllDependents } = useFamilyTree()
+  const { collectAllDependents, removePersonAndAllDependents } = useFamilyTree()
   const dependents = collectAllDependents(treeId, person.id).filter((dependent: Person) => dependent.id !== person.id)
 
   // call remove person API
-  const removePerson = () => {
+  const removePerson = async () => {
     try {
-      // TODO call remove person API
-      // await removePersonApi(person.id)
-      onClose()
+      await TreeService.deletePersonById(treeId, person.id)
+      removePersonAndAllDependents(treeId, person.id)
     } catch (error) {
       console.error(error)
+    } finally {
+      onClose()
     }
   }
 
@@ -62,10 +64,7 @@ export const RemovePersonContentView: React.FC<RemovePersonContentViewProps> = (
           </ButtonText>
         </Button>
         <Button
-          onPress={() => {
-            removePerson()
-            onClose()
-          }}
+          onPress={void removePerson()}
           action="negative"
         >
           <ButtonIcon className="text-white" as={Trash} />

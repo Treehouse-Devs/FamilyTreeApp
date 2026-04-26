@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import { router } from 'expo-router'
 import { EyeIcon, EyeOffIcon } from 'lucide-react-native'
 import { Alert } from 'react-native'
 import { Controller, useForm } from 'react-hook-form'
@@ -51,7 +52,7 @@ export default function SignInScreen() {
     if (res?.accessToken) {
       console.log('Login successful:', res)
       login(res.user, res.accessToken, res.refreshToken)
-      // Navigation is handled declaratively by index.tsx via <Redirect> when isLoggedIn becomes true
+      router.replace('/(authenticated)')
     } else if (error) {
       console.error('Login failed:', error)
       Alert.alert(t('loginFailed'), t('loginErrorMessage'))

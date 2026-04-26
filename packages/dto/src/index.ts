@@ -1,3 +1,5 @@
+import 'reflect-metadata'
+
 // Family DTOs
 export { CreateFamilyDto } from './family/create-family.dto'
 export { UpdateFamilyDto } from './family/update-family.dto'

@@ -1,8 +1,8 @@
 import { Button, ButtonText } from '@/components/ui/button'
 import { HStack } from '@/components/ui/hstack'
 import { Text } from '@/components/ui/text'
-import { ReactNode } from 'react'
-import { GestureResponderEvent } from 'react-native'
+import type { ReactNode } from 'react'
+import type { GestureResponderEvent } from 'react-native'
 
 export type TreeScreenButtonProps = {
   onPress?: (e: GestureResponderEvent) => void

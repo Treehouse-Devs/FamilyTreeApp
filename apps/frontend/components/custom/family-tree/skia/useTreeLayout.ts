@@ -1,9 +1,10 @@
 import { useMemo } from 'react'
 import { Skia } from '@shopify/react-native-skia'
-import { Person } from '@/store/slices/treeSlice'
-import {
+import type { Person } from '@/store/slices/tree/types'
+import type {
   NodeLayout,
-  Edge,
+  Edge } from './types'
+import {
   NODE_W,
   NODE_H,
   H_GAP,

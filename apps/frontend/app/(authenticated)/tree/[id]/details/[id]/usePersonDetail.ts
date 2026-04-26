@@ -1,27 +1,23 @@
 import { useEffect, useState } from 'react'
 import { useFamilyTree } from '@/hooks/useFamilyTree'
 import { TreeService } from '@/services/treeService'
-import { DetailedPerson } from '@/store/slices/treeSlice'
-import { Category } from '.'
+import type { DetailedPerson } from '@/store/slices/tree/types'
+import type { Category } from '.'
 
 export const usePersonDetail = (id: string, selectedTreeId: string) => {
-  const { getPerson, setPerson } = useFamilyTree()
+  const { getPersonDetails, setPersonDetails } = useFamilyTree()
 
-  const [personDetail, setPersonDetail] = useState<DetailedPerson | null>(null)
+  const [details, setDetails] = useState<DetailedPerson | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     const fetchPerson = async () => {
-      const person = getPerson(selectedTreeId, id)
+      const person = getPersonDetails(selectedTreeId, id) as DetailedPerson
       if (person && (person.location || person.occupation || person.contact)) {
-        setPersonDetail(person)
+        setDetails(person)
       } else {
-        const treePerson = getPerson(selectedTreeId, id)
         const { person: fetchedPerson } = await TreeService.fetchPersonById(selectedTreeId, id)
-        // Merge fetched data with tree person to preserve gender and other tree fields
-        const mergedPerson = { ...fetchedPerson, gender: treePerson?.gender }
-        setPersonDetail(mergedPerson)
-        setPerson(selectedTreeId, id, mergedPerson)
+        setDetails(fetchedPerson)
       }
       setIsLoading(false)
     }
@@ -29,16 +25,16 @@ export const usePersonDetail = (id: string, selectedTreeId: string) => {
   }, [selectedTreeId])
 
   const sendUpdate = async (prop: string, category: Category | undefined, value: string | number) => {
-    if (personDetail) {
+    if (details) {
       try {
         let editedPersonDetail: DetailedPerson
 
         if (category) {
           // Nested property (location, contact, occupation)
           editedPersonDetail = {
-            ...personDetail,
+            ...details,
             [category]: {
-              ...personDetail[category],
+              ...details[category],
               [prop]: value,
             },
           }
@@ -47,19 +43,19 @@ export const usePersonDetail = (id: string, selectedTreeId: string) => {
           if (prop === 'isStillAliveQ') {
             // change deathDate to undefined if value is stillAlive and to today date if set to notAlive
             editedPersonDetail = {
-              ...personDetail,
+              ...details,
               deathDate: value === 'stillAlive' ? undefined : new Date().getTime(),
             }
           } else {
             editedPersonDetail = {
-              ...personDetail,
+              ...details,
               [prop]: value,
             }
           }
         }
 
-        setPersonDetail(editedPersonDetail)
-        setPerson(selectedTreeId, id, editedPersonDetail)
+        setDetails(editedPersonDetail)
+        setPersonDetails(selectedTreeId, id, editedPersonDetail)
         await TreeService.patchPersonById(selectedTreeId, id, editedPersonDetail)
       } catch (error) {
         console.error('Patch API error:', error)
@@ -68,8 +64,8 @@ export const usePersonDetail = (id: string, selectedTreeId: string) => {
   }
 
   return {
-    personDetail,
-    setPersonDetail,
+    personDetail: details,
+    setPersonDetail: setDetails,
     isLoading,
     sendUpdate,
   }

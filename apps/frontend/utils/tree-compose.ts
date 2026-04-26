@@ -1,4 +1,4 @@
-import { Person, Tree } from '@/store/slices/treeSlice'
+import type { Person, Tree } from '@/store/slices/tree/types'
 import type { FlatPersonDto, FlatTreeDto } from '@treely/dto'
 
 export type FlatPerson = FlatPersonDto
@@ -8,7 +8,7 @@ export type FlatTree = FlatTreeDto
  * Composes a nested tree structure from a flat persons array.
  * Converts FlatTree (with rootId and persons array) to Tree (with nested root Person).
  */
-export function composeTreeFromFlat(flatTree: FlatTree): Tree {
+export function composeTreeFromFlat(flatTree: FlatTree): { tree: Tree, persons: FlatPerson[] } {
   const { id, name, createdAt, updatedAt, familyImageUrl, rootId, persons } = flatTree
 
   // Create a map for quick person lookup
@@ -78,11 +78,14 @@ export function composeTreeFromFlat(flatTree: FlatTree): Tree {
   const root = buildPerson(rootId)
 
   return {
-    id,
-    name,
-    createdAt,
-    updatedAt,
-    familyImageUrl,
-    root,
+    persons,
+    tree: {
+      id,
+      name,
+      createdAt,
+      updatedAt,
+      familyImageUrl,
+      root,
+    },
   }
 }

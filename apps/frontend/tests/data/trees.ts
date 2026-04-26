@@ -1,5 +1,6 @@
-import { Tree, DetailedPerson } from '@/store/slices/treeSlice'
-import { v4 as uuidv4 } from 'uuid'
+import type { Tree, DetailedPerson } from '@/store/slices/tree/types'
+import { Gender } from '@treely/dto'
+import { pseudoUuidv4 } from '../index'
 
 type TreeMock = {
   trees: Tree[]
@@ -21,7 +22,7 @@ export const treeMocks: TreeMock = {
     },
   ],
   createTree: (name: string) => {
-    const id = uuidv4()
+    const id = pseudoUuidv4()
     const newTree: Tree = {
       ...treeMocksWithParams.fetchTreeById(id),
       id,
@@ -192,7 +193,7 @@ export const treeMocksWithParams: TreeMockWithParams = {
       'dbc07888-3701-40c4-87be-4df09f04e324': {
         id: 'dbc07888-3701-40c4-87be-4df09f04e324',
         name: 'Bardock',
-
+        gender: Gender.MALE,
         birthDate: -916617600000,
         deathDate: 1628553600000,
         location: {
@@ -216,7 +217,7 @@ export const treeMocksWithParams: TreeMockWithParams = {
       'b83d4904-b535-401c-9c63-37f0d9096435': {
         id: 'b83d4904-b535-401c-9c63-37f0d9096435',
         name: 'Gine',
-
+        gender: Gender.FEMALE,
         birthDate: -773798400000,
         location: {
           nationality: 'Saiyan',
@@ -239,7 +240,7 @@ export const treeMocksWithParams: TreeMockWithParams = {
       'c6a256ab-7747-488b-81de-a7cf9c9b2910': {
         id: 'c6a256ab-7747-488b-81de-a7cf9c9b2910',
         name: 'Raditz',
-
+        gender: Gender.MALE,
         birthDate: -296438400000,
         location: {
           nationality: 'Saiyan',
@@ -262,7 +263,7 @@ export const treeMocksWithParams: TreeMockWithParams = {
       'f2ac7d84-a7ea-4195-8e46-04042cfc81c8': {
         id: 'f2ac7d84-a7ea-4195-8e46-04042cfc81c8',
         name: 'Launch',
-
+        gender: Gender.FEMALE,
         birthDate: -198720000000,
         location: {
           nationality: 'Earthling',
@@ -270,8 +271,8 @@ export const treeMocksWithParams: TreeMockWithParams = {
           domicile: 'Kame House',
         },
         contact: {
-          phoneNumber: 15550123,
-          homeNumber: 15550124,
+          phoneNumber: '15550123',
+          homeNumber: '15550124',
         },
         occupation: {
           occupation: 'Homemaker',
@@ -285,7 +286,7 @@ export const treeMocksWithParams: TreeMockWithParams = {
       '5330e122-3fec-4e4e-97be-0a7868c49242': {
         id: '5330e122-3fec-4e4e-97be-0a7868c49242',
         name: 'Rashi',
-
+        gender: Gender.MALE,
         birthDate: 490233600000,
         location: {
           nationality: 'Saiyan-Human Hybrid',
@@ -293,8 +294,8 @@ export const treeMocksWithParams: TreeMockWithParams = {
           domicile: 'West City',
         },
         contact: {
-          phoneNumber: 15550127,
-          homeNumber: 15550120,
+          phoneNumber: '15550127',
+          homeNumber: '15550120',
         },
         occupation: {
           occupation: 'Student',
@@ -308,7 +309,7 @@ export const treeMocksWithParams: TreeMockWithParams = {
       'a83d4904-b535-401c-9c63-37f0d9096435': {
         id: 'a83d4904-b535-401c-9c63-37f0d9096435',
         name: 'Ranch',
-
+        gender: Gender.FEMALE,
         birthDate: 543628800000,
         location: {
           nationality: 'Saiyan-Human Hybrid',
@@ -316,8 +317,8 @@ export const treeMocksWithParams: TreeMockWithParams = {
           domicile: 'West City',
         },
         contact: {
-          phoneNumber: 15550127,
-          homeNumber: 15550120,
+          phoneNumber: '15550127',
+          homeNumber: '15550120',
         },
         occupation: {
           occupation: 'Student',
@@ -331,7 +332,7 @@ export const treeMocksWithParams: TreeMockWithParams = {
       '123d4904-b535-401c-9c63-37f0d9096435': {
         id: '123d4904-b535-401c-9c63-37f0d9096435',
         name: 'Mooli',
-
+        gender: Gender.MALE,
         birthDate: 613440000000,
         location: {
           nationality: 'Saiyan-Human Hybrid',
@@ -339,8 +340,8 @@ export const treeMocksWithParams: TreeMockWithParams = {
           domicile: 'West City',
         },
         contact: {
-          phoneNumber: 15550127,
-          homeNumber: 15550120,
+          phoneNumber: '15550127',
+          homeNumber: '15550120',
         },
         occupation: {
           occupation: 'Student',
@@ -354,7 +355,7 @@ export const treeMocksWithParams: TreeMockWithParams = {
       '56dc74ba-7600-4f0b-ad06-bab252a8f0de': {
         id: '56dc74ba-7600-4f0b-ad06-bab252a8f0de',
         name: 'Goku',
-
+        gender: Gender.MALE,
         birthDate: -146102400000,
         location: {
           nationality: 'Saiyan',
@@ -362,8 +363,8 @@ export const treeMocksWithParams: TreeMockWithParams = {
           domicile: 'Mount Paozu, Earth',
         },
         contact: {
-          phoneNumber: 15550127,
-          homeNumber: 15550120,
+          phoneNumber: '15550127',
+          homeNumber: '15550120',
         },
         occupation: {
           occupation: 'Martial Artist',
@@ -377,7 +378,7 @@ export const treeMocksWithParams: TreeMockWithParams = {
       '783d4904-b535-401c-9c63-37f0d9096435': {
         id: '783d4904-b535-401c-9c63-37f0d9096435',
         name: 'Chi-Chi',
-
+        gender: Gender.FEMALE,
         birthDate: 74304000000,
         location: {
           nationality: 'Earthling',
@@ -385,8 +386,8 @@ export const treeMocksWithParams: TreeMockWithParams = {
           domicile: 'Mount Paozu, Earth',
         },
         contact: {
-          phoneNumber: 15550456,
-          homeNumber: 15550457,
+          phoneNumber: '15550456',
+          homeNumber: '15550457',
         },
         occupation: {
           occupation: 'Homemaker',
@@ -400,7 +401,7 @@ export const treeMocksWithParams: TreeMockWithParams = {
       'e1a15888-6a4b-4143-9521-fc45deb5d2a5': {
         id: 'e1a15888-6a4b-4143-9521-fc45deb5d2a5',
         name: 'Gohan',
-
+        gender: Gender.MALE,
         birthDate: 543024000000,
         location: {
           nationality: 'Saiyan-Human Hybrid',
@@ -408,8 +409,8 @@ export const treeMocksWithParams: TreeMockWithParams = {
           domicile: 'Satan City',
         },
         contact: {
-          phoneNumber: 15550789,
-          homeNumber: 15550790,
+          phoneNumber: '15550789',
+          homeNumber: '15550790',
         },
         occupation: {
           occupation: 'Scholar / Martial Artist',
@@ -423,7 +424,7 @@ export const treeMocksWithParams: TreeMockWithParams = {
       'a1b2c3d4-e5f6-7890-abcd-ef1234567890': {
         id: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
         name: 'Videl',
-
+        gender: Gender.FEMALE,
         birthDate: 568944000000,
         location: {
           nationality: 'Earthling',
@@ -431,8 +432,8 @@ export const treeMocksWithParams: TreeMockWithParams = {
           domicile: 'Satan City',
         },
         contact: {
-          phoneNumber: 15551234,
-          homeNumber: 15551235,
+          phoneNumber: '15551234',
+          homeNumber: '15551235',
         },
         occupation: {
           occupation: 'Martial Artist / Crime Fighter',
@@ -446,7 +447,7 @@ export const treeMocksWithParams: TreeMockWithParams = {
       'c5d4904a-b535-401c-9c63-37f0d9096435': {
         id: 'c5d4904a-b535-401c-9c63-37f0d9096435',
         name: 'Pan',
-
+        gender: Gender.FEMALE,
         birthDate: 1192060800000,
         location: {
           nationality: 'Saiyan-Human Hybrid',
@@ -454,8 +455,8 @@ export const treeMocksWithParams: TreeMockWithParams = {
           domicile: 'Satan City',
         },
         contact: {
-          phoneNumber: 15551234,
-          homeNumber: 15551235,
+          phoneNumber: '15551234',
+          homeNumber: '15551235',
         },
         occupation: {
           occupation: 'Student / Martial Artist',
@@ -469,7 +470,7 @@ export const treeMocksWithParams: TreeMockWithParams = {
       '883d4904-b535-401c-9c63-37f0d9096435': {
         id: '883d4904-b535-401c-9c63-37f0d9096435',
         name: 'Goten',
-
+        gender: Gender.MALE,
         birthDate: 718588800000,
         location: {
           nationality: 'Saiyan-Human Hybrid',
@@ -477,8 +478,8 @@ export const treeMocksWithParams: TreeMockWithParams = {
           domicile: 'Mount Paozu',
         },
         contact: {
-          phoneNumber: 15555678,
-          homeNumber: 15555679,
+          phoneNumber: '15555678',
+          homeNumber: '15555679',
         },
         occupation: {
           occupation: 'Student / Martial Artist',

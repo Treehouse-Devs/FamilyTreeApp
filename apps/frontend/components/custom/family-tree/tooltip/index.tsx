@@ -5,14 +5,14 @@ import { useTranslation } from 'react-i18next'
 import { getYear, getAge } from '@/utils/date'
 import { Modal } from '@/components/custom/modals/modal'
 
-import { ContentView, MemberType, PersonTooltipProps } from './types'
+import type { ContentView, MemberType, PersonTooltipProps } from './types'
 import { MainContentView } from './main'
-import { AddMemberContentView } from './add-member'
+import { AddMemberContentView, getAddMemberActions } from './add-member'
 import { RemovePersonContentView } from './remove-person'
 
 // Re-export types for external use
-export type { MemberType, PersonTooltipProps } from './types'
-export { RemovePersonContentView } from './remove-person'
+export type { PersonTooltipProps } from './types'
+export { MemberType } from './types'
 
 export const PersonTooltip: React.FC<PersonTooltipProps> = ({
   person,
@@ -26,6 +26,8 @@ export const PersonTooltip: React.FC<PersonTooltipProps> = ({
   const [currentView, setCurrentView] = useState<ContentView>('main')
 
   if (!person) return null
+
+  const addActions = getAddMemberActions(treeId, person, t)
 
   const year = getYear(person.birthDate)
   const age = getAge(person.birthDate, person.deathDate)
@@ -41,8 +43,8 @@ export const PersonTooltip: React.FC<PersonTooltipProps> = ({
     setCurrentView('addMember')
   }
 
-  const handleSelectMemberType = (type: MemberType) => {
-    onAddMember?.(type)
+  const handleSelectMemberType = async (type: MemberType) => {
+    await onAddMember?.(type)
     handleClose()
   }
 
@@ -61,6 +63,7 @@ export const PersonTooltip: React.FC<PersonTooltipProps> = ({
               year={year}
               ageText={ageText}
               onAddPress={handleAddPress}
+              isAddMemberDisabled={addActions.every(action => action.isDisabled)}
               onDetailsPress={() => {
                 onViewDetails?.()
                 handleClose()
@@ -75,8 +78,7 @@ export const PersonTooltip: React.FC<PersonTooltipProps> = ({
           <Animated.View entering={FadeIn.duration(150)} exiting={FadeOut.duration(100)}>
             <AddMemberContentView
               onSelectType={handleSelectMemberType}
-              person={person}
-              treeId={treeId}
+              addActions={addActions}
               t={t}
             />
           </Animated.View>

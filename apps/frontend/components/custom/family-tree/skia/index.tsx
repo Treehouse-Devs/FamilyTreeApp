@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { forwardRef, useImperativeHandle } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Canvas, Path, useFont } from '@shopify/react-native-skia'
 import { GestureDetector } from 'react-native-gesture-handler'
@@ -8,19 +8,19 @@ import { asHex, getVar, useCurrentMode } from '@/utils/color-token'
 import { useTreeLayout, useEdgePaths } from './useTreeLayout'
 import { useTreeGestures } from './useTreeGestures'
 import { PersonCard } from './person-card'
-import type { FamilyTreeSkiaProps } from './types'
+import type { FamilyTreeSkiaProps, FamilyTreeSkiaRef } from './types'
 
 // re-export types
-export { type FamilyTreeSkiaProps } from './types'
+export { type FamilyTreeSkiaProps, type FamilyTreeSkiaRef } from './types'
 
-export const FamilyTreeSkia: React.FC<FamilyTreeSkiaProps> = ({
+export const FamilyTreeSkia = forwardRef<FamilyTreeSkiaRef, FamilyTreeSkiaProps>(({
   root,
   onPressNode,
   scale = 1,
   minScale = 0.5,
   maxScale = 3,
   onZoomChange,
-}) => {
+}, ref) => {
   const mode = useCurrentMode()
   const { t } = useTranslation()
 
@@ -30,7 +30,7 @@ export const FamilyTreeSkia: React.FC<FamilyTreeSkiaProps> = ({
   const edgePaths = useEdgePaths(nodes, layout.edges)
 
   // Gestures & transforms
-  const { composedGesture, animatedStyle, pressedNodeId } = useTreeGestures({
+  const { composedGesture, animatedStyle, pressedNodeId, focusOnNode } = useTreeGestures({
     layout,
     nodes,
     scale,
@@ -39,6 +39,10 @@ export const FamilyTreeSkia: React.FC<FamilyTreeSkiaProps> = ({
     onPressNode,
     onZoomChange,
   })
+
+  useImperativeHandle(ref, () => ({
+    focusOnNode,
+  }))
 
   // Colors
   const CARD_FILL_COLOR = asHex(getVar(mode, 'secondary', '0'))
@@ -89,4 +93,6 @@ export const FamilyTreeSkia: React.FC<FamilyTreeSkiaProps> = ({
       </Animated.View>
     </GestureDetector>
   )
-}
+})
+
+FamilyTreeSkia.displayName = 'FamilyTreeSkia'

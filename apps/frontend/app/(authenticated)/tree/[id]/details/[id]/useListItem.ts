@@ -1,6 +1,6 @@
-import { DetailedPerson } from '@/store/slices/treeSlice'
+import type { DetailedPerson } from '@/store/slices/tree/types'
 import type { TFunction } from 'i18next'
-import { ListItemType } from '@/components/custom/list-item/types'
+import type { ListItemType } from '@/components/custom/list-item/types'
 import { useEffect, useState } from 'react'
 import { mapPersonToListItem } from './utils'
 

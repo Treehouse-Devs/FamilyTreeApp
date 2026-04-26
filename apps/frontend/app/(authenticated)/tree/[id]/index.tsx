@@ -4,27 +4,31 @@ import { useFamilyTree } from '@/hooks/useFamilyTree'
 import { TreeService } from '@/services/treeService'
 import { useLocalSearchParams, router } from 'expo-router'
 import { ChevronLeft, Menu, Minus, Plus } from 'lucide-react-native'
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useRef } from 'react'
 import { View, ActivityIndicator } from 'react-native'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 
 import { LinearGradient } from 'expo-linear-gradient'
 import { asHex, getVar, useCurrentMode } from '@/utils/color-token'
-import { FamilyTreeSkia } from '@/components/custom/family-tree/skia'
-import { Person } from '@/store/slices/treeSlice'
+import { FamilyTreeSkia, type FamilyTreeSkiaRef } from '@/components/custom/family-tree/skia'
+import type { Person } from '@/store/slices/tree/types'
 
 import { ButtonIcon } from '@/components/ui/button'
 import { FamilyMenuActionSheet } from '@/components/custom/family-tree/action-sheet'
-import { MemberType, PersonTooltip } from '@/components/custom/family-tree/tooltip'
+import { MemberType } from '@/components/custom/family-tree/tooltip'
+import { PersonTooltip } from '@/components/custom/family-tree/tooltip'
 import { useZoomLevel } from '@/hooks/useZoomLevel'
+import { useAddMember } from './useAddMember'
 
 const TreeScreen = () => {
   const { id } = useLocalSearchParams<{ id: string }>()
-  const { selectTree, selectedRoot, setRoot, setTree, trees } = useFamilyTree()
+  const { selectTree, selectedRoot, trees } = useFamilyTree()
+  const { addChild, addSpouse, addSiblings, addParents } = useAddMember(id)
   const [loading, setLoading] = useState(true)
   const { zoomLevel, setZoomLevel } = useZoomLevel()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [selectedPerson, setSelectedPerson] = useState<Person | null>(null)
+  const familyTreeRef = useRef<FamilyTreeSkiaRef>(null)
 
   const mode = useCurrentMode()
   // Resolve colors for gradient
@@ -51,7 +55,6 @@ const TreeScreen = () => {
     const existingTree = trees.find(t => t.id === id)
 
     if (existingTree && existingTree.root) {
-      setRoot(existingTree.root)
       setLoading(false)
 
       return
@@ -60,13 +63,7 @@ const TreeScreen = () => {
     const fetchTree = async () => {
       setLoading(true)
       try {
-        const tree = await TreeService.fetchTreeById(id)
-        if (!cancelled && tree) {
-          setTree(tree)
-          if (tree.root) {
-            setRoot(tree.root)
-          }
-        }
+        await TreeService.fetchTreeById(id)
       } catch (err) {
         if (!cancelled) {
           console.error('Failed to fetch tree:', err)
@@ -138,6 +135,7 @@ const TreeScreen = () => {
             maxScale={2}
             onZoomChange={handleZoomChange}
             onPressNode={handlePersonPress}
+            ref={familyTreeRef}
           />
         </View>
         {/* Header layer - overlays canvas but allows touch passthrough */}
@@ -186,9 +184,32 @@ const TreeScreen = () => {
           visible={selectedPerson !== null}
           treeId={id}
           onClose={() => setSelectedPerson(null)}
-          onAddMember={(type: MemberType) => {
-            // TODO: Implement add member based on type
-            console.log('Add member type:', type)
+          onAddMember={async (type: MemberType) => {
+            let newPersonId = null
+
+            switch (type) {
+              case MemberType.CHILD: {
+                newPersonId = await addChild(selectedPerson)
+                break
+              }
+              case MemberType.SPOUSE: {
+                newPersonId = await addSpouse(selectedPerson)
+                break
+              }
+              case MemberType.SIBLING: {
+                newPersonId = await addSiblings(selectedPerson)
+                break
+              }
+              case MemberType.PARENTS: {
+                newPersonId = await addParents(selectedPerson)
+                break
+              }
+            }
+
+            if (newPersonId) {
+              familyTreeRef.current?.focusOnNode(newPersonId)
+            }
+            setSelectedPerson(null)
           }}
           onViewDetails={() => {
             router.push(`/tree/${id}/details/${selectedPerson.id}`)

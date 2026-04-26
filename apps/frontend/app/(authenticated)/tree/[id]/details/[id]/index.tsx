@@ -4,7 +4,7 @@ import { router, useLocalSearchParams } from 'expo-router'
 import { useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useFamilyTree } from '@/hooks/useFamilyTree'
-import type { DetailedPerson } from '@/store/slices/treeSlice'
+import type { DetailedPerson } from '@/store/slices/tree/types'
 import { handleImageUpload } from './utils'
 import { ListItems } from '@/components/custom/list-item'
 import { BasicCard } from '@/components/custom/cards/basic-card'
@@ -19,6 +19,7 @@ import { useListItem } from './useListItem'
 import { useCompressImage } from '@/hooks/useCompressImage'
 import { DatePickerContent } from './dialog-content/date-picker-content'
 import { InputContent } from './dialog-content/input-content'
+import { Gender } from '@treely/dto'
 
 interface ModalConfig {
   type: 'input' | 'date'
@@ -42,14 +43,14 @@ const blankPersonDetail: PersonDetail = {
     officeAddress: '',
   },
   contact: {
-    homeNumber: 0,
-    phoneNumber: 0,
+    homeNumber: '',
+    phoneNumber: '',
   },
 }
 
 const PersonDetailScreen = () => {
   const { id } = useLocalSearchParams<{ id: string }>()
-  const { selectedTreeId, setPerson } = useFamilyTree()
+  const { selectedTreeId } = useFamilyTree()
   const { t } = useTranslation()
   const [isModalVisible, setIsModalVisible] = useState(false)
   const [modalConfig, setModalConfig] = useState<ModalConfig | null>(null)
@@ -164,7 +165,6 @@ const PersonDetailScreen = () => {
           imageThumbnailUrl,
         }
         setPersonDetail(editedPersonDetail)
-        setPerson(selectedTreeId, id, editedPersonDetail)
         setImageEditModalVisible(false)
       },
       onUploadError: (error: unknown) => {
@@ -173,7 +173,7 @@ const PersonDetailScreen = () => {
       },
       onUploadComplete: () => setIsUploading(false),
     })
-  }, [personDetail, selectedTreeId, id, setPerson, t])
+  }, [personDetail, selectedTreeId, id, t])
 
   const handleScroll = useCallback((event: { nativeEvent: { contentOffset: { y: number } } }) => {
     const scrollY = event.nativeEvent.contentOffset.y
@@ -183,7 +183,8 @@ const PersonDetailScreen = () => {
 
   const thumbnailSource = personDetail?.fullImageUrl
     ? { uri: personDetail.fullImageUrl }
-    : (personDetail?.gender === 'female' ? DUMMY_FEMALE : DUMMY_MALE)
+
+    : (personDetail?.gender === Gender.FEMALE ? DUMMY_FEMALE : DUMMY_MALE)
 
   const modalImageSource = selectedImageUri
     ? { uri: selectedImageUri }
@@ -217,7 +218,8 @@ const PersonDetailScreen = () => {
                 <Pressable onPress={openImagePicker}>
                   <View className="w-36 h-36 rounded-full bg-secondary-500 overflow-hidden mt-4 mb-2 border-2 border-secondary-500">
                     <Image
-                      source={personDetail?.fullImageUrl ? { uri: personDetail.fullImageUrl } : (personDetail?.gender === 'female' ? DUMMY_FEMALE : DUMMY_MALE)}
+
+                      source={personDetail?.fullImageUrl ? { uri: personDetail.fullImageUrl } : (personDetail?.gender === Gender.FEMALE ? DUMMY_FEMALE : DUMMY_MALE)}
                       className="w-36 h-36"
                       resizeMode="cover"
                       alt="Profile"

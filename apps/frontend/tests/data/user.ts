@@ -1,4 +1,5 @@
-import { Gender, type User } from '@/store/slices/userSlice'
+import type { User } from '@/store/slices/user/types'
+import { Gender } from '@treely/dto'
 
 export const mockUser: User = {
   id: 'u-001',
