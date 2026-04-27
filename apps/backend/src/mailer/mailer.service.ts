@@ -19,7 +19,7 @@ export class MailerService {
 
   async sendTemplateEmail(to: string, subject: string, templateName: string, context: Record<string, string>) {
     const templatePath = path.join(
-      __dirname,
+      process.cwd(),
       'src/mailer/templates',
       `${templateName}.mjml`,
     )
