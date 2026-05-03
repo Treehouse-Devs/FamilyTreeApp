@@ -6,11 +6,13 @@ import { useUser } from '@/hooks/useUser'
 import { useAuth } from '@/hooks/useAuth'
 import DUMMY_MALE from '@/assets/images/dummy-profile-male.webp'
 import { router } from 'expo-router'
+import { useColorMode } from '@/hooks/useColorMode'
 
 export const MainPageActionSheet = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) => {
   const { t } = useTranslation()
   const { user } = useUser()
   const { logout } = useAuth()
+  const { setColorMode } = useColorMode()
 
   const avatarSource = user?.avatarUrl ? { uri: user.avatarUrl } : DUMMY_MALE
 
@@ -29,6 +31,7 @@ export const MainPageActionSheet = ({ isOpen, onClose }: { isOpen: boolean, onCl
       onPress: () => {
         onClose()
         logout()
+        setColorMode('light')
         router.replace('/auth/signin')
       },
       destructive: true,

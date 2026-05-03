@@ -12,6 +12,8 @@ import { ImageEditModal } from '@/components/custom/modals/image-edit-modal'
 import * as ImagePicker from 'expo-image-picker'
 import { ActionSheet, ActionSheetItemWithIcon } from '@/components/custom/action-sheet'
 import { useCompressImage } from '@/hooks/useCompressImage'
+import Modal from '@/components/custom/modals/modal'
+import { VStack } from '@/components/ui/vstack'
 
 export const FamilyMenuActionSheet = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) => {
   const [isEditingName, setIsEditingName] = useState(false)
@@ -19,7 +21,9 @@ export const FamilyMenuActionSheet = ({ isOpen, onClose }: { isOpen: boolean, on
   const [imageEditModalVisible, setImageEditModalVisible] = useState(false)
   const [selectedImageUri, setSelectedImageUri] = useState<string | undefined>()
   const [isUploading, setIsUploading] = useState(false)
-  const { selectedTree } = useFamilyTree()
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false)
+  const [isDeleteLoading, setIsDeleteLoading] = useState(false)
+  const { selectedTree, removeTree } = useFamilyTree()
   const { t } = useTranslation()
   const { compressImage } = useCompressImage()
 
@@ -66,11 +70,29 @@ export const FamilyMenuActionSheet = ({ isOpen, onClose }: { isOpen: boolean, on
       icon: Trash2,
       text: t('remove'),
       onPress: () => {
-
+        setDeleteModalVisible(true)
       },
       destructive: true,
     },
   ]
+
+  const deleteTree = async () => {
+    if (selectedTree) {
+      try {
+        setIsDeleteLoading(true)
+        await TreeService.deleteTree(selectedTree.id)
+        removeTree(selectedTree.id)
+        onClose()
+        navigate('/(authenticated)')
+      } catch (error) {
+        console.error('Failed to delete family tree:', error)
+        alert(t('failedToDeleteTree'))
+      } finally {
+        setDeleteModalVisible(false)
+        setIsDeleteLoading(false)
+      }
+    }
+  }
 
   const imageSource = selectedTree?.familyImageUrl
     ? { uri: selectedTree.familyImageUrl }
@@ -184,6 +206,27 @@ export const FamilyMenuActionSheet = ({ isOpen, onClose }: { isOpen: boolean, on
         onClose={() => setImageEditModalVisible(false)}
         t={t}
       />
+      <Modal
+        visible={deleteModalVisible}
+        onClose={() => setDeleteModalVisible(false)}
+        title={t('deleteTree', { treeName: selectedTree?.name })}
+        button={{
+          text: t('deleteTreeButton'),
+          onPress: () => void deleteTree(),
+          isDisabled: false,
+          isLoading: isDeleteLoading,
+          action: 'negative',
+        }}
+      >
+        <VStack className="px-4 gap-2">
+          <Text>
+            {t('deleteTreeDescription')}
+          </Text>
+          <Text>
+            {t('deleteTreeConfirmation', { treeName: selectedTree?.name })}
+          </Text>
+        </VStack>
+      </Modal>
     </>
   )
 }

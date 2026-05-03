@@ -30,6 +30,10 @@ export const createTreeSlice: StateCreator<TreeSlice, [], [], TreeSlice> = (set,
 
   removeTree: (treeId) => {
     set(state => ({ trees: state.trees.filter(tree => tree.id !== treeId) }))
+    const otherTree = get().trees[0]
+    if (otherTree) {
+      get().selectTree(otherTree.id)
+    }
   },
 
   setTree: (tree) => {

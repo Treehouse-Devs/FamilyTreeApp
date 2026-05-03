@@ -282,22 +282,61 @@ type IButtonProps = Omit<
   React.ComponentPropsWithoutRef<typeof UIButton>,
   'context'
 > &
-VariantProps<typeof buttonStyle> & { className?: string }
+VariantProps<typeof buttonStyle> & { className?: string; isLoading?: boolean; children?: React.ReactNode }
+
+const spinnerColorMap: Record<string, Record<string, string>> = {
+  solid: {
+    primary: 'text-primary-700',
+    secondary: 'text-secondary-700',
+    positive: 'text-success-700',
+    negative: 'text-error-700',
+    default: 'text-typography-700',
+  },
+  outline: {
+    primary: 'text-primary-700',
+    secondary: 'text-secondary-700',
+    positive: 'text-success-700',
+    negative: 'text-error-700',
+    default: 'text-typography-700',
+  },
+  link: {
+    primary: 'text-primary-700',
+    secondary: 'text-secondary-700',
+    positive: 'text-success-700',
+    negative: 'text-error-700',
+    default: 'text-typography-700',
+  },
+}
 
 const Button = React.forwardRef<
   React.ComponentRef<typeof UIButton>,
   IButtonProps
 >(function Button(
-  { className, variant = 'solid', size = 'md', action = 'primary', ...props },
+  {
+    className,
+    variant = 'solid',
+    size = 'md',
+    action = 'primary',
+    isLoading = false,
+    children,
+    ...props
+  },
   ref,
 ) {
+  const spinnerColorClass =
+    (spinnerColorMap[variant ?? 'solid']?.[action ?? 'primary']) ?? 'text-typography-0'
+
   return (
     <UIButton
       ref={ref}
       {...props}
+      disabled={isLoading || props.disabled}
       className={buttonStyle({ variant, size, action, class: className })}
       context={{ variant, size, action }}
-    />
+    >
+      {isLoading && <ButtonSpinner className={spinnerColorClass} />}
+      {children}
+    </UIButton>
   )
 })
 

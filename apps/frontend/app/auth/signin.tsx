@@ -110,8 +110,8 @@ export default function SignInScreen() {
       >
       </Controller>
 
-      <Button action="secondary" onPress={() => void handleSubmit(onSubmitSignIn)()} className={buttonStyle(loading || !isValid)}>
-        <ButtonText className={buttonTextStyle(loading || !isValid)}>{t('signin')}</ButtonText>
+      <Button action="secondary" onPress={() => void handleSubmit(onSubmitSignIn)()} className={buttonStyle(!isValid)} isLoading={loading}>
+        <ButtonText className={buttonTextStyle(!isValid)}>{t('signin')}</ButtonText>
       </Button>
     </>
   )

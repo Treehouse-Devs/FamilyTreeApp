@@ -21,6 +21,8 @@ export interface ModalProps {
     text: string
     onPress: () => void
     isDisabled: boolean
+    isLoading?: boolean
+    action?: 'primary' | 'secondary' | 'negative' | 'positive'
   }
 }
 
@@ -66,7 +68,14 @@ export const Modal: React.FC<ModalProps> = ({
               <VStack className="w-full items-center" space="lg">
                 {children}
                 {button && (
-                  <Button key={`btn-${button.isDisabled}`} onPress={button.onPress} className="w-[6rem] mx-4" isDisabled={button.isDisabled}>
+                  <Button
+                    key={`btn-${button.isDisabled}`}
+                    onPress={button.onPress}
+                    className="w-[6rem] mx-4"
+                    isDisabled={button.isDisabled}
+                    isLoading={button.isLoading}
+                    action={button.action ?? 'primary'}
+                  >
                     <ButtonText>{button.text}</ButtonText>
                   </Button>
                 )}

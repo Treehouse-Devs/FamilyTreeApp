@@ -118,5 +118,11 @@
   "light": "Terang",
   "dark": "Gelap",
   "system": "Sistem",
-  "newMember": "Anggota Baru"
+  "newMember": "Anggota Baru",
+  "deleteTree": "Hapus pohon keluarga {{treeName}}?",
+  "deleteTreeDescription": "Menghapus pohon keluarga ini akan menghapus semua anggota yang tergantung pada pohon keluarga ini.",
+  "deleteTreeConfirmation": "Apakah kamu yakin ingin menghapus pohon keluarga {{treeName}}?",
+  "deleteTreeFailed": "Gagal menghapus pohon keluarga. Coba lagi ya!",
+  "deleteTreeSuccess": "Berhasil menghapus pohon keluarga",
+  "deleteTreeButton": "Hapus"
 }
