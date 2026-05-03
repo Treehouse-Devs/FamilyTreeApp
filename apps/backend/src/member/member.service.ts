@@ -1,24 +1,21 @@
-import { BadRequestException, ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common'
-import { DataSource, Repository } from 'typeorm'
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common'
+import { Repository } from 'typeorm'
 import { FamilyMember } from './entities/family-member.entity'
-import { InjectDataSource, InjectRepository } from '@nestjs/typeorm'
+import { InjectRepository } from '@nestjs/typeorm'
 import { FamilyService } from 'src/family/family.service'
-import { CreateFamilyMemberDto, DetailedPersonDto, PatchFamilyMemberDto, UploadMemberImageResponseDto } from '@treely/dto'
-import { FamilyRelationship } from './entities/family-relationship.entity'
+import { CreateFamilyMemberDto, DetailedPersonDto, PatchFamilyMemberDto, PersonDto, UploadMemberImageResponseDto } from '@treely/dto'
 import { StorageService } from 'src/storage/storage.service'
-import { RelationType } from '@treely/dto'
-import type { FlatPersonDto } from '@treely/dto'
+import { mapMemberToPersonDto } from './member.util'
 
 @Injectable()
 export class MemberService {
   constructor(
     @InjectRepository(FamilyMember) private readonly memberRepository: Repository<FamilyMember>,
-    @InjectDataSource() private dataSource: DataSource,
     private familyService: FamilyService,
     private storageService: StorageService,
   ) { }
 
-  async create(createFamilyMemberDto: CreateFamilyMemberDto, familyId: string, userId: string): Promise<FlatPersonDto> {
+  async create(createFamilyMemberDto: CreateFamilyMemberDto, familyId: string, userId: string): Promise<PersonDto> {
     const family = await this.familyService.findOne(familyId, userId)
     if (!family) {
       throw new ForbiddenException('This family is not belong to this user')
@@ -26,116 +23,78 @@ export class MemberService {
 
     const { name, gender, birthDate, deathDate, isBloodRelated, spouseId, fatherId, motherId } = createFamilyMemberDto
 
-    return await this.dataSource.transaction(async (manager) => {
+    return await this.memberRepository.manager.transaction(async (manager) => {
       const member = manager.create(FamilyMember, {
         familyId,
         fullName: name,
-        gender,
-        birthDate: new Date(birthDate),
-        deathDate: deathDate ? new Date(deathDate) : undefined,
-        isBloodRelated,
+        gender: gender,
+        birthDate,
+        deathDate,
+        isBloodRelated: isBloodRelated,
+        fatherId: fatherId ?? null,
+        motherId: motherId ?? null,
+        spouseId: spouseId ?? null,
       })
-      await manager.save(FamilyMember, member)
 
-      const memberCount = await manager.count(FamilyMember, { where: { familyId } })
-      const hasRelationship = spouseId || fatherId || motherId
-      if (memberCount > 1 && !hasRelationship) {
-        throw new BadRequestException('Relationship must exist')
-      }
+      await manager.save(member)
 
+      // Sync the other side of the spouse link
       if (spouseId) {
-        const spouse = await manager.findOne(FamilyMember, { where: { id: spouseId, familyId } })
-        if (!spouse) {
-          throw new NotFoundException('Spouse member not found')
-        }
-        const relationship = manager.create(FamilyRelationship, {
-          familyId,
-          sourceMemberId: spouseId,
-          targetMemberId: member.id,
-          relationType: RelationType.SPOUSE,
-        })
-        await manager.save(FamilyRelationship, relationship)
+        await manager.update(FamilyMember, { id: spouseId }, { spouseId: member.id })
       }
 
-      if (fatherId) {
-        const father = await manager.findOne(FamilyMember, { where: { id: fatherId, familyId } })
-        if (!father) {
-          throw new NotFoundException('Father member not found')
-        }
-        const relationship = manager.create(FamilyRelationship, {
-          familyId,
-          sourceMemberId: fatherId,
-          targetMemberId: member.id,
-          relationType: RelationType.CHILD,
-        })
-        await manager.save(FamilyRelationship, relationship)
-      }
-
-      if (motherId) {
-        const mother = await manager.findOne(FamilyMember, { where: { id: motherId, familyId } })
-        if (!mother) {
-          throw new NotFoundException('Mother member not found')
-        }
-        const relationship = manager.create(FamilyRelationship, {
-          familyId,
-          sourceMemberId: motherId,
-          targetMemberId: member.id,
-          relationType: RelationType.CHILD,
-        })
-        await manager.save(FamilyRelationship, relationship)
-      }
-
-      return {
-        id: member.id,
-        name: member.fullName,
-        birthDate: new Date(member.birthDate).getTime(),
-        isBloodRelated: member.isBloodRelated,
-        gender: member.gender,
-        deathDate: member.deathDate ? new Date(member.deathDate).getTime() : undefined,
-        spouseId,
-        fatherId,
-        motherId,
-        imageThumbnailUrl: member.imageThumbnailUrl ?? undefined,
-      }
+      return mapMemberToPersonDto(member)
     })
   }
 
-  async findOne(id: string, userId: string): Promise<FamilyMember | null> {
-    const member = await this.memberRepository.findOneBy({ id })
-    if (!member) {
-      throw new NotFoundException('Member not found')
-    }
-
-    const family = await this.familyService.findOne(member?.familyId ?? '', userId)
+  async findOne(treeId: string, personId: string, userId: string): Promise<FamilyMember> {
+    const family = await this.familyService.findOne(treeId, userId)
     if (!family) {
       throw new ForbiddenException('This family is not belong to this user')
+    }
+
+    const member = await this.memberRepository.findOneBy({ id: personId })
+    if (!member) {
+      throw new NotFoundException('Member not found')
     }
 
     return member
   }
 
-  async delete(id: string, userId: string): Promise<void> {
-    await this.findOne(id, userId)
+  async delete(treeId: string, personId: string, userId: string): Promise<void> {
+    const member = await this.findOne(treeId, personId, userId)
 
-    await this.memberRepository.softDelete(id)
+    await this.memberRepository.manager.transaction(async (manager) => {
+      // Unlink spouse before soft delete
+      if (member.spouseId) {
+        await manager.update(FamilyMember, { id: member.spouseId }, { spouseId: null })
+      }
+
+      // Orphan children — nullify their parent references pointing to this member
+      await manager.update(FamilyMember, { fatherId: member.id }, { fatherId: null })
+      await manager.update(FamilyMember, { motherId: member.id }, { motherId: null })
+
+      await manager.softDelete(FamilyMember, member.id)
+    })
   }
 
   async findOneDetailed(treeId: string, personId: string, userId: string): Promise<DetailedPersonDto> {
-    // Verify tree ownership
-    await this.familyService.findOne(treeId, userId)
+    const member = await this.findOne(treeId, personId, userId)
 
-    const member = await this.memberRepository.findOne({ where: { id: personId, familyId: treeId } })
-    if (!member) {
-      throw new NotFoundException('Member not found')
-    }
+    const children = await this.memberRepository.find({
+      where: [{ fatherId: personId }, { motherId: personId }],
+    })
 
     return {
       id: member.id,
       name: member.fullName,
-      birthDate: member.birthDate ? new Date(member.birthDate).getTime() : 0,
+      spouseId: member.spouseId ?? undefined,
+      spouse: member.spouse ? mapMemberToPersonDto(member.spouse) : undefined,
+      children: children.map(mapMemberToPersonDto),
+      birthDate: member.birthDate ? member.birthDate : 0,
       isBloodRelated: member.isBloodRelated,
       gender: member.gender,
-      deathDate: member.deathDate ? new Date(member.deathDate).getTime() : undefined,
+      deathDate: member.deathDate ? member.deathDate : undefined,
       imageThumbnailUrl: member.imageThumbnailUrl ?? undefined,
       fullImageUrl: member.fullImageUrl ?? undefined,
       location: (member.nationality || member.hometown || member.domicile)
@@ -166,18 +125,13 @@ export class MemberService {
     dto: PatchFamilyMemberDto,
     userId: string,
   ): Promise<DetailedPersonDto> {
-    await this.familyService.findOne(treeId, userId)
-
-    const member = await this.memberRepository.findOne({ where: { id: personId, familyId: treeId } })
-    if (!member) {
-      throw new ConflictException('Member not found')
-    }
+    await this.findOne(treeId, personId, userId)
 
     await this.memberRepository.update(personId, {
       ...(dto.name && { fullName: dto.name }),
       ...(dto.gender !== undefined && { gender: dto.gender }),
-      ...(dto.birthDate !== undefined && { birthDate: new Date(dto.birthDate) }),
-      ...(dto.deathDate !== undefined && { deathDate: new Date(dto.deathDate) }),
+      ...(dto.birthDate !== undefined && { birthDate: dto.birthDate }),
+      ...(dto.deathDate !== undefined && { deathDate: dto.deathDate }),
       ...(dto.location?.nationality !== undefined && { nationality: dto.location.nationality }),
       ...(dto.location?.hometown !== undefined && { hometown: dto.location.hometown }),
       ...(dto.location?.domicile !== undefined && { domicile: dto.location.domicile }),
@@ -196,12 +150,7 @@ export class MemberService {
     file: Express.Multer.File,
     userId: string,
   ): Promise<UploadMemberImageResponseDto> {
-    await this.familyService.findOne(treeId, userId)
-
-    const member = await this.memberRepository.findOne({ where: { id: personId, familyId: treeId } })
-    if (!member) {
-      throw new ConflictException('Member not found')
-    }
+    await this.findOne(treeId, personId, userId)
 
     const result = await this.storageService.uploadMemberImage(personId, file)
 

@@ -1,6 +1,6 @@
 import { Gender } from '@treely/dto/index'
 import { Family } from '../../family/entities/family.entity'
-import { Column, CreateDateColumn, DeleteDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm'
+import { Column, CreateDateColumn, DeleteDateColumn, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm'
 
 @Entity('family_members')
 export class FamilyMember {
@@ -14,17 +14,38 @@ export class FamilyMember {
   @Column()
   familyId!: string
 
+  @Column({ nullable: true })
+  fatherId!: string | null
+
+  @ManyToOne(() => FamilyMember, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'fatherId' })
+  father!: FamilyMember | null
+
+  @Column({ nullable: true })
+  motherId!: string | null
+
+  @ManyToOne(() => FamilyMember, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'motherId' })
+  mother!: FamilyMember | null
+
+  @Column({ nullable: true })
+  spouseId!: string | null
+
+  @OneToOne(() => FamilyMember, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'spouseId' })
+  spouse!: FamilyMember | null
+
   @Column({ type: 'varchar', length: 100, nullable: false })
   fullName!: string
 
   @Column({ type: 'enum', enum: Gender, nullable: false })
   gender!: Gender
 
-  @Column({ type: 'date', nullable: false })
-  birthDate!: Date
+  @Column({ type: 'bigint', nullable: false })
+  birthDate!: number
 
-  @Column({ type: 'date', nullable: true })
-  deathDate!: Date
+  @Column({ type: 'bigint', nullable: true })
+  deathDate!: number
 
   @Column({ type: 'boolean', nullable: false, default: false })
   isBloodRelated!: boolean
