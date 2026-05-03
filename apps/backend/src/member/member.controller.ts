@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Get, Param, Patch, Post, UploadedFile, UseGuards, UseInterceptors, UsePipes, ValidationPipe } from '@nestjs/common'
+import { BadRequestException, Body, Controller, Delete, Get, Param, Patch, Post, UploadedFile, UseGuards, UseInterceptors, UsePipes, ValidationPipe } from '@nestjs/common'
 import { FileInterceptor } from '@nestjs/platform-express'
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard'
 import { GetUser } from 'src/auth/get-user.decorator'
@@ -44,6 +44,15 @@ export class MemberController {
     const person = await this.memberService.updateDetailed(id, personId, dto, user.uid)
 
     return { person }
+  }
+
+  @Delete(':id/person/:personId')
+  async deletePerson(
+    @Param('id') id: string,
+    @Param('personId') personId: string,
+    @GetUser() user: UserFromToken,
+  ): Promise<void> {
+    await this.memberService.delete(id, personId, user.uid)
   }
 
   @Post(':id/person/:personId/image')
