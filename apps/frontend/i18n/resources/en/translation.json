@@ -118,5 +118,11 @@
   "light": "Light",
   "dark": "Dark",
   "system": "System",
-  "newMember": "New Member"
+  "newMember": "New Member",
+  "deleteTree": "Delete family tree {{treeName}}?",
+  "deleteTreeDescription": "Deleting this family tree will also remove all members dependent on this family tree.",
+  "deleteTreeConfirmation": "Are you sure you want to delete this family tree {{treeName}}?",
+  "deleteTreeFailed": "Failed to delete family tree. Please try again!",
+  "deleteTreeSuccess": "Successfully deleted family tree",
+  "deleteTreeButton": "Delete"
 }

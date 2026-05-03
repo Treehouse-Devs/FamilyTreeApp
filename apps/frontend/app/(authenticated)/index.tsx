@@ -182,7 +182,8 @@ const App = () => {
           button={{
             text: t('create'),
             onPress: onCreateTreePressed,
-            isDisabled: !newTreeName || newTreeName.trim().length === 0 || isCreateTreeModalLoading,
+            isDisabled: !newTreeName || newTreeName.trim().length === 0,
+            isLoading: isCreateTreeModalLoading,
           }}
         >
           <VStack className="w-full items-center px-4" space="lg">
