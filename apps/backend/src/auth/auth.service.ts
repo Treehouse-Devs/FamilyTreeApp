@@ -106,7 +106,7 @@ export class AuthService {
         displayName: userRecord.displayName,
       }
 
-      const { accessToken, expiredAt, refreshToken, refreshTokenExpiredAt } = this.tokenService.createJwtTokens(tokenPayload)
+      const { accessToken, expiredAt, refreshToken, refreshTokenExpiredAt } = await this.tokenService.createJwtTokens(tokenPayload)
       const profile = await this.profileService.getProfile(tokenPayload)
 
       return {
@@ -180,7 +180,7 @@ export class AuthService {
         displayName: userRecord.displayName,
       }
 
-      const { accessToken, expiredAt, refreshToken, refreshTokenExpiredAt } = this.tokenService.createJwtTokens(tokenPayload)
+      const { accessToken, expiredAt, refreshToken, refreshTokenExpiredAt } = await this.tokenService.createJwtTokens(tokenPayload)
       const profile = await this.profileService.getProfile(tokenPayload)
 
       return {
@@ -216,7 +216,7 @@ export class AuthService {
   }
 
   async refreshToken(uid: string, refreshToken: string): Promise<LoginResponseDto> {
-    const stored = this.tokenService.validateRefreshToken(uid, refreshToken)
+    const { refreshToken: newRefreshToken, refreshTokenExpiredAt } = await this.tokenService.rotateRefreshToken(uid, refreshToken)
     const userRecord = await this.firebaseService.getUser(uid)
     const tokenPayload: UserFromToken = {
       email: userRecord.email || '',
@@ -224,13 +224,14 @@ export class AuthService {
       displayName: userRecord.displayName,
     }
 
-    const { accessToken, expiredAt } = this.tokenService.createJwtTokens(tokenPayload)
+    const { accessToken, expiredAt } = this.tokenService.signAccessToken(tokenPayload)
     const profile = await this.profileService.getProfile(tokenPayload)
 
     return {
       accessToken,
       expiredAt,
-      refreshTokenExpiredAt: stored.expiredAt,
+      refreshToken: newRefreshToken,
+      refreshTokenExpiredAt,
       user: this.buildUserResponse(userRecord, profile),
       message: 'Token refreshed successfully',
     } as LoginResponseDto
@@ -239,7 +240,7 @@ export class AuthService {
   async deleteUser(uid: string) {
     try {
       await this.firebaseService.deleteUser(uid)
-      this.tokenService.deleteRefreshToken(uid)
+      await this.tokenService.revokeAllForUser(uid)
 
       return { message: 'User deleted successfully' }
     } catch (error: unknown) {
