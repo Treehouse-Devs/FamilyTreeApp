@@ -1,0 +1,119 @@
+name: Frontend Release (Android)
+
+# Builds a signed Android App Bundle (.aab) and a universal APK for
+# apps/frontend, then attaches them to a GitHub Release.
+#
+# Triggers:
+#   * Pushing a tag like `frontend-v1.2.3` cuts a release for that tag.
+#   * Manual `workflow_dispatch` lets you build on demand without a tag.
+#
+# Required repository secrets (already configured):
+#   KEYSTORE_BASE64  - base64-encoded release keystore (.jks/.keystore)
+#   KEY_ALIAS        - key alias inside the keystore
+#   KEY_PASSWORD     - password for the key
+#   STORE_PASSWORD   - password for the keystore
+
+on:
+  push:
+    tags:
+      - 'frontend-v*'
+  workflow_dispatch:
+    inputs:
+      build_type:
+        description: 'Artifact(s) to build'
+        required: true
+        default: 'both'
+        type: choice
+        options:
+          - both
+          - aab
+          - apk
+
+permissions:
+  contents: write
+
+defaults:
+  run:
+    working-directory: apps/frontend
+
+jobs:
+  build:
+    name: Build signed Android app
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: yarn
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      # Install from the monorepo root so workspace deps resolve.
+      - name: Install dependencies
+        working-directory: .
+        run: yarn install --frozen-lockfile
+
+      - name: Generate native Android project
+        run: yarn expo prebuild --platform android --no-install
+
+      - name: Decode release keystore
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+        run: |
+          echo "$KEYSTORE_BASE64" | base64 --decode > android/app/release.keystore
+
+      - name: Configure Gradle signing properties
+        env:
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
+        run: |
+          {
+            echo "TREELY_UPLOAD_STORE_FILE=release.keystore"
+            echo "TREELY_UPLOAD_KEY_ALIAS=$KEY_ALIAS"
+            echo "TREELY_UPLOAD_KEY_PASSWORD=$KEY_PASSWORD"
+            echo "TREELY_UPLOAD_STORE_PASSWORD=$STORE_PASSWORD"
+          } >> android/gradle.properties
+
+      - name: Build App Bundle (.aab)
+        if: ${{ github.event_name == 'push' || inputs.build_type == 'both' || inputs.build_type == 'aab' }}
+        working-directory: apps/frontend/android
+        run: ./gradlew bundleRelease --no-daemon
+
+      - name: Build universal APK (.apk)
+        if: ${{ github.event_name == 'push' || inputs.build_type == 'both' || inputs.build_type == 'apk' }}
+        working-directory: apps/frontend/android
+        run: ./gradlew assembleRelease --no-daemon
+
+      - name: Collect artifacts
+        run: |
+          mkdir -p ../../release-artifacts
+          find android/app/build/outputs -type f \( -name '*.aab' -o -name '*.apk' \) \
+            -exec cp {} ../../release-artifacts/ \;
+          ls -la ../../release-artifacts
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-android-${{ github.run_number }}
+          path: release-artifacts/*
+          if-no-files-found: error
+
+      - name: Publish GitHub Release
+        if: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') }}
+        uses: softprops/action-gh-release@v2
+        with:
+          files: apps/frontend/release-artifacts/*
+          generate_release_notes: true

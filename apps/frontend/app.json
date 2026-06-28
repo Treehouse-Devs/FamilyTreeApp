@@ -30,7 +30,8 @@
     "plugins": [
       "expo-localization",
       "expo-router",
-      "expo-font"
+      "expo-font",
+      "./plugins/withAndroidSigning.js"
     ]
   }
 }
