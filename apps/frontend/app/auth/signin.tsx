@@ -51,7 +51,7 @@ export default function SignInScreen() {
     const res = await api.login(data.email, data.password)
     if (res?.accessToken) {
       console.log('Login successful:', res)
-      login(res.user, res.accessToken, res.refreshToken)
+      login(res.user, res.accessToken, res.refreshToken, res.expiredAt)
       router.replace('/(authenticated)')
     } else if (error) {
       console.error('Login failed:', error)
