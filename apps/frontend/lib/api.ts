@@ -45,16 +45,18 @@ async function performTokenRefresh(): Promise<string | null> {
   // Without a uid + refresh token there is nothing to refresh with.
   if (!uid || !refreshToken) return null
 
-  const { data } = await refreshClient.post<{ accessToken: string, expiredAt?: number }>(
+  const { data } = await refreshClient.post<{ accessToken: string, expiredAt?: number, refreshToken?: string }>(
     '/auth/refresh-token',
     { uid, refreshToken },
   )
 
-  // The backend does not rotate the refresh token on refresh, so we keep the
-  // existing one and only swap in the new access token + expiry.
+  // The backend rotates the refresh token on every refresh and returns a new
+  // one, invalidating the old token. We must persist the rotated token so the
+  // next refresh succeeds; fall back to the existing one only if the response
+  // omits it.
   setTokens({
     accessToken: data.accessToken,
-    refreshToken,
+    refreshToken: data.refreshToken ?? refreshToken,
     expiredAt: data.expiredAt ?? null,
   })
 
