@@ -3157,6 +3157,11 @@
   dependencies:
     tslib "2.8.1"
 
+"@nestjs/throttler@^6.4.0":
+  version "6.5.0"
+  resolved "https://registry.yarnpkg.com/@nestjs/throttler/-/throttler-6.5.0.tgz#1ee550a258c4ae697d3978f2c8932adff927439e"
+  integrity sha512-9j0ZRfH0QE1qyrj9JjIRDz5gQLPqq9yVC2nHsrosDVAfI5HHw08/aUAWx9DZLSdQf4HDkmhTTEGLrRFHENvchQ==
+
 "@nestjs/typeorm@^11.0.0":
   version "11.0.0"
   resolved "https://registry.npmjs.org/@nestjs/typeorm/-/typeorm-11.0.0.tgz"
@@ -8544,6 +8549,11 @@ expo-router@6.0.23:
     shallowequal "^1.1.0"
     use-latest-callback "^0.2.1"
     vaul "^1.1.2"
+
+expo-secure-store@~15.0.7:
+  version "15.0.8"
+  resolved "https://registry.yarnpkg.com/expo-secure-store/-/expo-secure-store-15.0.8.tgz#678065599bb76061b5a85b15b9426bf7a11089ae"
+  integrity sha512-lHnzvRajBu4u+P99+0GEMijQMFCOYpWRO4dWsXSuMt77+THPIGjzNvVKrGSl6mMrLsfVaKL8BpwYZLGlgA+zAw==
 
 expo-server@^1.0.5:
   version "1.0.5"
@@ -15774,8 +15784,3 @@ zustand@^5.0.5:
   version "5.0.6"
   resolved "https://registry.npmjs.org/zustand/-/zustand-5.0.6.tgz"
   integrity sha512-ihAqNeUVhe0MAD+X8M5UzqyZ9k3FFZLBTtqo6JLPwV53cbRB/mJwBI0PxcIgqhBBHlEs8G45OTDTMq3gNcLq3A==
-
-"expo-secure-store@~15.0.7":
-  version "15.0.8"
-  resolved "https://registry.yarnpkg.com/expo-secure-store/-/expo-secure-store-15.0.8.tgz#678065599bb76061b5a85b15b9426bf7a11089ae"
-  integrity sha512-lHnzvRajBu4u+P99+0GEMijQMFCOYpWRO4dWsXSuMt77+THPIGjzNvVKrGSl6mMrLsfVaKL8BpwYZLGlgA+zAw==
