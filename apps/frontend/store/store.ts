@@ -10,6 +10,7 @@ import type { TreeSlice } from './slices/tree/types'
 import { createTreeSlice } from './slices/tree/slice'
 import type { UserSlice } from './slices/user/types'
 import { createUserSlice } from './slices/user/slice'
+import { loadTokens } from '@/lib/tokenStorage'
 
 // Add hydration state to the store
 interface HydrationState {
@@ -47,18 +48,33 @@ export const useStore = create<StoreState>()(
           await AsyncStorage.removeItem(name)
         },
       },
-      // Only persist certain fields
+      // Only persist non-sensitive fields here. Tokens are deliberately NOT
+      // persisted via AsyncStorage — they live in the OS keystore (see
+      // lib/tokenStorage) and are rehydrated separately below.
       partialize: state => ({
         user: state.user,
-        accessToken: state.accessToken,
         hasSeenWelcome: state.hasSeenWelcome,
         colorMode: state.colorMode,
       } as unknown as StoreState),
-      // Set hydration state when rehydration is complete
-      onRehydrateStorage: () => (state) => {
-        if (state && state.hydrated === false) {
-          state.setHydrated(true)
-        }
+      // After AsyncStorage rehydration, pull the tokens from secure storage
+      // into the in-memory store, then mark hydration complete.
+      onRehydrateStorage: () => () => {
+        void (async () => {
+          try {
+            const tokens = await loadTokens()
+            if (tokens) {
+              useStore.setState({
+                accessToken: tokens.accessToken,
+                refreshToken: tokens.refreshToken,
+                expiredAt: tokens.expiredAt,
+              })
+            }
+          } catch (error) {
+            console.error('Failed to load tokens from secure storage:', error)
+          } finally {
+            useStore.getState().setHydrated(true)
+          }
+        })()
       },
     },
   ),
