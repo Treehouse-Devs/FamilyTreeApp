@@ -13,12 +13,15 @@ import { MailerModule } from './mailer/mailer.module'
 import { FamilyModule } from './family/family.module'
 import { MemberModule } from './member/member.module'
 import { ProfileModule } from './profile/profile.module'
+import { HealthModule } from './health/health.module'
+import { validateEnvironment } from './config/env.validation'
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
       load: [configuration],
+      validate: validateEnvironment,
     }),
     // Global baseline rate limit: 100 requests / minute per client.
     // Sensitive auth routes tighten this further with @Throttle().
@@ -38,6 +41,7 @@ import { ProfileModule } from './profile/profile.module'
     ProfileModule,
     AuthModule,
     MailerModule,
+    HealthModule,
   ],
   controllers: [],
   providers: [

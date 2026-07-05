@@ -1,4 +1,4 @@
-import { MigrationInterface, QueryRunner } from 'typeorm'
+import type { MigrationInterface, QueryRunner } from 'typeorm'
 
 export class AddLanguageAndProfileNotNull1775347200000 implements MigrationInterface {
   name = 'AddLanguageAndProfileNotNull1775347200000'

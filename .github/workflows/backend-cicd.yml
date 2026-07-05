@@ -1,0 +1,171 @@
+name: Backend CI/CD
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - apps/backend/**
+      - packages/dto/**
+      - .dockerignore
+      - package.json
+      - yarn.lock
+      - tsconfig.json
+      - eslint.config.js
+      - .github/workflows/backend-cicd.yml
+  push:
+    branches: [main]
+    paths:
+      - apps/backend/**
+      - packages/dto/**
+      - .dockerignore
+      - package.json
+      - yarn.lock
+      - tsconfig.json
+      - eslint.config.js
+      - .github/workflows/backend-cicd.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: backend-${{ github.event_name == 'pull_request' && github.event.pull_request.number || 'production' }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  IMAGE_REPOSITORY: familytree/backend
+
+jobs:
+  verify:
+    name: Verify backend release
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine@sha256:97ff59a4e30e08d1c11bdcd9455e7832368c0572b576c9092cde2df4ae5552a3
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: familytree
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d familytree"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      NODE_ENV: test
+      DB_HOST: 127.0.0.1
+      DB_PORT: 5432
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+      DB_NAME: familytree
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22.23.1
+          cache: yarn
+      - run: yarn install --frozen-lockfile
+      - name: Lint
+        run: yarn eslint "apps/backend/{src,libs,test}/**/*.ts"
+      - name: Typecheck
+        run: yarn tsc -p apps/backend/tsconfig.check.json
+      - name: Unit tests
+        run: yarn workspace backend test --runInBand
+      - name: Build application and migrations
+        run: yarn workspace backend build
+      - name: Apply migrations to an empty PostgreSQL database
+        run: yarn workspace backend migration:run:prod
+      - name: Validate Compose configuration
+        run: |
+          cp apps/backend/.env.example apps/backend/.env
+          BACKEND_IMAGE=example.invalid/familytree/backend:test \
+            docker compose -f apps/backend/docker-compose.yml config --quiet
+      - name: Build production image
+        run: docker build -f apps/backend/Dockerfile -t backend:test .
+
+  deploy:
+    name: Deploy approved release
+    needs: verify
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    runs-on: ubuntu-latest
+    environment: production
+    permissions:
+      contents: read
+    env:
+      VPS_HOST: ${{ vars.VPS_HOST }}
+      VPS_PORT: ${{ vars.VPS_PORT }}
+      VPS_USER: ${{ vars.VPS_USER }}
+      DEPLOY_DIR: ${{ vars.DEPLOY_DIR }}
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - name: Build immutable image archive
+        run: |
+          release_image="$IMAGE_REPOSITORY:$GITHUB_SHA"
+          docker build -f apps/backend/Dockerfile -t "$release_image" .
+          docker save "$release_image" | gzip -1 > backend-image.tar.gz
+          sha256sum backend-image.tar.gz > backend-image.tar.gz.sha256
+          echo "RELEASE_IMAGE=$release_image" >> "$GITHUB_ENV"
+      - name: Configure pinned SSH credentials
+        env:
+          VPS_SSH_PRIVATE_KEY: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
+          VPS_KNOWN_HOSTS: ${{ secrets.VPS_KNOWN_HOSTS }}
+        run: |
+          test -n "$VPS_HOST"
+          test -n "$VPS_PORT"
+          test -n "$VPS_USER"
+          test -n "$DEPLOY_DIR"
+          test -n "$VPS_SSH_PRIVATE_KEY"
+          test -n "$VPS_KNOWN_HOSTS"
+          install -m 0700 -d "$HOME/.ssh"
+          printf '%s\n' "$VPS_SSH_PRIVATE_KEY" > "$HOME/.ssh/id_ed25519"
+          chmod 0600 "$HOME/.ssh/id_ed25519"
+          printf '%s\n' "$VPS_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
+          chmod 0644 "$HOME/.ssh/known_hosts"
+          ssh-keygen -y -f "$HOME/.ssh/id_ed25519" >/dev/null
+      - name: Install reviewed deployment files
+        run: |
+          scp -P "$VPS_PORT" \
+            -i "$HOME/.ssh/id_ed25519" \
+            -o BatchMode=yes \
+            -o ConnectTimeout=15 \
+            -o IdentitiesOnly=yes \
+            -o StrictHostKeyChecking=yes \
+            backend-image.tar.gz backend-image.tar.gz.sha256 \
+            apps/backend/docker-compose.yml apps/backend/scripts/deploy-backend.sh \
+            "$VPS_USER@$VPS_HOST:/tmp/"
+          ssh -p "$VPS_PORT" \
+            -i "$HOME/.ssh/id_ed25519" \
+            -o BatchMode=yes \
+            -o ConnectTimeout=15 \
+            -o IdentitiesOnly=yes \
+            -o StrictHostKeyChecking=yes \
+            "$VPS_USER@$VPS_HOST" \
+            "sh -s -- '$DEPLOY_DIR'" <<'REMOTE'
+          set -eu
+          deploy_dir=$1
+          install -d "$deploy_dir/scripts"
+          install -m 0644 /tmp/docker-compose.yml "$deploy_dir/docker-compose.yml"
+          install -m 0755 /tmp/deploy-backend.sh "$deploy_dir/scripts/deploy-backend.sh"
+          test -f "$deploy_dir/.env"
+          REMOTE
+      - name: Load image and deploy
+        run: |
+          ssh -p "$VPS_PORT" \
+            -i "$HOME/.ssh/id_ed25519" \
+            -o BatchMode=yes \
+            -o ConnectTimeout=15 \
+            -o IdentitiesOnly=yes \
+            -o StrictHostKeyChecking=yes \
+            "$VPS_USER@$VPS_HOST" \
+            "sh -s -- '$DEPLOY_DIR' '$RELEASE_IMAGE'" <<'REMOTE'
+          set -eu
+          deploy_dir=$1
+          release_image=$2
+          "$deploy_dir/scripts/deploy-backend.sh" \
+            "$deploy_dir" "$release_image" /tmp/backend-image.tar.gz
+          curl --fail --silent --show-error \
+            --retry 5 --retry-delay 2 --retry-connrefused \
+            http://127.0.0.1:3001/health/ready
+          REMOTE

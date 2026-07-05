@@ -1,9 +1,11 @@
-import { Test, TestingModule } from '@nestjs/testing'
+import type { TestingModule } from '@nestjs/testing'
+import { Test } from '@nestjs/testing'
 import { MemberController } from './member.controller'
 import { MemberService } from './member.service'
 import { BadRequestException } from '@nestjs/common'
-import { Gender, DetailedPersonDto, UploadMemberImageResponseDto } from '@treely/dto/index'
-import { UserFromToken } from 'src/auth/auth.types'
+import type { DetailedPersonDto, UploadMemberImageResponseDto } from '@treely/dto/index'
+import { Gender } from '@treely/dto/index'
+import type { UserFromToken } from 'src/auth/auth.types'
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 

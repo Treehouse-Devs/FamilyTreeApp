@@ -1,7 +1,10 @@
 import { DataSource } from 'typeorm'
 import * as dotenv from 'dotenv'
+import { join } from 'path'
 
 dotenv.config()
+
+const isCompiled = __filename.endsWith('.js')
 
 export default new DataSource({
   type: 'postgres',
@@ -11,7 +14,7 @@ export default new DataSource({
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
   synchronize: false,
-  entities: ['src/**/entities/*.entity{.ts,.js}'],
-  migrations: ['src/migrations/*{.ts,.js}'],
-  logging: true,
+  entities: isCompiled ? [] : [join(__dirname, '..', '**', 'entities', '*.entity.ts')],
+  migrations: [join(__dirname, '..', 'migrations', isCompiled ? '*.js' : '*.ts')],
+  logging: process.env.NODE_ENV !== 'production',
 })

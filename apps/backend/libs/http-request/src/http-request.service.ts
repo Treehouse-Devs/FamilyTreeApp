@@ -8,13 +8,12 @@ export class HttpRequestService {
       const response = await axios.post(url, data, {
         headers: { 'Content-Type': 'application/json' },
       })
+
       return response
-    }
-    catch (error: unknown) {
+    } catch (error: unknown) {
       if (error instanceof AxiosError) {
         throw error.response?.data
-      }
-      else {
+      } else {
         throw error
       }
     }

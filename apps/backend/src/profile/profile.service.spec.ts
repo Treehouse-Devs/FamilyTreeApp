@@ -89,45 +89,11 @@ describe('ProfileService', () => {
       })
     })
 
-    it('should create a new user and return profile DTO when user does not exist', async () => {
-      const userFromToken = makeUserFromToken()
-      const createdUser = makeUser()
+    it('should throw NotFoundException when the profile does not exist', async () => {
       userRepository.findOneBy.mockResolvedValue(null)
-      userRepository.create.mockReturnValue(createdUser)
-      userRepository.save.mockResolvedValue(createdUser)
 
-      const result = await service.getProfile(userFromToken)
-
-      expect(userRepository.create).toHaveBeenCalledWith({
-        firebaseUid: userFromToken.uid,
-        name: userFromToken.displayName,
-        birthDate: '0',
-        gender: Gender.MALE,
-      })
-      expect(userRepository.save).toHaveBeenCalledWith(createdUser)
-      expect(result).toEqual({
-        id: createdUser.id,
-        firebaseUid: createdUser.firebaseUid,
-        name: createdUser.name,
-        email: 'john@example.com',
-        avatarUrl: createdUser.avatarUrl,
-        birthDate: 0,
-        gender: createdUser.gender,
-        language: createdUser.language,
-      })
-    })
-
-    it('should fall back to empty string when displayName is undefined', async () => {
-      const userFromToken = makeUserFromToken({ displayName: undefined })
-      const createdUser = makeUser({ name: '' })
-      userRepository.findOneBy.mockResolvedValue(null)
-      userRepository.create.mockReturnValue(createdUser)
-      userRepository.save.mockResolvedValue(createdUser)
-
-      await service.getProfile(userFromToken)
-
-      expect(userRepository.create).toHaveBeenCalledWith(
-        expect.objectContaining({ name: '' }),
+      await expect(service.getProfile(makeUserFromToken())).rejects.toThrow(
+        new NotFoundException('Profile not found'),
       )
     })
 

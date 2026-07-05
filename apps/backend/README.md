@@ -59,16 +59,11 @@ $ yarn run test:cov
 
 ## Deployment
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+Production runs with Docker Compose on one Linux VPS. GitHub Actions builds the image, exports a compressed archive, copies it to the VPS over pinned, key-only SSH, and loads it into the VPS's local Docker image store. A container registry is not required.
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+Each release is identified by `familytree/backend:<full-git-sha>`. The VPS verifies the transferred archive checksum, loads the image, runs migrations, replaces the backend only after migrations succeed, and checks readiness. GitHub then verifies `http://127.0.0.1:3001/health/ready` over SSH. The previous healthy image remains locally available for application rollback.
 
-```bash
-$ yarn install -g @nestjs/mau
-$ mau deploy
-```
-
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+Do not manually prune the current or previous healthy backend image. Monitor disk usage because registry-free deployments retain rollback images on the VM.
 
 ## Resources
 

@@ -1,0 +1,44 @@
+# Version control & repo metadata
+.git
+.github
+.claude
+.agents
+.clinerules
+.editorconfig
+.gitignore
+
+# Node build artifacts (installed/built fresh inside the image)
+**/node_modules
+**/.turbo
+**/dist
+**/build
+**/coverage
+**/.expo
+
+# Tests are not needed in the image
+**/test
+
+# Logs & scratch
+**/*.log
+tmp
+
+# Env files are never baked into the image (compose provides env at runtime)
+.env
+**/.env
+**/.env.*
+
+# Runtime data (mounted as a named volume in compose)
+apps/backend/uploads
+
+# Frontend is a separate app (Expo) — not part of the backend image
+apps/frontend
+
+# Docs / non-build sources
+docs
+README.md
+scripts
+utils
+eslint.config.js
+
+# OS noise
+**/.DS_Store
