@@ -1,6 +1,7 @@
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common'
 import { Repository } from 'typeorm'
 import { FamilyMember } from './entities/family-member.entity'
+import { Family } from 'src/family/entities/family.entity'
 import { InjectRepository } from '@nestjs/typeorm'
 import { FamilyService } from 'src/family/family.service'
 import { CreateFamilyMemberDto, DetailedPersonDto, PatchFamilyMemberDto, PersonDto, UploadMemberImageResponseDto } from '@treely/dto'
@@ -74,6 +75,10 @@ export class MemberService {
       // Orphan children — nullify their parent references pointing to this member
       await manager.update(FamilyMember, { fatherId: member.id }, { fatherId: null })
       await manager.update(FamilyMember, { motherId: member.id }, { motherId: null })
+
+      // If this member was the family's designated root, clear it so getTree's fallback
+      // picks a new top-level root (e.g. one of the now-orphaned children).
+      await manager.update(Family, { id: member.familyId, rootId: member.id }, { rootId: null })
 
       await manager.softDelete(FamilyMember, member.id)
     })
