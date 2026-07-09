@@ -34,7 +34,7 @@ describe('validateFamilyGraph', () => {
     expect(issues[0].personIds.sort()).toEqual(['A', 'B'])
   })
 
-  it('flags DAG_CHILD_COLLISION when both partners have their own ancestry', () => {
+  it('does NOT error on a converging-lineage couple (now drawable by the generation layout)', () => {
     const persons = [
       p({ id: 'PF' }),
       p({ id: 'PM' }),
@@ -43,33 +43,7 @@ describe('validateFamilyGraph', () => {
       p({ id: 'C', fatherId: 'F', motherId: 'M' }),
     ]
     const issues = validateFamilyGraph(persons, 'PF')
-    const dag = issues.find(i => i.code === 'DAG_CHILD_COLLISION')
-    expect(dag).toBeDefined()
-    expect(dag!.level).toBe('error')
-    expect(dag!.personIds).toEqual(expect.arrayContaining(['F', 'M', 'C']))
-  })
-
-  it('reports DAG_CHILD_COLLISION once per couple even with several shared children', () => {
-    const persons = [
-      p({ id: 'PF' }),
-      p({ id: 'PM' }),
-      p({ id: 'F', fatherId: 'PF', spouseId: 'M' }),
-      p({ id: 'M', motherId: 'PM', spouseId: 'F', isBloodRelated: false }),
-      p({ id: 'C1', fatherId: 'F', motherId: 'M' }),
-      p({ id: 'C2', fatherId: 'F', motherId: 'M' }),
-    ]
-    const dagIssues = validateFamilyGraph(persons, 'PF').filter(i => i.code === 'DAG_CHILD_COLLISION')
-    expect(dagIssues).toHaveLength(1)
-  })
-
-  it('does NOT flag a normal couple where only one partner has ancestry', () => {
-    const persons = [
-      p({ id: 'G' }),
-      p({ id: 'F', fatherId: 'G', spouseId: 'M' }), // blood, has a parent
-      p({ id: 'M', spouseId: 'F', isBloodRelated: false }), // in-law, no parents
-      p({ id: 'C', fatherId: 'F', motherId: 'M' }),
-    ]
-    expect(codes(persons, 'G')).not.toContain('DAG_CHILD_COLLISION')
+    expect(issues.some(i => i.level === 'error')).toBe(false)
   })
 
   it('warns when one person is referenced as the spouse of several people', () => {

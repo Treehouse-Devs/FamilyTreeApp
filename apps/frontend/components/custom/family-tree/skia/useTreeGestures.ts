@@ -4,9 +4,8 @@ import { Gesture } from 'react-native-gesture-handler'
 import { useSharedValue, useAnimatedStyle, withTiming } from 'react-native-reanimated'
 import { scheduleOnRN } from 'react-native-worklets'
 import type { Person } from '@/store/slices/tree/types'
-import type { NodeLayout } from './types'
+import type { NodeLayout, TreeLayout } from './types'
 import { NODE_W, NODE_H } from './types'
-import type { TreeLayout } from './useTreeLayout'
 
 type UseTreeGesturesParams = {
   layout: TreeLayout

@@ -1,3 +1,4 @@
+import type { FlatPersonDto } from '@treely/dto'
 import type { Person } from '@/store/slices/tree/types'
 
 // --- Layout Types ------------------------------------------------------------
@@ -5,18 +6,38 @@ import type { Person } from '@/store/slices/tree/types'
 export type NodeLayout = {
   id: string
   person: Person
-  depth: number
+  depth: number // generation (0 = top-most)
   x: number
   y: number
-  subtreeWidth: number
-  isSpouse?: boolean
-  bloodRelatedId?: string // For spouses, the ID of the blood-related person
 }
 
 export type Edge = {
   fromId: string
   toId: string
   type: 'parent-child' | 'couple'
+  /** For parent-child edges: the parent couple-union the line drops from. */
+  fromUnionId?: string
+}
+
+/** Geometry of a couple (or single) at one generation — the anchor for child lines. */
+export type CoupleUnionLayout = {
+  id: string
+  memberIds: string[]
+  midX: number // horizontal center of the union
+  topY: number // members' top (y)
+  bottomY: number // members' bottom (y + NODE_H)
+}
+
+export type TreeLayout = {
+  nodes: NodeLayout[]
+  edges: Edge[]
+  unions: CoupleUnionLayout[]
+  canvasWidth: number
+  canvasHeight: number
+  contentMinX: number
+  contentMinY: number
+  contentMaxX: number
+  contentMaxY: number
 }
 
 // --- Component Props ---------------------------------------------------------
@@ -26,10 +47,8 @@ export type FamilyTreeSkiaRef = {
 }
 
 export type FamilyTreeSkiaProps = {
-  /** A single root (back-compat). Prefer `roots` for multi-root forests. */
-  root?: Person
-  /** All top-level roots; rendered side by side under a virtual super-root. */
-  roots?: Person[]
+  /** The full flat person graph for the tree (the complete DAG). */
+  persons: FlatPersonDto[]
   onPressNode?: (person: Person) => void
   scale?: number
   minScale?: number
@@ -47,9 +66,7 @@ export const PADDING_X = PADDING
 export const PADDING_Y = PADDING
 export const RADIUS = 12
 
-export const H_GAP = 24 // horizontal gap between siblings
-export const H_GAP_COUPLE = 40 // horizontal gap between couple
+export const H_GAP = 24 // horizontal gap between siblings / unions in the same family
+export const H_GAP_SUBTREE = 48 // wider gap between unions of different families
+export const H_GAP_COUPLE = 40 // horizontal gap between the two members of a couple
 export const V_GAP = 84 // vertical gap between generations
-
-// Id of the synthetic, non-rendered parent used to lay out multiple real roots as a forest.
-export const VIRTUAL_ROOT_ID = '__virtual_root__'

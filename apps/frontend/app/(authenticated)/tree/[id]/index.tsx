@@ -4,7 +4,7 @@ import { useFamilyTree } from '@/hooks/useFamilyTree'
 import { TreeService } from '@/services/treeService'
 import { useLocalSearchParams, router } from 'expo-router'
 import { ChevronLeft, Menu, Minus, Plus } from 'lucide-react-native'
-import { useEffect, useState, useCallback, useRef } from 'react'
+import { useEffect, useState, useCallback, useRef, useMemo } from 'react'
 import { View, ActivityIndicator } from 'react-native'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 
@@ -22,7 +22,9 @@ import { useAddMember } from './useAddMember'
 
 const TreeScreen = () => {
   const { id } = useLocalSearchParams<{ id: string }>()
-  const { selectTree, selectedRoot, selectedRoots, trees } = useFamilyTree()
+  const { selectTree, selectedRoot, flatPersons, trees } = useFamilyTree()
+  // The generation layout consumes the full flat graph; memoize so it recomputes only on change.
+  const persons = useMemo(() => Object.values(flatPersons[id] ?? {}), [flatPersons, id])
   const { addChild, addSpouse, addSiblings, addParents } = useAddMember(id)
   const [loading, setLoading] = useState(true)
   const { zoomLevel, setZoomLevel } = useZoomLevel()
@@ -129,8 +131,7 @@ const TreeScreen = () => {
         {/* Canvas layer - full screen */}
         <View style={{ flex: 1, marginTop: 48 }}>
           <FamilyTreeSkia
-            root={selectedRoot}
-            roots={selectedRoots?.length ? selectedRoots : selectedRoot ? [selectedRoot] : undefined}
+            persons={persons}
             scale={zoomLevel}
             minScale={0.5}
             maxScale={2}

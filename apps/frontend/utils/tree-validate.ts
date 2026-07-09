@@ -11,7 +11,6 @@ import type { FlatPersonDto } from '@treely/dto'
 
 export type TreeIssueCode =
   | 'CYCLE'
-  | 'DAG_CHILD_COLLISION'
   | 'MULTIPLE_SPOUSES'
   | 'DANGLING_SPOUSE'
   | 'STALE_ROOT'
@@ -87,30 +86,8 @@ export function validateFamilyGraph(persons: FlatPersonDto[], rootId?: string): 
     return issues
   }
 
-  // --- DAG_CHILD_COLLISION -------------------------------------------------
-  // A child whose father AND mother each have their own ancestry means two lineages
-  // converge on this couple. The forest layout attaches children under a single anchor,
-  // so it cannot draw the second lineage joining in. Report one issue per couple.
-  const seenCouples = new Set<string>()
-  for (const child of persons) {
-    if (!child.fatherId || !child.motherId) continue
-    const father = byId.get(child.fatherId)
-    const mother = byId.get(child.motherId)
-    if (!father || !mother) continue
-    if (!hasParent(father) || !hasParent(mother)) continue
-
-    const key = [father.id, mother.id].sort().join('::')
-    if (seenCouples.has(key)) continue
-    seenCouples.add(key)
-
-    issues.push({
-      level: 'error',
-      code: 'DAG_CHILD_COLLISION',
-      message: 'Both partners of a couple have their own ancestry, which the current '
-        + 'forest layout cannot draw (needs generation-based layout).',
-      personIds: [father.id, mother.id, child.id],
-    })
-  }
+  // Note: a couple whose two partners each have their own ancestry (a converging lineage)
+  // is now fully drawable by the generation/level-based layout, so it is no longer flagged.
 
   // --- MULTIPLE_SPOUSES / DANGLING_SPOUSE ----------------------------------
   const incomingSpouseRefs = new Map<string, string[]>()
