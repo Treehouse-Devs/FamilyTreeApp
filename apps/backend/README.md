@@ -61,7 +61,9 @@ $ yarn run test:cov
 
 Production runs with Docker Compose on one Linux VPS. GitHub Actions builds the image, exports a compressed archive, copies it to the VPS over pinned, key-only SSH, and loads it into the VPS's local Docker image store. A container registry is not required.
 
-Each release is identified by `familytree/backend:<full-git-sha>`. The VPS verifies the transferred archive checksum, loads the image, runs migrations, replaces the backend only after migrations succeed, and checks readiness. GitHub then verifies `http://127.0.0.1:3001/health/ready` over SSH. The previous healthy image remains locally available for application rollback.
+Each release is identified by `familytree/backend:<full-git-sha>`. The VPS verifies the transferred archive checksum, loads the image, runs migrations, replaces the backend only after migrations succeed, and checks readiness. GitHub then verifies `http://127.0.0.1:3001/health/ready` over SSH and `https://api-treely.arkaes.dev/health/ready` through the public Caddy endpoint. The previous healthy image remains locally available for application rollback.
+
+Caddy terminates HTTPS for `api-treely.arkaes.dev` and proxies to the backend container. Point the domain's DNS record at the VPS and allow inbound TCP 80/443. If Cloudflare proxies this hostname, configure origin TLS so Cloudflare can reach Caddy over HTTPS.
 
 Do not manually prune the current or previous healthy backend image. Monitor disk usage because registry-free deployments retain rollback images on the VM.
 

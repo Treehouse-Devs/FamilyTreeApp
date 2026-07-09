@@ -133,7 +133,7 @@ jobs:
             -o IdentitiesOnly=yes \
             -o StrictHostKeyChecking=yes \
             backend-image.tar.gz backend-image.tar.gz.sha256 \
-            apps/backend/docker-compose.yml apps/backend/scripts/deploy-backend.sh \
+            apps/backend/Caddyfile apps/backend/docker-compose.yml apps/backend/scripts/deploy-backend.sh \
             "$VPS_USER@$VPS_HOST:/tmp/"
           ssh -p "$VPS_PORT" \
             -i "$HOME/.ssh/id_ed25519" \
@@ -146,6 +146,7 @@ jobs:
           set -eu
           deploy_dir=$1
           install -d "$deploy_dir/scripts"
+          install -m 0644 /tmp/Caddyfile "$deploy_dir/Caddyfile"
           install -m 0644 /tmp/docker-compose.yml "$deploy_dir/docker-compose.yml"
           install -m 0755 /tmp/deploy-backend.sh "$deploy_dir/scripts/deploy-backend.sh"
           test -f "$deploy_dir/.env"
@@ -168,4 +169,7 @@ jobs:
           curl --fail --silent --show-error \
             --retry 5 --retry-delay 2 --retry-connrefused \
             http://127.0.0.1:3001/health/ready
+          curl --fail --silent --show-error \
+            --retry 5 --retry-delay 2 --retry-connrefused \
+            https://api-treely.arkaes.dev/health/ready
           REMOTE
