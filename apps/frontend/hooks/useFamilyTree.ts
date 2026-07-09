@@ -12,6 +12,7 @@ export const useFamilyTree = () => {
     state.trees.find(tree => tree.id === state.selectedTreeId),
   )
   const selectedRoot = useStore(state => state.trees.find(tree => tree.id === state.selectedTreeId)?.root)
+  const selectedRoots = useStore(state => state.trees.find(tree => tree.id === state.selectedTreeId)?.roots)
   const flatPersons = useStore(state => state.flatPersons)
   const getPersonDetails = useStore(state => state.getPersonDetails)
   const setPersonDetails = useStore(state => state.setPersonDetails)
@@ -36,6 +37,7 @@ export const useFamilyTree = () => {
     selectedTreeId,
     selectedTree,
     selectedRoot,
+    selectedRoots,
     flatPersons,
     getPersonDetails,
     setPersonDetails,

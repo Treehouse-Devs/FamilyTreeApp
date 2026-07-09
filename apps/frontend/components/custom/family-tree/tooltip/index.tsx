@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated'
 import { useTranslation } from 'react-i18next'
 
-import { getYear, getAge } from '@/utils/date'
+import { getYear, getAge, UNKNOWN_DATE } from '@/utils/date'
 import { Modal } from '@/components/custom/modals/modal'
 
 import type { ContentView, MemberType, PersonTooltipProps } from './types'
@@ -33,7 +33,7 @@ export const PersonTooltip: React.FC<PersonTooltipProps> = ({
   const age = getAge(person.birthDate, person.deathDate)
   const ageText = person.deathDate
     ? t('deceased', { year: getYear(person.deathDate) })
-    : t('age', { years: age })
+    : age != null ? t('age', { years: age }) : UNKNOWN_DATE
 
   const handleClose = () => {
     onClose()

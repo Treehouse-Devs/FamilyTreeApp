@@ -63,7 +63,10 @@ export interface TreeDto {
   createdAt: number
   updatedAt: number
   familyImageUrl?: string
+  /** The primary root (back-compat): the declared rootId when valid, else the first root. */
   root?: PersonDto
+  /** All top-level roots of the forest (a family tree is a forest, not a single tree). */
+  roots?: PersonDto[]
 }
 
 /**

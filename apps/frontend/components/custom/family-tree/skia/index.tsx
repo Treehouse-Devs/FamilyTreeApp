@@ -1,4 +1,4 @@
-import React, { forwardRef, useImperativeHandle } from 'react'
+import React, { forwardRef, useImperativeHandle, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Canvas, Path, useFont } from '@shopify/react-native-skia'
 import { GestureDetector } from 'react-native-gesture-handler'
@@ -15,6 +15,7 @@ export { type FamilyTreeSkiaProps, type FamilyTreeSkiaRef } from './types'
 
 export const FamilyTreeSkia = forwardRef<FamilyTreeSkiaRef, FamilyTreeSkiaProps>(({
   root,
+  roots,
   onPressNode,
   scale = 1,
   minScale = 0.5,
@@ -24,8 +25,14 @@ export const FamilyTreeSkia = forwardRef<FamilyTreeSkiaRef, FamilyTreeSkiaProps>
   const mode = useCurrentMode()
   const { t } = useTranslation()
 
+  // Normalize to a stable roots array (a family tree is a forest of top-level roots).
+  const rootArray = useMemo(
+    () => (roots?.length ? roots : root ? [root] : []),
+    [roots, root],
+  )
+
   // Layout
-  const layout = useTreeLayout(root)
+  const layout = useTreeLayout(rootArray)
   const { nodes, canvasWidth, canvasHeight } = layout
   const edgePaths = useEdgePaths(nodes, layout.edges)
 

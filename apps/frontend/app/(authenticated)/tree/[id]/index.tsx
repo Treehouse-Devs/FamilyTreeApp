@@ -22,7 +22,7 @@ import { useAddMember } from './useAddMember'
 
 const TreeScreen = () => {
   const { id } = useLocalSearchParams<{ id: string }>()
-  const { selectTree, selectedRoot, trees } = useFamilyTree()
+  const { selectTree, selectedRoot, selectedRoots, trees } = useFamilyTree()
   const { addChild, addSpouse, addSiblings, addParents } = useAddMember(id)
   const [loading, setLoading] = useState(true)
   const { zoomLevel, setZoomLevel } = useZoomLevel()
@@ -130,6 +130,7 @@ const TreeScreen = () => {
         <View style={{ flex: 1, marginTop: 48 }}>
           <FamilyTreeSkia
             root={selectedRoot}
+            roots={selectedRoots?.length ? selectedRoots : selectedRoot ? [selectedRoot] : undefined}
             scale={zoomLevel}
             minScale={0.5}
             maxScale={2}

@@ -40,7 +40,8 @@ const MemberListScreen = () => {
         return a.name.localeCompare(b.name)
       }
 
-      return a.birthDate - b.birthDate
+      // Members without a birth date sort last (ascending).
+      return (a.birthDate ?? Infinity) - (b.birthDate ?? Infinity)
     })
 
     return memberSortDirection === 'desc' ? sorted.reverse() : sorted
