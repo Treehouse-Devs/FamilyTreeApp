@@ -51,6 +51,10 @@ export class PatchFamilyMemberDto {
 
   @IsNumber()
   @IsOptional()
+  birthOrder?: number
+
+  @IsNumber()
+  @IsOptional()
   deathDate?: number
 
   @ValidateNested()

@@ -21,14 +21,15 @@ export class MemberService {
       throw new ForbiddenException('This family is not belong to this user')
     }
 
-    const { name, gender, birthDate, deathDate, isBloodRelated, spouseId, fatherId, motherId } = createFamilyMemberDto
+    const { name, gender, birthDate, birthOrder, deathDate, isBloodRelated, spouseId, fatherId, motherId } = createFamilyMemberDto
 
     return await this.memberRepository.manager.transaction(async (manager) => {
       const member = manager.create(FamilyMember, {
         familyId,
         fullName: name,
         gender: gender,
-        birthDate,
+        birthDate: birthDate ?? null,
+        birthOrder: birthOrder ?? null,
         deathDate,
         isBloodRelated: isBloodRelated,
         fatherId: fatherId ?? null,
@@ -91,7 +92,8 @@ export class MemberService {
       spouseId: member.spouseId ?? undefined,
       spouse: member.spouse ? mapMemberToPersonDto(member.spouse) : undefined,
       children: children.map(mapMemberToPersonDto),
-      birthDate: member.birthDate ? member.birthDate : 0,
+      birthDate: member.birthDate != null ? Number(member.birthDate) : undefined,
+      birthOrder: member.birthOrder ?? undefined,
       isBloodRelated: member.isBloodRelated,
       gender: member.gender,
       deathDate: member.deathDate ? member.deathDate : undefined,
@@ -131,6 +133,7 @@ export class MemberService {
       ...(dto.name && { fullName: dto.name }),
       ...(dto.gender !== undefined && { gender: dto.gender }),
       ...(dto.birthDate !== undefined && { birthDate: dto.birthDate }),
+      ...(dto.birthOrder !== undefined && { birthOrder: dto.birthOrder }),
       ...(dto.deathDate !== undefined && { deathDate: dto.deathDate }),
       ...(dto.location?.nationality !== undefined && { nationality: dto.location.nationality }),
       ...(dto.location?.hometown !== undefined && { hometown: dto.location.hometown }),

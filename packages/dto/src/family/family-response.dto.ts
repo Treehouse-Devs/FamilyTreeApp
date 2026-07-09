@@ -6,7 +6,8 @@ import type { Gender } from '../profile'
 export interface FlatPersonDto {
   id: string
   name: string
-  birthDate: number
+  birthDate?: number
+  birthOrder?: number
   isBloodRelated: boolean
   gender: Gender
   deathDate?: number
@@ -42,7 +43,8 @@ export interface TreesDto {
 export interface PersonDto {
   id: string
   name: string
-  birthDate: number
+  birthDate?: number
+  birthOrder?: number
   isBloodRelated: boolean
   deathDate?: number
   children?: PersonDto[]
