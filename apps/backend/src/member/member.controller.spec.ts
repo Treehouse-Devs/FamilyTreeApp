@@ -15,7 +15,6 @@ function makeDetailedPerson(overrides: Partial<DetailedPersonDto> = {}): Detaile
     name: 'John Doe',
     gender: Gender.MALE,
     birthDate: new Date('1990-01-01').getTime(),
-    isBloodRelated: true,
     deathDate: undefined,
     imageThumbnailUrl: undefined,
     fullImageUrl: undefined,

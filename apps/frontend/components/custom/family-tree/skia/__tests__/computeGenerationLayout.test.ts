@@ -5,7 +5,6 @@ import type { TreeLayout } from '../types'
 
 const p = (over: Partial<FlatPersonDto> & { id: string }): FlatPersonDto => ({
   name: over.id,
-  isBloodRelated: true,
   gender: 'male' as FlatPersonDto['gender'],
   ...over,
 })
@@ -32,11 +31,11 @@ describe('computeGenerationLayout — converging lineages (the DAG case)', () =>
   // GF/GM); C is their child. Both ancestries must sit above the B-G couple.
   const persons: FlatPersonDto[] = [
     p({ id: 'BF', spouseId: 'BM' }),
-    p({ id: 'BM', isBloodRelated: false, spouseId: 'BF' }),
+    p({ id: 'BM', spouseId: 'BF' }),
     p({ id: 'GF', spouseId: 'GM' }),
-    p({ id: 'GM', isBloodRelated: false, spouseId: 'GF' }),
+    p({ id: 'GM', spouseId: 'GF' }),
     p({ id: 'B', fatherId: 'BF', motherId: 'BM', spouseId: 'G' }),
-    p({ id: 'G', fatherId: 'GF', motherId: 'GM', spouseId: 'B', isBloodRelated: false }),
+    p({ id: 'G', fatherId: 'GF', motherId: 'GM', spouseId: 'B' }),
     p({ id: 'C', fatherId: 'B', motherId: 'G' }),
   ]
   const layout = computeGenerationLayout(persons)
@@ -113,7 +112,7 @@ describe('computeGenerationLayout — other cases', () => {
   it('handles a single lineage', () => {
     const layout = computeGenerationLayout([
       p({ id: 'A', spouseId: 'B' }),
-      p({ id: 'B', isBloodRelated: false, spouseId: 'A' }),
+      p({ id: 'B', spouseId: 'A' }),
       p({ id: 'C', fatherId: 'A', motherId: 'B' }),
     ])
     expect(node(layout, 'A').depth).toBe(0)
@@ -135,7 +134,7 @@ describe('computeGenerationLayout — other cases', () => {
   it('places an in-law with no ancestry beside the blood partner (no upward edge)', () => {
     const layout = computeGenerationLayout([
       p({ id: 'B', spouseId: 'M' }),
-      p({ id: 'M', isBloodRelated: false, spouseId: 'B' }),
+      p({ id: 'M', spouseId: 'B' }),
       p({ id: 'C', fatherId: 'B', motherId: 'M' }),
     ])
     expect(node(layout, 'B').depth).toBe(0)
@@ -158,10 +157,10 @@ describe('computeGenerationLayout — other cases', () => {
     // B (root) married G; then G gains parents GF/GM. B stays at G's generation.
     const layout = computeGenerationLayout([
       p({ id: 'B', spouseId: 'G' }),
-      p({ id: 'G', isBloodRelated: false, spouseId: 'B', fatherId: 'GF', motherId: 'GM' }),
+      p({ id: 'G', spouseId: 'B', fatherId: 'GF', motherId: 'GM' }),
       p({ id: 'C', fatherId: 'B', motherId: 'G' }),
       p({ id: 'GF', spouseId: 'GM' }),
-      p({ id: 'GM', isBloodRelated: false, spouseId: 'GF' }),
+      p({ id: 'GM', spouseId: 'GF' }),
     ])
     expect(node(layout, 'GF').depth).toBe(0)
     expect(node(layout, 'B').depth).toBe(1)

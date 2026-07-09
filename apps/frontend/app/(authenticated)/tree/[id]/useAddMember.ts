@@ -6,7 +6,7 @@ import type { CreateFamilyMemberDto } from '@treely/dto'
 import { useTranslation } from 'react-i18next'
 
 export const useAddMember = (treeId: string) => {
-  const { addPerson, getParentsIds, getPersonFromRoot } = useFamilyTree()
+  const { addPerson, getParentsIds } = useFamilyTree()
   const { t } = useTranslation()
 
   const createAndAddPerson = async (
@@ -14,7 +14,6 @@ export const useAddMember = (treeId: string) => {
     relationshipType: 'parent' | 'children' | 'spouse',
     targetId: string | undefined,
     logContext: string,
-    fromPerson?: DetailedPerson,
   ) => {
     if (!targetId) {
       throw new Error(`Failed to create person: Invalid target person ID for ${logContext}`)
@@ -36,14 +35,7 @@ export const useAddMember = (treeId: string) => {
           ...(dto.gender === Gender.MALE
             ? { fatherId: person.id }
             : { motherId: person.id }),
-          isBloodRelated: true,
         })
-
-        if (fromPerson && (fromPerson.spouseId || fromPerson.spouse?.id)) {
-          await TreeService.patchPersonById(treeId, fromPerson.spouseId || fromPerson.spouse?.id || '', {
-            isBloodRelated: false,
-          })
-        }
       }
 
       if (person) {
@@ -59,18 +51,10 @@ export const useAddMember = (treeId: string) => {
     }
   }
 
-  const addChild = (fromPerson: DetailedPerson) => {
-    if (!fromPerson.isBloodRelated && (fromPerson.spouseId || fromPerson.spouse?.id)) {
-      const spouse = getPersonFromRoot(treeId, fromPerson.spouseId || fromPerson.spouse?.id || '')
-
-      if (!spouse) {
-        throw new Error('Failed to add child: Invalid spouse person')
-      }
-
-      fromPerson = spouse
-    }
-
-    return createAndAddPerson(
+  // Children hang off the couple union, so a child added from either partner renders under the
+  // couple — no need to redirect to a particular "blood" side.
+  const addChild = (fromPerson: DetailedPerson) =>
+    createAndAddPerson(
       {
         fatherId: fromPerson.gender === Gender.MALE ? fromPerson.id : undefined,
         motherId: fromPerson.gender === Gender.FEMALE ? fromPerson.id : undefined,
@@ -79,13 +63,11 @@ export const useAddMember = (treeId: string) => {
       fromPerson.id,
       'adding child',
     )
-  }
 
   const addSpouse = (fromPerson: DetailedPerson) =>
     createAndAddPerson(
       {
         spouseId: fromPerson.id,
-        isBloodRelated: false,
       },
       'spouse',
       fromPerson.id,
@@ -112,7 +94,6 @@ export const useAddMember = (treeId: string) => {
       'parent',
       fromPerson.id,
       'adding parents',
-      fromPerson,
     )
 
   return { addChild, addSpouse, addSiblings, addParents }
@@ -124,7 +105,6 @@ const blankPerson = (t: (key: string) => string): CreateFamilyMemberDto => {
     gender: Gender.MALE,
     birthDate: Date.now(),
     deathDate: undefined,
-    isBloodRelated: true,
     spouseId: undefined,
     fatherId: undefined,
     motherId: undefined,

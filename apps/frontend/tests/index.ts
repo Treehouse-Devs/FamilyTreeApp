@@ -48,7 +48,6 @@ export const mockApi = async (url: string, method: string): Promise<unknown> => 
         deathDate: undefined,
         imageThumbnailUrl: undefined,
         fullImageUrl: undefined,
-        isBloodRelated: true,
         location: { nationality: undefined, hometown: undefined, domicile: undefined },
         contact: { phoneNumber: null, homeNumber: null },
         occupation: { occupation: undefined, officeAddress: undefined },

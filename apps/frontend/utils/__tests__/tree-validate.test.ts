@@ -3,7 +3,6 @@ import type { FlatPerson } from '../tree-compose'
 
 const p = (over: Partial<FlatPerson> & { id: string }): FlatPerson => ({
   name: over.id,
-  isBloodRelated: true,
   gender: 'male' as FlatPerson['gender'],
   ...over,
 })
@@ -15,7 +14,7 @@ describe('validateFamilyGraph', () => {
   it('returns no issues for a clean single-lineage tree', () => {
     const persons = [
       p({ id: 'A', birthDate: 1, spouseId: 'B' }),
-      p({ id: 'B', isBloodRelated: false, spouseId: 'A' }),
+      p({ id: 'B', spouseId: 'A' }),
       p({ id: 'C', fatherId: 'A', motherId: 'B' }),
     ]
     expect(validateFamilyGraph(persons, 'A')).toEqual([])
@@ -39,7 +38,7 @@ describe('validateFamilyGraph', () => {
       p({ id: 'PF' }),
       p({ id: 'PM' }),
       p({ id: 'F', fatherId: 'PF', spouseId: 'M' }),
-      p({ id: 'M', motherId: 'PM', spouseId: 'F', isBloodRelated: false }),
+      p({ id: 'M', motherId: 'PM', spouseId: 'F' }),
       p({ id: 'C', fatherId: 'F', motherId: 'M' }),
     ]
     const issues = validateFamilyGraph(persons, 'PF')
@@ -49,8 +48,8 @@ describe('validateFamilyGraph', () => {
   it('warns when one person is referenced as the spouse of several people', () => {
     const persons = [
       p({ id: 'H' }),
-      p({ id: 'W1', isBloodRelated: false, spouseId: 'H' }),
-      p({ id: 'W2', isBloodRelated: false, spouseId: 'H' }),
+      p({ id: 'W1', spouseId: 'H' }),
+      p({ id: 'W2', spouseId: 'H' }),
     ]
     const issue = validateFamilyGraph(persons, 'H').find(i => i.code === 'MULTIPLE_SPOUSES')
     expect(issue).toBeDefined()

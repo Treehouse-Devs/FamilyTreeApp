@@ -67,7 +67,6 @@ function flatToPerson(f: FlatPersonDto): Person {
     name: f.name,
     birthDate: f.birthDate,
     birthOrder: f.birthOrder,
-    isBloodRelated: f.isBloodRelated,
     gender: f.gender,
     deathDate: f.deathDate,
     spouseId: f.spouseId,
@@ -92,7 +91,6 @@ function buildUnions(
 ): UnionModel {
   const anchorOfCouple = (p: FlatPersonDto, q: FlatPersonDto): FlatPersonDto => {
     if (hasParent(p) !== hasParent(q)) return hasParent(p) ? p : q
-    if (p.isBloodRelated !== q.isBloodRelated) return p.isBloodRelated ? p : q
 
     return (personIndex.get(p.id) ?? 0) <= (personIndex.get(q.id) ?? 0) ? p : q
   }

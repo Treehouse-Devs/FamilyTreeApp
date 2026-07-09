@@ -38,7 +38,6 @@ export function composeTreeFromFlat(flatTree: FlatTree): ComposeResult {
   // renders via the spouse mechanism (so it must not also appear as a top-level root).
   function anchorOfCouple(p: FlatPerson, q: FlatPerson): FlatPerson {
     if (hasParent(p) !== hasParent(q)) return hasParent(p) ? p : q
-    if (p.isBloodRelated !== q.isBloodRelated) return p.isBloodRelated ? p : q
 
     return (personIndex.get(p.id) ?? 0) <= (personIndex.get(q.id) ?? 0) ? p : q
   }
@@ -95,7 +94,6 @@ export function composeTreeFromFlat(flatTree: FlatTree): ComposeResult {
       name: flat.name,
       birthDate: flat.birthDate,
       birthOrder: flat.birthOrder,
-      isBloodRelated: flat.isBloodRelated,
       gender: flat.gender,
       deathDate: flat.deathDate,
       spouseId: flat.spouseId,

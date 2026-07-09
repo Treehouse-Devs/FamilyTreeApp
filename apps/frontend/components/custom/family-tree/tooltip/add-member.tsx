@@ -58,7 +58,11 @@ export const AddMemberContentView: React.FC<AddMemberContentViewProps> = ({
 }
 
 export const getAddMemberActions = (treeId: string, person: DetailedPerson, t: (key: string) => string): Array<{ key: MemberType } & ActionButtonProps> => {
-  const { hasSpouse, isRoot } = useFamilyTree()
+  const { hasSpouse, isRoot, getParentsIds } = useFamilyTree()
+
+  // A sibling shares a parent, so it can only be added to someone who has a parent in the tree.
+  const { fatherId, motherId } = getParentsIds(treeId, person.id)
+  const hasParent = !!fatherId || !!motherId
 
   return [
     {
@@ -77,7 +81,7 @@ export const getAddMemberActions = (treeId: string, person: DetailedPerson, t: (
       key: MemberType.SIBLING,
       icon: UsersRound,
       label: t('sibling'),
-      isDisabled: !person.isBloodRelated,
+      isDisabled: !hasParent,
     },
     {
       key: MemberType.CHILD,
