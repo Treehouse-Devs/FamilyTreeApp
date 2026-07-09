@@ -1,4 +1,4 @@
-import { IsBoolean, IsNumber, IsEnum, IsNotEmpty, IsOptional, IsString, IsUUID } from 'class-validator'
+import { IsNumber, IsEnum, IsNotEmpty, IsOptional, IsString, IsUUID } from 'class-validator'
 import { Gender } from '../profile'
 
 export class CreateFamilyMemberDto {
@@ -20,9 +20,6 @@ export class CreateFamilyMemberDto {
   @IsNumber()
   @IsOptional()
   deathDate?: number
-
-  @IsBoolean()
-  isBloodRelated!: boolean
 
   @IsOptional()
   @IsUUID()

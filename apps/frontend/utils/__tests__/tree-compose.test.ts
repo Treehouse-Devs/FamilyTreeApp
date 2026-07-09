@@ -2,7 +2,6 @@ import { composeTreeFromFlat, type FlatTree, type FlatPerson } from '../tree-com
 
 const p = (over: Partial<FlatPerson> & { id: string }): FlatPerson => ({
   name: over.id,
-  isBloodRelated: true,
   gender: 'male' as FlatPerson['gender'],
   ...over,
 })
@@ -26,7 +25,7 @@ describe('composeTreeFromFlat', () => {
   it('excludes an in-law spouse (mutual link) from roots but attaches them', () => {
     const persons = [
       p({ id: 'A', birthDate: 1, spouseId: 'B' }),
-      p({ id: 'B', isBloodRelated: false, spouseId: 'A' }),
+      p({ id: 'B', spouseId: 'A' }),
     ]
     const { roots } = composeTreeFromFlat(tree('A', persons))
     expect(roots.map(r => r.id)).toEqual(['A'])
@@ -37,7 +36,7 @@ describe('composeTreeFromFlat', () => {
     // Only the in-law points back; the anchor has no spouseId.
     const persons = [
       p({ id: 'A', birthDate: 1 }),
-      p({ id: 'B', isBloodRelated: false, spouseId: 'A' }),
+      p({ id: 'B', spouseId: 'A' }),
     ]
     const { roots } = composeTreeFromFlat(tree('A', persons))
     expect(roots.map(r => r.id)).toEqual(['A'])
@@ -109,7 +108,7 @@ describe('composeTreeFromFlat', () => {
   it('renders new parents as roots when the declared root gained parents', () => {
     const persons = [
       p({ id: 'F' }),
-      p({ id: 'M', isBloodRelated: false, spouseId: 'F' }),
+      p({ id: 'M', spouseId: 'F' }),
       p({ id: 'R', fatherId: 'F', motherId: 'M' }), // former root, now has parents
     ]
     const { roots, tree: t } = composeTreeFromFlat(tree('R', persons))

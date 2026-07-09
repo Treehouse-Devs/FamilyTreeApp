@@ -8,7 +8,6 @@ export interface FlatPersonDto {
   name: string
   birthDate?: number
   birthOrder?: number
-  isBloodRelated: boolean
   gender: Gender
   deathDate?: number
   spouseId?: string
@@ -45,7 +44,6 @@ export interface PersonDto {
   name: string
   birthDate?: number
   birthOrder?: number
-  isBloodRelated: boolean
   deathDate?: number
   children?: PersonDto[]
   spouse?: PersonDto

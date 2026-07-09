@@ -94,7 +94,6 @@ export const createTreeSlice: StateCreator<TreeSlice, [], [], TreeSlice> = (set,
           name: person.name,
           birthDate: person.birthDate,
           children: [currentRoot],
-          isBloodRelated: true,
         }
       } else {
         if (!findPersonById(currentRoot, originId)) return state

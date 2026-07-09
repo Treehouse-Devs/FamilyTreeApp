@@ -54,7 +54,6 @@ export const treeMocksWithParams: TreeMockWithParams = {
         birthDate: -916617600000,
         deathDate: 1628553600000,
         spouseId: 'b83d4904-b535-401c-9c63-37f0d9096435',
-        isBloodRelated: true,
       },
       // Bardock's spouse: Gine
       {
@@ -64,7 +63,6 @@ export const treeMocksWithParams: TreeMockWithParams = {
         imageThumbnailUrl: undefined,
         birthDate: -773798400000,
         spouseId: 'dbc07888-3701-40c4-87be-4df09f04e324',
-        isBloodRelated: true,
       },
       // Raditz (Bardock's child)
       {
@@ -76,7 +74,6 @@ export const treeMocksWithParams: TreeMockWithParams = {
         spouseId: 'f2ac7d84-a7ea-4195-8e46-04042cfc81c8',
         fatherId: 'dbc07888-3701-40c4-87be-4df09f04e324',
         motherId: 'b83d4904-b535-401c-9c63-37f0d9096435',
-        isBloodRelated: true,
       },
       // Raditz's spouse: Launch
       {
@@ -86,7 +83,6 @@ export const treeMocksWithParams: TreeMockWithParams = {
         imageThumbnailUrl: undefined,
         birthDate: -198720000000,
         spouseId: 'c6a256ab-7747-488b-81de-a7cf9c9b2910',
-        isBloodRelated: false,
       },
       // Raditz's children
       {
@@ -97,7 +93,6 @@ export const treeMocksWithParams: TreeMockWithParams = {
         birthDate: 490233600000,
         fatherId: 'c6a256ab-7747-488b-81de-a7cf9c9b2910',
         motherId: 'f2ac7d84-a7ea-4195-8e46-04042cfc81c8',
-        isBloodRelated: true,
       },
       {
         id: 'a83d4904-b535-401c-9c63-37f0d9096435',
@@ -107,7 +102,6 @@ export const treeMocksWithParams: TreeMockWithParams = {
         birthDate: 543628800000,
         fatherId: 'c6a256ab-7747-488b-81de-a7cf9c9b2910',
         motherId: 'f2ac7d84-a7ea-4195-8e46-04042cfc81c8',
-        isBloodRelated: true,
       },
       {
         id: '123d4904-b535-401c-9c63-37f0d9096435',
@@ -117,7 +111,6 @@ export const treeMocksWithParams: TreeMockWithParams = {
         birthDate: 613440000000,
         fatherId: 'c6a256ab-7747-488b-81de-a7cf9c9b2910',
         motherId: 'f2ac7d84-a7ea-4195-8e46-04042cfc81c8',
-        isBloodRelated: true,
       },
       // Goku (Bardock's child)
       {
@@ -129,7 +122,6 @@ export const treeMocksWithParams: TreeMockWithParams = {
         spouseId: '783d4904-b535-401c-9c63-37f0d9096435',
         fatherId: 'dbc07888-3701-40c4-87be-4df09f04e324',
         motherId: 'b83d4904-b535-401c-9c63-37f0d9096435',
-        isBloodRelated: true,
       },
       // Goku's spouse: Chi-Chi
       {
@@ -139,7 +131,6 @@ export const treeMocksWithParams: TreeMockWithParams = {
         imageThumbnailUrl: undefined,
         birthDate: 74304000000,
         spouseId: '56dc74ba-7600-4f0b-ad06-bab252a8f0de',
-        isBloodRelated: false,
       },
       // Gohan (Goku's child)
       {
@@ -151,7 +142,6 @@ export const treeMocksWithParams: TreeMockWithParams = {
         spouseId: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
         fatherId: '56dc74ba-7600-4f0b-ad06-bab252a8f0de',
         motherId: '783d4904-b535-401c-9c63-37f0d9096435',
-        isBloodRelated: true,
       },
       // Gohan's spouse: Videl
       {
@@ -161,7 +151,6 @@ export const treeMocksWithParams: TreeMockWithParams = {
         imageThumbnailUrl: undefined,
         birthDate: 568944000000,
         spouseId: 'e1a15888-6a4b-4143-9521-fc45deb5d2a5',
-        isBloodRelated: false,
       },
       // Pan (Gohan's child)
       {
@@ -172,7 +161,6 @@ export const treeMocksWithParams: TreeMockWithParams = {
         birthDate: 1192060800000,
         fatherId: 'e1a15888-6a4b-4143-9521-fc45deb5d2a5',
         motherId: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
-        isBloodRelated: true,
       },
       // Goten (Goku's child)
       {
@@ -183,7 +171,6 @@ export const treeMocksWithParams: TreeMockWithParams = {
         birthDate: 718588800000,
         fatherId: '56dc74ba-7600-4f0b-ad06-bab252a8f0de',
         motherId: '783d4904-b535-401c-9c63-37f0d9096435',
-        isBloodRelated: true,
       },
     ],
   }),
@@ -211,7 +198,6 @@ export const treeMocksWithParams: TreeMockWithParams = {
         },
         imageThumbnailUrl: undefined,
         fullImageUrl: undefined,
-        isBloodRelated: true,
       },
       // Gine
       'b83d4904-b535-401c-9c63-37f0d9096435': {
@@ -234,7 +220,6 @@ export const treeMocksWithParams: TreeMockWithParams = {
         },
         imageThumbnailUrl: undefined,
         fullImageUrl: undefined,
-        isBloodRelated: true,
       },
       // Raditz
       'c6a256ab-7747-488b-81de-a7cf9c9b2910': {
@@ -257,7 +242,6 @@ export const treeMocksWithParams: TreeMockWithParams = {
         },
         imageThumbnailUrl: undefined,
         fullImageUrl: undefined,
-        isBloodRelated: true,
       },
       // Launch
       'f2ac7d84-a7ea-4195-8e46-04042cfc81c8': {
@@ -280,7 +264,6 @@ export const treeMocksWithParams: TreeMockWithParams = {
         },
         imageThumbnailUrl: undefined,
         fullImageUrl: undefined,
-        isBloodRelated: false,
       },
       // Rashi
       '5330e122-3fec-4e4e-97be-0a7868c49242': {
@@ -303,7 +286,6 @@ export const treeMocksWithParams: TreeMockWithParams = {
         },
         imageThumbnailUrl: undefined,
         fullImageUrl: undefined,
-        isBloodRelated: true,
       },
       // Ranch
       'a83d4904-b535-401c-9c63-37f0d9096435': {
@@ -326,7 +308,6 @@ export const treeMocksWithParams: TreeMockWithParams = {
         },
         imageThumbnailUrl: undefined,
         fullImageUrl: undefined,
-        isBloodRelated: true,
       },
       // Mooli
       '123d4904-b535-401c-9c63-37f0d9096435': {
@@ -349,7 +330,6 @@ export const treeMocksWithParams: TreeMockWithParams = {
         },
         imageThumbnailUrl: undefined,
         fullImageUrl: undefined,
-        isBloodRelated: true,
       },
       // Goku
       '56dc74ba-7600-4f0b-ad06-bab252a8f0de': {
@@ -372,7 +352,6 @@ export const treeMocksWithParams: TreeMockWithParams = {
         },
         imageThumbnailUrl: undefined,
         fullImageUrl: undefined,
-        isBloodRelated: true,
       },
       // Chi-Chi
       '783d4904-b535-401c-9c63-37f0d9096435': {
@@ -395,7 +374,6 @@ export const treeMocksWithParams: TreeMockWithParams = {
         },
         imageThumbnailUrl: undefined,
         fullImageUrl: undefined,
-        isBloodRelated: false,
       },
       // Gohan
       'e1a15888-6a4b-4143-9521-fc45deb5d2a5': {
@@ -418,7 +396,6 @@ export const treeMocksWithParams: TreeMockWithParams = {
         },
         imageThumbnailUrl: undefined,
         fullImageUrl: undefined,
-        isBloodRelated: true,
       },
       // Videl
       'a1b2c3d4-e5f6-7890-abcd-ef1234567890': {
@@ -441,7 +418,6 @@ export const treeMocksWithParams: TreeMockWithParams = {
         },
         imageThumbnailUrl: undefined,
         fullImageUrl: undefined,
-        isBloodRelated: false,
       },
       // Pan
       'c5d4904a-b535-401c-9c63-37f0d9096435': {
@@ -464,7 +440,6 @@ export const treeMocksWithParams: TreeMockWithParams = {
         },
         imageThumbnailUrl: undefined,
         fullImageUrl: undefined,
-        isBloodRelated: true,
       },
       // Goten
       '883d4904-b535-401c-9c63-37f0d9096435': {
@@ -487,7 +462,6 @@ export const treeMocksWithParams: TreeMockWithParams = {
         },
         imageThumbnailUrl: undefined,
         fullImageUrl: undefined,
-        isBloodRelated: true,
       },
     }
 

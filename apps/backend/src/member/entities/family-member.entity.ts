@@ -50,9 +50,6 @@ export class FamilyMember {
   @Column({ type: 'int', nullable: true })
   birthOrder!: number | null
 
-  @Column({ type: 'boolean', nullable: false, default: false })
-  isBloodRelated!: boolean
-
   @Column({ type: 'varchar', nullable: true })
   imageThumbnailUrl!: string | null
 

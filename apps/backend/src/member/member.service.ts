@@ -22,7 +22,7 @@ export class MemberService {
       throw new ForbiddenException('This family is not belong to this user')
     }
 
-    const { name, gender, birthDate, birthOrder, deathDate, isBloodRelated, spouseId, fatherId, motherId } = createFamilyMemberDto
+    const { name, gender, birthDate, birthOrder, deathDate, spouseId, fatherId, motherId } = createFamilyMemberDto
 
     return await this.memberRepository.manager.transaction(async (manager) => {
       const member = manager.create(FamilyMember, {
@@ -32,7 +32,6 @@ export class MemberService {
         birthDate: birthDate ?? null,
         birthOrder: birthOrder ?? null,
         deathDate,
-        isBloodRelated: isBloodRelated,
         fatherId: fatherId ?? null,
         motherId: motherId ?? null,
         spouseId: spouseId ?? null,
@@ -99,7 +98,6 @@ export class MemberService {
       children: children.map(mapMemberToPersonDto),
       birthDate: member.birthDate != null ? Number(member.birthDate) : undefined,
       birthOrder: member.birthOrder ?? undefined,
-      isBloodRelated: member.isBloodRelated,
       gender: member.gender,
       deathDate: member.deathDate ? member.deathDate : undefined,
       imageThumbnailUrl: member.imageThumbnailUrl ?? undefined,
