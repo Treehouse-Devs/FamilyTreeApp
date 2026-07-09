@@ -26,7 +26,10 @@ export type FamilyTreeSkiaRef = {
 }
 
 export type FamilyTreeSkiaProps = {
-  root: Person
+  /** A single root (back-compat). Prefer `roots` for multi-root forests. */
+  root?: Person
+  /** All top-level roots; rendered side by side under a virtual super-root. */
+  roots?: Person[]
   onPressNode?: (person: Person) => void
   scale?: number
   minScale?: number
@@ -47,3 +50,6 @@ export const RADIUS = 12
 export const H_GAP = 24 // horizontal gap between siblings
 export const H_GAP_COUPLE = 40 // horizontal gap between couple
 export const V_GAP = 84 // vertical gap between generations
+
+// Id of the synthetic, non-rendered parent used to lay out multiple real roots as a forest.
+export const VIRTUAL_ROOT_ID = '__virtual_root__'

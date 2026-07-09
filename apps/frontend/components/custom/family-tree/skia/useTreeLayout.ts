@@ -12,6 +12,7 @@ import {
   V_GAP,
   PADDING_X,
   PADDING_Y,
+  VIRTUAL_ROOT_ID,
 } from './types'
 
 // --- Helper ------------------------------------------------------------------
@@ -53,9 +54,22 @@ export type TreeLayout = {
 
 /**
  * Computes the DFS tree layout: positions every node and collects edges.
+ *
+ * Accepts one root or many. Multiple roots are laid out as a forest by hanging them off
+ * a synthetic super-root at depth -1; that node is never drawn and emits no edges, so the
+ * real roots land at depth 0 side by side.
  */
-export function useTreeLayout(root: Person): TreeLayout {
+export function useTreeLayout(rootOrRoots: Person | Person[]): TreeLayout {
   return useMemo(() => {
+    const rootArray = Array.isArray(rootOrRoots) ? rootOrRoots : [rootOrRoots]
+    const virtualRoot: Person = {
+      id: VIRTUAL_ROOT_ID,
+      name: '',
+      isBloodRelated: false,
+      gender: rootArray[0]?.gender ?? ('male' as Person['gender']),
+      children: rootArray,
+    }
+
     const nodeMap = new Map<string, NodeLayout>()
     const edgeList: Edge[] = []
 
@@ -64,6 +78,7 @@ export function useTreeLayout(root: Person): TreeLayout {
       depth: number,
       offsetX: number,
     ): number => {
+      const isSynthetic = person.id === VIRTUAL_ROOT_ID
       const subtreeWidth = calculateSubtreeWidth(person)
       const hasSpouse = !!person.spouse
       const coupleWidth = hasSpouse ? NODE_W * 2 + H_GAP_COUPLE : NODE_W
@@ -94,11 +109,14 @@ export function useTreeLayout(root: Person): TreeLayout {
           const childCenter = layoutTree(child, depth + 1, childOffsetX)
           childCenters.push(childCenter)
 
-          edgeList.push({
-            fromId: person.id,
-            toId: child.id,
-            type: 'parent-child',
-          })
+          // The synthetic super-root is not drawn, so it has no edges to its roots.
+          if (!isSynthetic) {
+            edgeList.push({
+              fromId: person.id,
+              toId: child.id,
+              type: 'parent-child',
+            })
+          }
 
           childOffsetX += calculateSubtreeWidth(child)
         })
@@ -109,54 +127,57 @@ export function useTreeLayout(root: Person): TreeLayout {
       }
 
       const y = depth * (NODE_H + V_GAP) + PADDING_Y
-      let personX: number
 
-      if (hasSpouse) {
-        personX = childrenCenterX - coupleWidth / 2
-        const spouseX = personX + NODE_W + H_GAP_COUPLE
+      // Skip emitting a node/edges for the synthetic super-root; its real-root children
+      // still get positioned (they land at depth 0).
+      if (!isSynthetic) {
+        if (hasSpouse) {
+          const personX = childrenCenterX - coupleWidth / 2
+          const spouseX = personX + NODE_W + H_GAP_COUPLE
 
-        nodeMap.set(person.id, {
-          id: person.id,
-          person,
-          depth,
-          x: personX,
-          y,
-          subtreeWidth,
-        })
+          nodeMap.set(person.id, {
+            id: person.id,
+            person,
+            depth,
+            x: personX,
+            y,
+            subtreeWidth,
+          })
 
-        nodeMap.set(person.spouse!.id, {
-          id: person.spouse!.id,
-          person: person.spouse!,
-          depth,
-          x: spouseX,
-          y,
-          subtreeWidth: NODE_W,
-          isSpouse: true,
-          bloodRelatedId: person.id,
-        })
+          nodeMap.set(person.spouse!.id, {
+            id: person.spouse!.id,
+            person: person.spouse!,
+            depth,
+            x: spouseX,
+            y,
+            subtreeWidth: NODE_W,
+            isSpouse: true,
+            bloodRelatedId: person.id,
+          })
 
-        edgeList.push({
-          fromId: person.id,
-          toId: person.spouse!.id,
-          type: 'couple',
-        })
-      } else {
-        personX = childrenCenterX - NODE_W / 2
+          edgeList.push({
+            fromId: person.id,
+            toId: person.spouse!.id,
+            type: 'couple',
+          })
+        } else {
+          const personX = childrenCenterX - NODE_W / 2
 
-        nodeMap.set(person.id, {
-          id: person.id,
-          person,
-          depth,
-          x: personX,
-          y,
-          subtreeWidth,
-        })
+          nodeMap.set(person.id, {
+            id: person.id,
+            person,
+            depth,
+            x: personX,
+            y,
+            subtreeWidth,
+          })
+        }
       }
 
       return childrenCenterX
     }
 
-    layoutTree(root, 0, PADDING_X)
+    layoutTree(virtualRoot, -1, PADDING_X)
 
     let minX = Infinity
     let minY = Infinity
@@ -179,7 +200,7 @@ export function useTreeLayout(root: Person): TreeLayout {
       contentMaxX: maxX,
       contentMaxY: maxY,
     }
-  }, [root])
+  }, [rootOrRoots])
 }
 
 // --- Edge Paths Hook ---------------------------------------------------------

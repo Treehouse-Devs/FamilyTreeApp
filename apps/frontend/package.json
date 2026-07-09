@@ -6,7 +6,8 @@
     "start": "expo start",
     "android": "expo run:android",
     "ios": "expo run:ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "test": "jest"
   },
   "dependencies": {
     "@expo-google-fonts/plus-jakarta-sans": "^0.4.1",
@@ -69,8 +70,11 @@
     "@babel/core": "^7.25.2",
     "@gluestack-ui/nativewind-utils": "^1.0.26",
     "@gluestack-ui/utils": "^3.0.15",
+    "@types/jest": "^29.5.14",
     "@types/react": "~19.1.10",
+    "jest": "^29.7.0",
     "jscodeshift": "0.15.2",
+    "ts-jest": "^29.4.0",
     "react-i18next": "^17.0.4",
     "typescript": "~5.9.2",
     "uuidv4": "^6.2.13"

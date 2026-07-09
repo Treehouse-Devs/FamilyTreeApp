@@ -4,6 +4,14 @@ import type { FlatPerson } from '@/utils/tree-compose'
 import { composeTreeFromFlat, type FlatTree } from '@/utils/tree-compose'
 import { BaseService } from './base'
 import type { UploadFamilyImageResponseDto, UploadMemberImageResponseDto, CreateFamilyMemberDto, FlatPersonDto } from '@treely/dto'
+import type { TreeIssue } from '@/utils/tree-validate'
+
+function reportTreeIssues(treeId: string, issues: TreeIssue[]) {
+  const errors = issues.filter(i => i.level === 'error')
+  if (errors.length > 0) {
+    console.warn(`[tree ${treeId}] ${errors.length} graph issue(s) the renderer cannot represent:`, errors)
+  }
+}
 
 export class TreeService extends BaseService {
   static async fetchTrees() {
@@ -12,7 +20,8 @@ export class TreeService extends BaseService {
 
   static async createTree(name: string) {
     const flatTree = await this.post<FlatTree>('/trees', { name })
-    const { tree, persons } = composeTreeFromFlat(flatTree)
+    const { tree, persons, issues } = composeTreeFromFlat(flatTree)
+    reportTreeIssues(tree.id, issues)
     // Store the tree in Zustand store
     useStore.getState().setTree(tree)
     useStore.getState().setFlatPersons(tree.id, persons)
@@ -35,7 +44,8 @@ export class TreeService extends BaseService {
 
   static async fetchTreeById(treeId: string) {
     const flatTree = await this.get<FlatTree>(`/trees/${treeId}`)
-    const { tree, persons } = composeTreeFromFlat(flatTree)
+    const { tree, persons, issues } = composeTreeFromFlat(flatTree)
+    reportTreeIssues(tree.id, issues)
     // Store the tree in Zustand store
     useStore.getState().setTree(tree)
     useStore.getState().setFlatPersons(tree.id, persons)

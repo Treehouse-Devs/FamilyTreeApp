@@ -90,7 +90,9 @@ export function mapPersonToListItem(person: DetailedPerson, t: TFunction, onDeta
   return listItems
 }
 
-export function formatDate(date: number) {
+export function formatDate(date: number | undefined) {
+  if (date == null) return '—'
+
   return new Date(date).toLocaleDateString()
 }
 
