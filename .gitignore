@@ -4,3 +4,4 @@ dist
 .agents
 .github/*.md
 .clinerules
+.env
