@@ -38,6 +38,9 @@ jobs:
     # Only build for PRs raised from cloud sessions (claude/* head branches).
     if: startsWith(github.head_ref, 'claude/')
     runs-on: ubuntu-latest
+    # Consumed by the Verify step, the expo-github-action, and the eas build.
+    env:
+      EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
     defaults:
       run:
         working-directory: apps/frontend
@@ -46,8 +49,6 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Verify EXPO_TOKEN is configured
-        env:
-          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
         run: |
           if [ -z "$EXPO_TOKEN" ]; then
             echo "::error::EXPO_TOKEN secret is not set. See apps/frontend/EAS_PREVIEW.md for one-time setup."
@@ -73,8 +74,6 @@ jobs:
 
       - name: Start EAS preview build
         id: eas
-        env:
-          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
         run: |
           # --no-wait returns as soon as the build is queued so the runner is
           # not held for the whole build; the install page URL is available
