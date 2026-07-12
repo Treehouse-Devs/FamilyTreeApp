@@ -22,7 +22,7 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.anonymous.familytree"
+      "package": "com.treelyapp.familytree"
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -32,6 +32,13 @@
       "expo-router",
       "expo-font",
       "./plugins/withAndroidSigning.js"
-    ]
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "b8c97d44-c75f-4a9a-9176-26a1e7fc42c1"
+      }
+    },
+    "owner": "treelydevs"
   }
 }

@@ -1,0 +1,128 @@
+name: Frontend PR Preview (Android)
+
+# Builds an installable Android preview APK on EAS for pull requests opened by
+# Claude Code cloud sessions, then comments an install link/QR on the PR so the
+# change can be tested on a real Android phone.
+#
+# Only cloud-session PRs run this workflow: the `if` guard on the job restricts
+# it to head branches that start with `claude/` (the pattern used by cloud
+# sessions). Regular PRs are skipped so EAS build quota is not spent on them.
+#
+# Required repository secret:
+#   EXPO_TOKEN - an Expo access token for the account that owns the EAS project
+#                (create at https://expo.dev/settings/access-tokens).
+#
+# One-time setup is documented in apps/frontend/EAS_PREVIEW.md.
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - apps/frontend/**
+      - packages/dto/**
+      - package.json
+      - yarn.lock
+      - .github/workflows/frontend-pr-preview.yml
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: frontend-preview-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  preview:
+    name: Build Android preview APK
+    # Only build for PRs raised from cloud sessions (claude/* head branches).
+    if: startsWith(github.head_ref, 'claude/')
+    runs-on: ubuntu-latest
+    # Consumed by the Verify step, the expo-github-action, and the eas build.
+    env:
+      EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+    defaults:
+      run:
+        working-directory: apps/frontend
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Verify EXPO_TOKEN is configured
+        run: |
+          if [ -z "$EXPO_TOKEN" ]; then
+            echo "::error::EXPO_TOKEN secret is not set. See apps/frontend/EAS_PREVIEW.md for one-time setup."
+            exit 1
+          fi
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: yarn
+
+      - name: Setup EAS
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      # Install from the monorepo root so workspace deps resolve.
+      - name: Install dependencies
+        working-directory: .
+        run: yarn install --frozen-lockfile
+
+      - name: Start EAS preview build
+        id: eas
+        run: |
+          # --no-wait returns as soon as the build is queued so the runner is
+          # not held for the whole build; the install page URL is available
+          # immediately and shows a QR code + Install button once it finishes.
+          eas build \
+            --profile preview \
+            --platform android \
+            --non-interactive \
+            --no-wait \
+            --message "PR #${{ github.event.pull_request.number }} (${{ github.head_ref }})" \
+            --json > eas-build.json
+          cat eas-build.json
+          BUILD_URL=$(node -e "const b=require('./eas-build.json');console.log((b[0]&&b[0].buildDetailsPageUrl)||'')")
+          echo "build_url=$BUILD_URL" >> "$GITHUB_OUTPUT"
+
+      - name: Comment install link on the PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const url = ${{ toJSON(steps.eas.outputs.build_url) }};
+            const marker = '<!-- eas-android-preview -->';
+            const body = [
+              marker,
+              '### 📱 Android preview build',
+              '',
+              url
+                ? `A preview APK is building on EAS for this PR.\n\n**[Open the build & install on your phone →](${url})**`
+                : 'A preview APK build was started on EAS, but the build URL could not be read from the CLI output. Check the workflow logs or https://expo.dev.',
+              '',
+              'Open the link above on your **Android** device once the build finishes, then scan the QR code or tap **Install**. You may need to allow installs from your browser the first time.',
+            ].join('\n');
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            const existing = comments.find((c) => c.body && c.body.includes(marker));
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body,
+              });
+            }
