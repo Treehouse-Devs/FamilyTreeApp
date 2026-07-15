@@ -1,0 +1,188 @@
+<testsuites id="" name="" tests="25" failures="1" skipped="13" errors="0" time="21.595056">
+<testsuite name="routes.spec.ts" timestamp="2026-07-19T13:01:31.960Z" hostname="" tests="25" failures="1" skipped="13" time="20.616" errors="0">
+<testcase name="staging API route coverage › GET /health/live" classname="routes.spec.ts" time="0.314">
+</testcase>
+<testcase name="staging API route coverage › GET /health/ready" classname="routes.spec.ts" time="0.104">
+</testcase>
+<testcase name="staging API route coverage › POST /auth/forgot-password rejects invalid payload" classname="routes.spec.ts" time="0.181">
+</testcase>
+<testcase name="staging API route coverage › POST /auth/verification-email rejects invalid payload" classname="routes.spec.ts" time="0.191">
+</testcase>
+<testcase name="staging API route coverage › POST /auth/google-auth preserves invalid-token 401" classname="routes.spec.ts" time="0.43">
+</testcase>
+<testcase name="staging API route coverage › POST /auth/register creates disposable user a" classname="routes.spec.ts" time="7.436">
+</testcase>
+<testcase name="staging API route coverage › POST /auth/register creates disposable user b" classname="routes.spec.ts" time="8.174">
+</testcase>
+<testcase name="staging API route coverage › POST /auth/login authenticates both verified users" classname="routes.spec.ts" time="2.157">
+</testcase>
+<testcase name="staging API route coverage › GET /profile reads the authenticated profile" classname="routes.spec.ts" time="0.302">
+</testcase>
+<testcase name="staging API route coverage › PATCH /profile updates profile fields" classname="routes.spec.ts" time="0.388">
+</testcase>
+<testcase name="staging API route coverage › POST /profile/image uploads an image" classname="routes.spec.ts" time="0.499">
+</testcase>
+<testcase name="staging API route coverage › POST /trees creates independent trees for both users" classname="routes.spec.ts" time="0.407">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|artifacts/routes-staging-API-route-c-bfe75-endent-trees-for-both-users/error-context.md]]
+]]>
+</system-out>
+<failure message="POST /trees (e2e-local-1784466091226-tree-create-a)" type="expect.toBe">
+<![CDATA[  routes.spec.ts:129:7 › staging API route coverage › POST /trees creates independent trees for both users 
+
+    Error: POST /trees (e2e-local-1784466091226-tree-create-a)
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 201
+    Received: 500
+
+       at helpers.ts:94
+
+      92 |   }
+      93 |
+    > 94 |   expect(response.status(), `${method} ${path} (${requestId})`).toBe(expectedStatus)
+         |                                                                 ^
+      95 |   expect(response.headers()['x-request-id'], `${method} ${path} request ID echo`).toBe(requestId)
+      96 |
+      97 |   return { response, body, requestId }
+        at stagingRequest (/media/alvintriseptia/SamsungDriv/Coding/Project/FamilyTreeApp/apps/backend/test/staging-api/helpers.ts:94:65)
+        at /media/alvintriseptia/SamsungDriv/Coding/Project/FamilyTreeApp/apps/backend/test/staging-api/routes.spec.ts:132:24
+
+    Error Context: ../../test-results/staging-api/artifacts/routes-staging-API-route-c-bfe75-endent-trees-for-both-users/error-context.md
+]]>
+</failure>
+</testcase>
+<testcase name="staging API route coverage › GET /trees lists only owned trees" classname="routes.spec.ts">
+<properties>
+<property name="blocked" value="Missing prerequisite: user a access token">
+</property>
+<property name="skip" value="Blocked by missing prerequisite: user a access token">
+</property>
+</properties>
+<skipped>
+</skipped>
+</testcase>
+<testcase name="staging API route coverage › GET /trees/:id returns owned tree and hides it from another user" classname="routes.spec.ts">
+<properties>
+<property name="blocked" value="Missing prerequisite: user a tree">
+</property>
+<property name="skip" value="Blocked by missing prerequisite: user a tree">
+</property>
+</properties>
+<skipped>
+</skipped>
+</testcase>
+<testcase name="staging API route coverage › PATCH /trees/:id updates owned tree and rejects another user" classname="routes.spec.ts">
+<properties>
+<property name="blocked" value="Missing prerequisite: user a tree">
+</property>
+<property name="skip" value="Blocked by missing prerequisite: user a tree">
+</property>
+</properties>
+<skipped>
+</skipped>
+</testcase>
+<testcase name="staging API route coverage › POST /trees/:treeId/image uploads only to an owned tree" classname="routes.spec.ts">
+<properties>
+<property name="blocked" value="Missing prerequisite: user a tree">
+</property>
+<property name="skip" value="Blocked by missing prerequisite: user a tree">
+</property>
+</properties>
+<skipped>
+</skipped>
+</testcase>
+<testcase name="staging API route coverage › POST /trees/:id/person creates members and rejects cross-tree relationships" classname="routes.spec.ts">
+<properties>
+<property name="blocked" value="Missing prerequisite: user a tree">
+</property>
+<property name="skip" value="Blocked by missing prerequisite: user a tree">
+</property>
+</properties>
+<skipped>
+</skipped>
+</testcase>
+<testcase name="staging API route coverage › GET /trees/:id/person/:personId enforces tree and user ownership" classname="routes.spec.ts">
+<properties>
+<property name="blocked" value="Missing prerequisite: user a tree">
+</property>
+<property name="skip" value="Blocked by missing prerequisite: user a tree">
+</property>
+</properties>
+<skipped>
+</skipped>
+</testcase>
+<testcase name="staging API route coverage › PATCH /trees/:id/person/:personId updates only an owned member" classname="routes.spec.ts">
+<properties>
+<property name="blocked" value="Missing prerequisite: user a tree">
+</property>
+<property name="skip" value="Blocked by missing prerequisite: user a tree">
+</property>
+</properties>
+<skipped>
+</skipped>
+</testcase>
+<testcase name="staging API route coverage › POST /trees/:id/person/:personId/image uploads only for an owned member" classname="routes.spec.ts">
+<properties>
+<property name="blocked" value="Missing prerequisite: user a tree">
+</property>
+<property name="skip" value="Blocked by missing prerequisite: user a tree">
+</property>
+</properties>
+<skipped>
+</skipped>
+</testcase>
+<testcase name="staging API route coverage › DELETE /trees/:id/person/:personId deletes only an owned member" classname="routes.spec.ts">
+<properties>
+<property name="blocked" value="Missing prerequisite: user b tree">
+</property>
+<property name="skip" value="Blocked by missing prerequisite: user b tree">
+</property>
+</properties>
+<skipped>
+</skipped>
+</testcase>
+<testcase name="staging API route coverage › DELETE /trees/:id deletes only an owned tree" classname="routes.spec.ts">
+<properties>
+<property name="blocked" value="Missing prerequisite: user a secondary tree">
+</property>
+<property name="skip" value="Blocked by missing prerequisite: user a secondary tree">
+</property>
+</properties>
+<skipped>
+</skipped>
+</testcase>
+<testcase name="staging API route coverage › POST /auth/refresh-token rotates and rejects reuse" classname="routes.spec.ts">
+<properties>
+<property name="blocked" value="Missing prerequisite: user a uid">
+</property>
+<property name="skip" value="Blocked by missing prerequisite: user a uid">
+</property>
+</properties>
+<skipped>
+</skipped>
+</testcase>
+<testcase name="staging API route coverage › POST /auth/reset-password changes the authenticated password" classname="routes.spec.ts">
+<properties>
+<property name="blocked" value="Missing prerequisite: user a access token">
+</property>
+<property name="skip" value="Blocked by missing prerequisite: user a access token">
+</property>
+</properties>
+<skipped>
+</skipped>
+</testcase>
+<testcase name="staging API route coverage › DELETE /auth removes the Firebase account without changing the public contract" classname="routes.spec.ts">
+<properties>
+<property name="blocked" value="Missing prerequisite: user b access token">
+</property>
+<property name="skip" value="Blocked by missing prerequisite: user b access token">
+</property>
+</properties>
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+</testsuites>

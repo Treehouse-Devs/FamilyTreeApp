@@ -5,3 +5,4 @@ dist
 .github/*.md
 .clinerules
 .env
+.superpowers/
