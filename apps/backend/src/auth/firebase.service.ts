@@ -10,6 +10,15 @@ interface FirebaseUserData {
   password?: string
 }
 
+function firebaseAuthErrorCode(error: unknown): string | undefined {
+  const firebaseError = error as {
+    code?: string
+    errorInfo?: { code?: string }
+  }
+
+  return firebaseError.code ?? firebaseError.errorInfo?.code
+}
+
 @Injectable()
 export class FirebaseService {
   async createUser({ displayName, email, password }: { displayName: string, email: string, password?: string }) {
@@ -77,7 +86,7 @@ export class FirebaseService {
     try {
       return await admin.auth().verifyIdToken(idToken)
     } catch (error: unknown) {
-      if (error instanceof FirebaseError && error.code === 'auth/invalid-id-token') {
+      if (firebaseAuthErrorCode(error)?.startsWith('auth/')) {
         throw new UnauthorizedException('Invalid Google ID token')
       }
       throw new InternalServerErrorException('Google authentication failed')

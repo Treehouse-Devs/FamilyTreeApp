@@ -12,6 +12,7 @@ on:
       - tsconfig.json
       - eslint.config.js
       - .github/workflows/backend-cicd.yml
+      - .github/workflows/staging-api-e2e.yml
   push:
     branches: [main]
     paths:
@@ -23,13 +24,14 @@ on:
       - tsconfig.json
       - eslint.config.js
       - .github/workflows/backend-cicd.yml
+      - .github/workflows/staging-api-e2e.yml
   workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: backend-${{ github.event_name == 'pull_request' && github.event.pull_request.number || 'production' }}
+  group: backend-${{ github.event_name == 'pull_request' && github.event.pull_request.number || 'staging' }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 env:
@@ -73,6 +75,8 @@ jobs:
         run: yarn tsc -p apps/backend/tsconfig.check.json
       - name: Unit tests
         run: yarn workspace backend test --runInBand
+      - name: Discover staging API tests without contacting staging
+        run: yarn workspace backend test:staging-api:list
       - name: Build application and migrations
         run: yarn workspace backend build
       - name: Apply migrations to an empty PostgreSQL database
@@ -101,13 +105,19 @@ jobs:
             caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile
       - name: Build production image
         run: docker build -f apps/backend/Dockerfile -t backend:test .
+      - name: Verify production image staging assets
+        run: |
+          docker run --rm --entrypoint sh backend:test -c \
+            'test -f src/mailer/templates/forgot-password.mjml &&
+             test -f src/mailer/templates/verify-email.mjml &&
+             test -x scripts/staging-e2e-admin.cjs'
 
   deploy:
     name: Deploy approved release
     needs: verify
     if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest
-    environment: production
+    environment: staging
     permissions:
       contents: read
     env:
@@ -194,3 +204,10 @@ jobs:
             --retry 5 --retry-delay 2 --retry-connrefused \
             https://api-treely.arkaes.dev/health/ready
           REMOTE
+
+  staging-api-e2e:
+    name: Verify deployed staging API
+    needs: deploy
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    uses: ./.github/workflows/staging-api-e2e.yml
+    secrets: inherit

@@ -5,7 +5,7 @@ import { getRepositoryToken } from '@nestjs/typeorm'
 import { FamilyMember } from './entities/family-member.entity'
 import { FamilyService } from 'src/family/family.service'
 import { StorageService } from 'src/storage/storage.service'
-import { ForbiddenException, NotFoundException } from '@nestjs/common'
+import { BadRequestException, NotFoundException } from '@nestjs/common'
 import { Gender } from '@treely/dto'
 import type { Family } from 'src/family/entities/family.entity'
 
@@ -56,6 +56,7 @@ describe('MemberService', () => {
       transaction: jest.fn((fn: (manager: typeof mockManager) => Promise<unknown>) => fn(mockManager)),
     },
     findOneBy: jest.fn(),
+    countBy: jest.fn(),
     find: jest.fn(),
     update: jest.fn(),
   }
@@ -96,10 +97,10 @@ describe('MemberService', () => {
       motherId: undefined,
     }
 
-    it('should throw ForbiddenException when family does not belong to user', async () => {
-      familyService.findOne.mockResolvedValue(null)
+    it('should propagate NotFoundException when family does not belong to user', async () => {
+      familyService.findOne.mockRejectedValue(new NotFoundException('Family not found'))
 
-      await expect(service.create(baseDto, 'family-1', 'user-1')).rejects.toThrow(ForbiddenException)
+      await expect(service.create(baseDto, 'family-1', 'user-1')).rejects.toThrow(NotFoundException)
     })
 
     it('should create a member when it is the first member in the family (no relationships required)', async () => {
@@ -107,6 +108,7 @@ describe('MemberService', () => {
       const createdMember = makeMember({ fullName: 'Jane Doe', gender: Gender.FEMALE })
 
       familyService.findOne.mockResolvedValue(family)
+      memberRepository.countBy.mockResolvedValue(0)
       mockManager.create.mockReturnValue(createdMember)
       mockManager.save.mockResolvedValue(createdMember)
       const result = await service.create(baseDto, 'family-1', 'user-1')
@@ -119,6 +121,7 @@ describe('MemberService', () => {
       const newMember = makeMember({ id: 'new-member' })
 
       familyService.findOne.mockResolvedValue({ id: 'family-1' })
+      memberRepository.countBy.mockResolvedValue(1)
       mockManager.create.mockReturnValue(newMember)
       mockManager.save.mockResolvedValue(newMember)
 
@@ -126,10 +129,20 @@ describe('MemberService', () => {
 
       expect(mockManager.update).toHaveBeenCalledWith(
         FamilyMember,
-        { id: 'spouse-id' },
+        { id: 'spouse-id', familyId: 'family-1' },
         { spouseId: 'new-member' },
       )
       expect(result).toMatchObject({ id: newMember.id })
+    })
+
+    it('rejects relationship IDs from another tree', async () => {
+      familyService.findOne.mockResolvedValue({ id: 'family-1' })
+      memberRepository.countBy.mockResolvedValue(0)
+
+      await expect(
+        service.create({ ...baseDto, fatherId: 'other-tree-member' }, 'family-1', 'user-1'),
+      ).rejects.toThrow(BadRequestException)
+      expect(mockManager.save).not.toHaveBeenCalled()
     })
   })
 
@@ -142,11 +155,10 @@ describe('MemberService', () => {
       await expect(service.findOne('family-1', 'member-1', 'user-1')).rejects.toThrow(NotFoundException)
     })
 
-    it('should throw ForbiddenException when family does not belong to user', async () => {
-      memberRepository.findOneBy.mockResolvedValue(makeMember())
-      familyService.findOne.mockResolvedValue(null)
+    it('should propagate NotFoundException when family does not belong to user', async () => {
+      familyService.findOne.mockRejectedValue(new NotFoundException('Family not found'))
 
-      await expect(service.findOne('family-1', 'member-1', 'user-1')).rejects.toThrow(ForbiddenException)
+      await expect(service.findOne('family-1', 'member-1', 'user-1')).rejects.toThrow(NotFoundException)
     })
 
     it('should return the member when found and authorized', async () => {
@@ -156,7 +168,19 @@ describe('MemberService', () => {
 
       const result = await service.findOne('family-1', 'member-1', 'user-1')
 
+      expect(memberRepository.findOneBy).toHaveBeenCalledWith({ id: 'member-1', familyId: 'family-1' })
       expect(result).toEqual(member)
+    })
+
+    it('does not return a member with the same ID from another tree', async () => {
+      familyService.findOne.mockResolvedValue({ id: 'family-1' })
+      memberRepository.findOneBy.mockResolvedValue(null)
+
+      await expect(service.findOne('family-1', 'member-other', 'user-1')).rejects.toThrow(NotFoundException)
+      expect(memberRepository.findOneBy).toHaveBeenCalledWith({
+        id: 'member-other',
+        familyId: 'family-1',
+      })
     })
   })
 

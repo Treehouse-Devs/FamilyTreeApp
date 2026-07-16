@@ -11,8 +11,10 @@ Do not enable it in production. Passwords, tokens, cookies, authorization header
 1. Set these values in the deployment `.env`:
 
    ```env
+   DEPLOYMENT_ENV=staging
    LOG_MONITOR_ENABLED=true
    LOG_MONITOR_ENVIRONMENT=staging
+   E2E_ADMIN_ENABLED=true
    GRAFANA_PORT=3002
    GRAFANA_ADMIN_USER=admin
    GRAFANA_ADMIN_PASSWORD_FILE=./secrets/grafana_admin_password
@@ -36,6 +38,20 @@ Do not enable it in production. Passwords, tokens, cookies, authorization header
    ```
 
 The backend deployment script creates the Grafana administrator password file with mode `0600` when monitoring is first enabled. Frontend developers authenticate through Caddy and receive anonymous Viewer access inside loopback-only Grafana; they do not receive the Grafana administrator credential.
+
+## Staging API E2E
+
+The `Staging API E2E` workflow runs after a successful staging deployment and can
+also be dispatched manually. Configure the GitHub `staging` environment with the
+same pinned `VPS_HOST`, `VPS_PORT`, `VPS_USER`, `DEPLOY_DIR`,
+`VPS_SSH_PRIVATE_KEY`, and `VPS_KNOWN_HOSTS` values used by deployment, plus an
+`E2E_EMAIL_BASE` variable such as `qa@example.com`. The mailbox must accept
+plus-addressed aliases.
+
+Firebase service-account credentials stay only in the VPS `.env`. The workflow
+uses the guarded CLI inside the backend container to verify and hard-delete the
+two exact disposable users for its run. The CLI refuses to run unless
+`DEPLOYMENT_ENV=staging` and `E2E_ADMIN_ENABLED=true`.
 
 ## Verify
 

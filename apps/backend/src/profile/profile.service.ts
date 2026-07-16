@@ -16,12 +16,12 @@ export class ProfileService {
     private readonly storageService: StorageService,
   ) { }
 
-  private toResponseDto(user: User, userFromToken: UserFromToken): ProfileResponseDto {
+  private toResponseDto(user: User): ProfileResponseDto {
     return {
       id: user.id,
       firebaseUid: user.firebaseUid,
       name: user.name,
-      email: userFromToken.email,
+      email: user.email,
       avatarUrl: user.avatarUrl,
       birthDate: Number(user.birthDate),
       gender: user.gender,
@@ -31,19 +31,25 @@ export class ProfileService {
 
   async createProfile(
     uid: string,
+    email: string,
     name: string,
     birthDate: number,
     gender: Gender,
   ): Promise<ProfileResponseDto> {
     const user = this.userRepository.create({
       firebaseUid: uid,
+      email,
       name,
       birthDate,
       gender,
     })
     await this.userRepository.save(user)
 
-    return this.toResponseDto(user, { uid, email: '' })
+    return this.toResponseDto(user)
+  }
+
+  async deleteProfile(uid: string): Promise<void> {
+    await this.userRepository.delete({ firebaseUid: uid })
   }
 
   async getProfile(userFromToken: UserFromToken): Promise<ProfileResponseDto> {
@@ -53,7 +59,7 @@ export class ProfileService {
       throw new NotFoundException('Profile not found')
     }
 
-    return this.toResponseDto(user, userFromToken)
+    return this.toResponseDto(user)
   }
 
   async updateProfile(userFromToken: UserFromToken, dto: UpdateProfileDto): Promise<ProfileResponseDto> {
@@ -69,7 +75,7 @@ export class ProfileService {
 
     user = await this.userRepository.save(user)
 
-    return this.toResponseDto(user, userFromToken)
+    return this.toResponseDto(user)
   }
 
   async updateProfileImage(userFromToken: UserFromToken, file: Express.Multer.File): Promise<ProfileResponseDto> {
@@ -83,6 +89,6 @@ export class ProfileService {
     user.avatarUrl = avatarUrl
     user = await this.userRepository.save(user)
 
-    return this.toResponseDto(user, userFromToken)
+    return this.toResponseDto(user)
   }
 }

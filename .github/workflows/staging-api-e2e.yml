@@ -1,0 +1,126 @@
+name: Staging API E2E
+
+on:
+  workflow_call:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: staging-api-e2e
+  cancel-in-progress: false
+
+env:
+  STAGING_API_URL: https://api-treely.arkaes.dev
+  E2E_RUN_ID: ${{ github.run_id }}-${{ github.run_attempt }}
+
+jobs:
+  test:
+    name: Exercise all staging API routes
+    runs-on: ubuntu-latest
+    environment: staging
+    env:
+      VPS_HOST: ${{ vars.VPS_HOST }}
+      VPS_PORT: ${{ vars.VPS_PORT }}
+      VPS_USER: ${{ vars.VPS_USER }}
+      DEPLOY_DIR: ${{ vars.DEPLOY_DIR }}
+      E2E_EMAIL_BASE: ${{ vars.E2E_EMAIL_BASE }}
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22.23.1
+          cache: yarn
+      - run: yarn install --frozen-lockfile
+      - name: Validate exact staging target and disposable mailbox
+        run: |
+          test "$STAGING_API_URL" = "https://api-treely.arkaes.dev"
+          test -n "$E2E_EMAIL_BASE"
+          node -e '
+            if (!/^[a-z0-9._-]+@[a-z0-9.-]+$/i.test(process.env.E2E_EMAIL_BASE ?? "")) {
+              throw new Error("E2E_EMAIL_BASE must be a simple email address without plus addressing")
+            }
+          '
+      - name: Configure pinned SSH credentials
+        env:
+          VPS_SSH_PRIVATE_KEY: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
+          VPS_KNOWN_HOSTS: ${{ secrets.VPS_KNOWN_HOSTS }}
+        run: |
+          test -n "$VPS_HOST"
+          test -n "$VPS_PORT"
+          test -n "$VPS_USER"
+          test -n "$DEPLOY_DIR"
+          test -n "$VPS_SSH_PRIVATE_KEY"
+          test -n "$VPS_KNOWN_HOSTS"
+          install -m 0700 -d "$HOME/.ssh"
+          printf '%s\n' "$VPS_SSH_PRIVATE_KEY" > "$HOME/.ssh/id_ed25519"
+          chmod 0600 "$HOME/.ssh/id_ed25519"
+          printf '%s\n' "$VPS_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
+          chmod 0644 "$HOME/.ssh/known_hosts"
+          ssh-keygen -y -f "$HOME/.ssh/id_ed25519" >/dev/null
+      - name: Verify staging monitor and admin guard are enabled
+        run: |
+          ssh -p "$VPS_PORT" \
+            -i "$HOME/.ssh/id_ed25519" \
+            -o BatchMode=yes \
+            -o ConnectTimeout=15 \
+            -o IdentitiesOnly=yes \
+            -o StrictHostKeyChecking=yes \
+            "$VPS_USER@$VPS_HOST" \
+            "sh -s -- '$DEPLOY_DIR'" <<'REMOTE'
+          set -eu
+          cd "$1"
+          test "$(docker compose exec -T backend node -e 'process.stdout.write(process.env.DEPLOYMENT_ENV ?? "")')" = staging
+          test "$(docker compose exec -T backend node -e 'process.stdout.write(process.env.E2E_ADMIN_ENABLED ?? "")')" = true
+          test "$(docker compose exec -T backend node -e 'process.stdout.write(process.env.LOG_MONITOR_ENABLED ?? "")')" = true
+          docker compose exec -T grafana wget -q -O - http://127.0.0.1:3000/api/health >/dev/null
+          docker compose exec -T grafana wget -q -O - http://loki:3100/ready >/dev/null
+          docker compose exec -T grafana wget -q -O - http://alloy:12345/-/ready >/dev/null
+          REMOTE
+      - name: Run Playwright API suite
+        env:
+          STAGING_API_E2E_ENABLED: "true"
+        run: yarn workspace backend test:staging-api
+      - name: Clean disposable staging data
+        if: ${{ always() }}
+        run: |
+          ssh -p "$VPS_PORT" \
+            -i "$HOME/.ssh/id_ed25519" \
+            -o BatchMode=yes \
+            -o ConnectTimeout=15 \
+            -o IdentitiesOnly=yes \
+            -o StrictHostKeyChecking=yes \
+            "$VPS_USER@$VPS_HOST" \
+            "sh -s -- '$DEPLOY_DIR' '$E2E_EMAIL_BASE' '$E2E_RUN_ID'" <<'REMOTE'
+          set -eu
+          deploy_dir=$1
+          email_base=$2
+          run_id=$3
+          cd "$deploy_dir"
+          docker compose exec -T \
+            -e E2E_EMAIL_BASE="$email_base" \
+            backend node scripts/staging-e2e-admin.cjs cleanup --run-id "$run_id"
+          REMOTE
+      - name: Add sanitized result summary
+        if: ${{ always() }}
+        run: |
+          results=apps/backend/test-results/staging-api/results.json
+          if test -f "$results"; then
+            node apps/backend/scripts/staging-e2e-summary.cjs "$results"
+          else
+            printf '%s\n' \
+              '## Staging API e2e' \
+              '' \
+              "Run: \`$E2E_RUN_ID\`" \
+              '' \
+              'Playwright did not produce a result file.' >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - name: Upload staging API reports
+        if: ${{ always() }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: staging-api-e2e-${{ env.E2E_RUN_ID }}
+          path: apps/backend/test-results/staging-api
+          if-no-files-found: warn
+          retention-days: 14

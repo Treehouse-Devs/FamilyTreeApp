@@ -7,7 +7,7 @@ x-backend: &backend
   environment:
     DB_HOST: db
     NODE_ENV: production
-    APP_URL: https://${API_DOMAIN:-api-treely.arkaes.dev}
+    DEPLOYMENT_ENV: staging
   depends_on:
     db:
       condition: service_healthy

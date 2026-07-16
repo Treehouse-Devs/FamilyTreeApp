@@ -1,4 +1,5 @@
 const ENVIRONMENTS = new Set(['development', 'production', 'test'])
+const DEPLOYMENT_ENVIRONMENTS = new Set(['development', 'staging', 'production', 'test'])
 const STORAGE_PROVIDERS = new Set(['local', 'firebase'])
 
 function requireValue(config: Record<string, unknown>, key: string): void {
@@ -44,11 +45,18 @@ export function validateEnvironment(config: Record<string, unknown>): Record<str
   if (!ENVIRONMENTS.has(nodeEnv)) {
     throw new Error('NODE_ENV must be development, production, or test')
   }
+  const deploymentEnv = typeof config.DEPLOYMENT_ENV === 'string'
+    ? config.DEPLOYMENT_ENV
+    : nodeEnv
+  if (!DEPLOYMENT_ENVIRONMENTS.has(deploymentEnv)) {
+    throw new Error('DEPLOYMENT_ENV must be development, staging, production, or test')
+  }
 
   const port = parsePort(config.PORT, 3000, 'PORT')
   const databasePort = parsePort(config.DB_PORT, 5432, 'DB_PORT')
   const smtpPort = parsePort(config.SMTP_PORT, 465, 'SMTP_PORT')
   const logMonitorEnabled = parseBoolean(config.LOG_MONITOR_ENABLED, false, 'LOG_MONITOR_ENABLED')
+  const e2eAdminEnabled = parseBoolean(config.E2E_ADMIN_ENABLED, false, 'E2E_ADMIN_ENABLED')
   const logMonitorEnvironment = parseEnvironmentLabel(config.LOG_MONITOR_ENVIRONMENT, nodeEnv)
 
   const storageProvider = typeof config.STORAGE_PROVIDER === 'string' ? config.STORAGE_PROVIDER : 'local'
@@ -82,15 +90,20 @@ export function validateEnvironment(config: Record<string, unknown>): Record<str
       requireValue(config, 'FB_STORAGE_BUCKET')
     }
   }
+  if (e2eAdminEnabled && deploymentEnv !== 'staging') {
+    throw new Error('E2E_ADMIN_ENABLED may only be true when DEPLOYMENT_ENV=staging')
+  }
 
   return {
     ...config,
     NODE_ENV: nodeEnv,
+    DEPLOYMENT_ENV: deploymentEnv,
     PORT: port,
     DB_PORT: databasePort,
     SMTP_PORT: smtpPort,
     STORAGE_PROVIDER: storageProvider,
     LOG_MONITOR_ENABLED: logMonitorEnabled,
     LOG_MONITOR_ENVIRONMENT: logMonitorEnvironment,
+    E2E_ADMIN_ENABLED: e2eAdminEnabled,
   }
 }

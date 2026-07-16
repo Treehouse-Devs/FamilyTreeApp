@@ -1,4 +1,4 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common'
+import { Injectable, NotFoundException } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Family } from './entities/family.entity'
 import { DataSource, ILike, Repository } from 'typeorm'
@@ -59,7 +59,7 @@ export class FamilyService {
     const family = await this.familyRepo.findOneBy({ id, createdByUid: userId })
 
     if (!family) {
-      throw new ConflictException('Family not found')
+      throw new NotFoundException('Family not found')
     }
 
     return family
