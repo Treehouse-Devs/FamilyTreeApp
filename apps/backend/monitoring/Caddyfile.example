@@ -1,0 +1,21 @@
+# Merge these handlers into the existing api-treely.arkaes.dev site block.
+# Keep the /log matcher before the catch-all backend handler.
+api-treely.arkaes.dev {
+	@logMonitorRoot path /log
+	handle @logMonitorRoot {
+		redir /log/ permanent
+	}
+
+	handle_path /log/* {
+		basic_auth {
+			{$LOG_MONITOR_USERNAME} {$LOG_MONITOR_PASSWORD_HASH}
+		}
+		reverse_proxy 127.0.0.1:3002 {
+			header_up -Authorization
+		}
+	}
+
+	handle {
+		reverse_proxy 127.0.0.1:3001
+	}
+}

@@ -15,6 +15,7 @@ import { MemberModule } from './member/member.module'
 import { ProfileModule } from './profile/profile.module'
 import { HealthModule } from './health/health.module'
 import { validateEnvironment } from './config/env.validation'
+import { LogMonitorModule } from './log-monitor/log-monitor.module'
 
 @Module({
   imports: [
@@ -42,6 +43,7 @@ import { validateEnvironment } from './config/env.validation'
     AuthModule,
     MailerModule,
     HealthModule,
+    LogMonitorModule,
   ],
   controllers: [],
   providers: [

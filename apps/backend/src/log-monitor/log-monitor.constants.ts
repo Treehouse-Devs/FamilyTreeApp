@@ -1,0 +1,8 @@
+export const FAILURE_EVENT_SINK = Symbol('FAILURE_EVENT_SINK')
+export const LOG_MONITOR_ENABLED = Symbol('LOG_MONITOR_ENABLED')
+export const LOG_MONITOR_ENVIRONMENT = Symbol('LOG_MONITOR_ENVIRONMENT')
+
+export const CAPTURED_BODY_MAX_BYTES = 256 * 1024
+export const EXCEPTION_STACK_MAX_BYTES = 64 * 1024
+export const FAILURE_EVENT_MAX_BYTES = 1024 * 1024
+export const REQUEST_ID_HEADER = 'x-request-id'

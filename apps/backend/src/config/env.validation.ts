@@ -16,6 +16,29 @@ function parsePort(value: unknown, fallback: number, key: string): number {
   return port
 }
 
+function parseBoolean(value: unknown, fallback: boolean, key: string): boolean {
+  if (value === undefined) {
+    return fallback
+  }
+  if (value === true || value === 'true') {
+    return true
+  }
+  if (value === false || value === 'false') {
+    return false
+  }
+
+  throw new Error(`${key} must be true or false`)
+}
+
+function parseEnvironmentLabel(value: unknown, fallback: string): string {
+  const label = typeof value === 'string' ? value : fallback
+  if (!/^[a-z0-9_-]{1,32}$/i.test(label)) {
+    throw new Error('LOG_MONITOR_ENVIRONMENT must contain only letters, numbers, underscores, or hyphens')
+  }
+
+  return label
+}
+
 export function validateEnvironment(config: Record<string, unknown>): Record<string, unknown> {
   const nodeEnv = typeof config.NODE_ENV === 'string' ? config.NODE_ENV : 'development'
   if (!ENVIRONMENTS.has(nodeEnv)) {
@@ -25,6 +48,8 @@ export function validateEnvironment(config: Record<string, unknown>): Record<str
   const port = parsePort(config.PORT, 3000, 'PORT')
   const databasePort = parsePort(config.DB_PORT, 5432, 'DB_PORT')
   const smtpPort = parsePort(config.SMTP_PORT, 465, 'SMTP_PORT')
+  const logMonitorEnabled = parseBoolean(config.LOG_MONITOR_ENABLED, false, 'LOG_MONITOR_ENABLED')
+  const logMonitorEnvironment = parseEnvironmentLabel(config.LOG_MONITOR_ENVIRONMENT, nodeEnv)
 
   const storageProvider = typeof config.STORAGE_PROVIDER === 'string' ? config.STORAGE_PROVIDER : 'local'
   if (!STORAGE_PROVIDERS.has(storageProvider)) {
@@ -65,5 +90,7 @@ export function validateEnvironment(config: Record<string, unknown>): Record<str
     DB_PORT: databasePort,
     SMTP_PORT: smtpPort,
     STORAGE_PROVIDER: storageProvider,
+    LOG_MONITOR_ENABLED: logMonitorEnabled,
+    LOG_MONITOR_ENVIRONMENT: logMonitorEnvironment,
   }
 }

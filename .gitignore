@@ -1,6 +1,7 @@
 node_modules
 build
 dist
+apps/backend/secrets/
 .agents
 .github/*.md
 .clinerules

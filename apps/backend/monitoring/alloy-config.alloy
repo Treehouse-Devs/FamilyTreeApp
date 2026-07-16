@@ -1,0 +1,90 @@
+logging {
+  level  = "info"
+  format = "logfmt"
+}
+
+local.file_match "docker_logs" {
+  path_targets = [{
+    "__path__" = "/var/lib/docker/containers/*/*-json.log",
+    "job"      = "docker",
+  }]
+  sync_period = "10s"
+}
+
+loki.source.file "docker_logs" {
+  targets    = local.file_match.docker_logs.targets
+  forward_to = [loki.process.backend_failures.receiver]
+}
+
+loki.process "backend_failures" {
+  stage.json {
+    expressions = {
+      docker_log       = "log",
+      docker_timestamp = "time",
+    }
+  }
+
+  stage.timestamp {
+    source = "docker_timestamp"
+    format = "RFC3339Nano"
+  }
+
+  stage.json {
+    source = "docker_log"
+    expressions = {
+      environment = "environment",
+      event       = "event",
+      method      = "request.method",
+      service     = "service",
+      status_code = "response.statusCode",
+    }
+  }
+
+  stage.labels {
+    values = {
+      environment = "",
+      event       = "",
+      method      = "",
+      service     = "",
+    }
+  }
+
+  stage.match {
+    selector            = "{event!=\"http_failure\"}"
+    action              = "drop"
+    drop_counter_reason = "not_backend_http_failure"
+  }
+
+  stage.match {
+    selector            = "{service!=\"backend\"}"
+    action              = "drop"
+    drop_counter_reason = "not_backend_service"
+  }
+
+  stage.regex {
+    source     = "status_code"
+    expression = "^(?P<status_class>[45])[0-9][0-9]$"
+  }
+
+  stage.labels {
+    values = {
+      status_class = "",
+    }
+  }
+
+  stage.label_drop {
+    values = ["event"]
+  }
+
+  stage.output {
+    source = "docker_log"
+  }
+
+  forward_to = [loki.write.local.receiver]
+}
+
+loki.write "local" {
+  endpoint {
+    url = "http://loki:3100/loki/api/v1/push"
+  }
+}
