@@ -3,9 +3,7 @@
 # Keep the /log matcher before the catch-all backend handler.
 {$API_PUBLIC_DOMAIN} {
 	@logMonitorRoot path /log
-	handle @logMonitorRoot {
-		redir /log/ permanent
-	}
+	redir @logMonitorRoot /log/ permanent
 
 	handle_path /log/* {
 		basic_auth {
