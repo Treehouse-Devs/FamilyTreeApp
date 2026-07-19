@@ -102,7 +102,7 @@ docker compose exec -T grafana wget -q -O - http://loki:3100/ready
 docker compose exec -T grafana wget -q -O - http://alloy:12345/-/ready
 ```
 
-Trigger a controlled failed API request, then open `/log/`. The **Backend Failed Requests** dashboard should show the event within five seconds. Expand the log row to inspect its request, response, and exception fields.
+Trigger a controlled failed API request, then open `/log/`. The **Backend Failed Requests** dashboard should show the event on its next 30-second refresh. Expand the log row to inspect its request, response, and exception fields.
 
 ## Disable
 

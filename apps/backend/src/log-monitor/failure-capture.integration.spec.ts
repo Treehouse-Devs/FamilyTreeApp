@@ -1,8 +1,23 @@
-import { BadRequestException, Body, Controller, Get, Module, Post, Res } from '@nestjs/common'
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Get,
+  Injectable,
+  Module,
+  Post,
+  Res,
+  UploadedFile,
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common'
+import type { CanActivate } from '@nestjs/common'
 import type { INestApplication } from '@nestjs/common'
 import type { Response } from 'express'
 import { Test } from '@nestjs/testing'
+import { FileInterceptor } from '@nestjs/platform-express'
 import type { NestExpressApplication } from '@nestjs/platform-express'
+import { memoryStorage } from 'multer'
 import request from 'supertest'
 import type { App } from 'supertest/types'
 import type { FailureEvent } from './failure-event.types'
@@ -10,6 +25,15 @@ import { CAPTURED_BODY_MAX_BYTES, FAILURE_EVENT_SINK, LOG_MONITOR_ENABLED } from
 import type { FailureEventSink } from './failure-event-writer.service'
 import { LogMonitorModule } from './log-monitor.module'
 import { FailureCaptureMiddleware } from './failure-capture.middleware'
+
+@Injectable()
+class DelayedGuard implements CanActivate {
+  async canActivate(): Promise<boolean> {
+    await new Promise(resolve => setTimeout(resolve, 25))
+
+    return true
+  }
+}
 
 @Controller('capture')
 class CaptureTestController {
@@ -37,11 +61,27 @@ class CaptureTestController {
   unexpectedError(): never {
     throw new Error('database unavailable')
   }
+
+  @Post('multipart')
+  @UseGuards(DelayedGuard)
+  @UseInterceptors(FileInterceptor('image', { storage: memoryStorage() }))
+  upload(@UploadedFile() file?: Express.Multer.File) {
+    if (!file) {
+      throw new BadRequestException('No file uploaded')
+    }
+
+    return {
+      originalName: file.originalname,
+      mimeType: file.mimetype,
+      size: file.size,
+    }
+  }
 }
 
 @Module({
   imports: [LogMonitorModule],
   controllers: [CaptureTestController],
+  providers: [DelayedGuard],
 })
 class CaptureTestModule { }
 
@@ -185,6 +225,28 @@ describe('HTTP failure capture', () => {
       capturedBytes: CAPTURED_BODY_MAX_BYTES,
       truncated: true,
     })
+  })
+
+  it('does not consume multipart uploads before an asynchronous guard and Multer', async () => {
+    const pngFixture = Buffer.from(
+      'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=',
+      'base64',
+    )
+
+    const response = await request(app.getHttpServer())
+      .post('/capture/multipart')
+      .attach('image', pngFixture, {
+        filename: 'avatar.png',
+        contentType: 'image/png',
+      })
+      .expect(201)
+
+    expect(response.body).toEqual({
+      originalName: 'avatar.png',
+      mimeType: 'image/png',
+      size: pngFixture.length,
+    })
+    expect(lines).toHaveLength(0)
   })
 
   it('does not capture successful responses and replaces unsafe request IDs', async () => {

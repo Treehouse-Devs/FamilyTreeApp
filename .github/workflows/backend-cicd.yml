@@ -98,9 +98,13 @@ jobs:
               process.stdin.on("data", chunk => input += chunk);
               process.stdin.on("end", () => {
                 const config = JSON.parse(input);
-                const environment = config.services.grafana.environment;
+                const grafana = config.services.grafana;
+                const environment = grafana.environment;
                 if (environment.GF_SERVER_DOMAIN !== "api.example.com") process.exit(1);
                 if (environment.GF_SERVER_ROOT_URL !== "https://api.example.com/log/") process.exit(1);
+                if (environment.GF_DASHBOARDS_MIN_REFRESH_INTERVAL !== "30s") process.exit(1);
+                if (environment.GOMEMLIMIT !== "256MiB") process.exit(1);
+                if (grafana.mem_limit !== "536870912") process.exit(1);
               });
             '
           BACKEND_IMAGE=example.invalid/familytree/backend:test \

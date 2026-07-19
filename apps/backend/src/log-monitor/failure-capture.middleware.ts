@@ -26,6 +26,14 @@ function requestIdFrom(request: Request): string {
   return candidate && SAFE_REQUEST_ID.test(candidate) ? candidate : randomUUID()
 }
 
+function isCapturableBodyContentType(contentType: string): boolean {
+  return JSON_CONTENT_TYPE.test(contentType) || TEXT_CONTENT_TYPE.test(contentType)
+}
+
+function shouldCaptureRequestBody(request: Request): boolean {
+  return isCapturableBodyContentType(request.get('content-type') ?? '')
+}
+
 function fileMetadata(file: Express.Multer.File): UploadedFileMetadata {
   return {
     fieldName: file.fieldname,
@@ -77,7 +85,7 @@ function capturedBufferedBody(
   if (originalBytes === 0) {
     return serializer.serializeJson(undefined, CAPTURED_BODY_MAX_BYTES)
   }
-  if (!JSON_CONTENT_TYPE.test(contentType) && !TEXT_CONTENT_TYPE.test(contentType)) {
+  if (!isCapturableBodyContentType(contentType)) {
     return {
       value: '[Binary omitted]',
       kind: 'binary' as const,
@@ -177,7 +185,9 @@ export class FailureCaptureMiddleware implements NestMiddleware {
     const requestId = requestIdFrom(request)
     response.setHeader(REQUEST_ID_HEADER, requestId)
     const context = this.contexts.create(request, requestId)
-    request.on('data', chunk => context.requestBody.append(chunk))
+    if (shouldCaptureRequestBody(request)) {
+      request.on('data', chunk => context.requestBody.append(chunk))
+    }
     patchResponse(response, context)
 
     response.once('finish', () => {

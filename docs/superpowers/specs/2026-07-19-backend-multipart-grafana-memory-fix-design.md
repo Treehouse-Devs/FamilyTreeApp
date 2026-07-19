@@ -41,7 +41,7 @@ monitor enablement behavior remain unchanged.
 ### Grafana Memory And Refresh
 
 The Grafana container will retain its hard `mem_limit: 512m`. Its environment
-will set `GOMEMLIMIT=400MiB` so the Go runtime targets a heap size that leaves
+will set `GOMEMLIMIT=256MiB` so the Go runtime targets a heap size that leaves
 room for the process, mapped files, SQLite, and container overhead.
 
 The provisioned backend-failure dashboard refresh interval will change from
@@ -75,7 +75,7 @@ capture, and disabled monitoring must continue to pass.
 Compose rendering must verify:
 
 - Grafana retains a 512 MiB hard memory limit;
-- `GOMEMLIMIT` resolves to `400MiB`; and
+- `GOMEMLIMIT` resolves to `256MiB`; and
 - Grafana's minimum dashboard refresh interval resolves to 30 seconds.
 
 The dashboard JSON must use a 30-second default refresh.
@@ -99,7 +99,7 @@ the staging-like environment. Verify:
   multipart field names.
 - Failure monitoring remains enabled and captures failed JSON/text requests.
 - Multipart uploads no longer fail because of the monitoring middleware.
-- Grafana remains capped at 512 MiB with a 400 MiB Go memory target.
+- Grafana remains capped at 512 MiB with a 256 MiB Go memory target.
 - The dashboard and server minimum refresh interval are 30 seconds.
 - The isolated Docker validation leaves no test containers, volumes, users, or
   generated repository changes behind.
