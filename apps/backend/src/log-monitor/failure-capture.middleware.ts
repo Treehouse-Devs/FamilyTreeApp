@@ -14,6 +14,7 @@ import type { BoundedBodyCapture } from './bounded-body-capture'
 const SAFE_REQUEST_ID = /^[A-Za-z0-9._:-]{1,128}$/
 const JSON_CONTENT_TYPE = /^application\/(?:[a-z0-9.+-]*\+)?json(?:;|$)/i
 const TEXT_CONTENT_TYPE = /^(?:text\/[a-z0-9.+-]+|application\/(?:xml|x-www-form-urlencoded))(?:;|$)/i
+const SENSITIVE_HEADERS = new Set(['authorization', 'cookie', 'proxy-authorization', 'set-cookie'])
 
 interface RequestWithUploads extends Request {
   file?: Express.Multer.File
@@ -24,6 +25,15 @@ function requestIdFrom(request: Request): string {
   const candidate = request.get(REQUEST_ID_HEADER)
 
   return candidate && SAFE_REQUEST_ID.test(candidate) ? candidate : randomUUID()
+}
+
+function redactedHeaders<T extends Record<string, string | number | string[] | undefined>>(headers: T): T {
+  return Object.fromEntries(
+    Object.entries(headers).map(([name, value]) => [
+      name,
+      SENSITIVE_HEADERS.has(name.toLowerCase()) ? '[REDACTED]' : value,
+    ]),
+  ) as T
 }
 
 function isCapturableBodyContentType(contentType: string): boolean {
@@ -224,14 +234,14 @@ export class FailureCaptureMiddleware implements NestMiddleware {
         query: { ...request.query },
         ip: request.ip ?? '',
         userAgent: request.get('user-agent') ?? '',
-        headers: { ...request.headers },
+        headers: redactedHeaders(request.headers),
         authenticatedUser: authenticatedUser(request),
         body: capturedRequestBody(request, context, this.serializer),
         files: uploadedFiles(request),
       },
       response: {
         statusCode: response.statusCode,
-        headers: { ...response.getHeaders() },
+        headers: redactedHeaders(response.getHeaders()),
         body: capturedResponseBody(context, response, this.serializer),
       },
       exception: context.exception,

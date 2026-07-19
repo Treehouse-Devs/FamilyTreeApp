@@ -54,6 +54,8 @@ class CaptureTestController {
 
   @Get('manual-failure')
   manualFailure(@Res() response: Response): void {
+    response.setHeader('set-cookie', ['session=secret', 'refresh=secret'])
+    response.setHeader('x-debug-context', 'retained')
     response.status(418).json({ message: 'teapot' })
   }
 
@@ -131,6 +133,9 @@ describe('HTTP failure capture', () => {
       .post('/capture/bad-request?source=frontend')
       .set('x-request-id', 'frontend-debug-42')
       .set('authorization', 'Bearer staging-token')
+      .set('cookie', 'session=secret')
+      .set('proxy-authorization', 'Basic c2VjcmV0')
+      .set('x-debug-context', 'retained')
       .send({ firstName: 'Rina', password: 'unredacted' })
       .expect(400)
       .expect('x-request-id', 'frontend-debug-42')
@@ -151,7 +156,12 @@ describe('HTTP failure capture', () => {
         method: 'POST',
         path: '/capture/bad-request?source=frontend',
         query: { source: 'frontend' },
-        headers: { authorization: 'Bearer staging-token' },
+        headers: {
+          'authorization': '[REDACTED]',
+          'cookie': '[REDACTED]',
+          'proxy-authorization': '[REDACTED]',
+          'x-debug-context': 'retained',
+        },
         body: { value: { firstName: 'Rina', password: 'unredacted' } },
       },
       response: {
@@ -283,6 +293,10 @@ describe('HTTP failure capture', () => {
     const event = JSON.parse(lines[0]) as FailureEvent
     expect(event.response).toMatchObject({
       statusCode: 418,
+      headers: {
+        'set-cookie': '[REDACTED]',
+        'x-debug-context': 'retained',
+      },
       body: { value: { message: 'teapot' } },
     })
     expect(event.exception).toBeUndefined()
