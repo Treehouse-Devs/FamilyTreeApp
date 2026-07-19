@@ -7,4 +7,8 @@ apps/backend/test-results/
 .github/*.md
 .clinerules
 .env
-.superpowers/
+.superpowers/*
+!.superpowers/specs/
+.superpowers/specs/*
+!.superpowers/specs/2026-07-19-backend-multipart-grafana-memory-fix-design.md
+!.superpowers/specs/2026-07-19-family-schema-and-log-redaction-fix-design.md
