@@ -181,6 +181,8 @@ services:
 volumes:
   pgdata:
   backend-uploads:
+  caddy_data:
+  caddy_config:
   loki-data:
   grafana-data:
   alloy-data:
