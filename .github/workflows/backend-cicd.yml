@@ -197,7 +197,7 @@ jobs:
             -o IdentitiesOnly=yes \
             -o StrictHostKeyChecking=yes \
             backend-image.tar.gz backend-image.tar.gz.sha256 monitoring-config.tar.gz \
-            apps/backend/docker-compose.yml apps/backend/scripts/deploy-backend.sh \
+            apps/backend/Caddyfile apps/backend/docker-compose.yml apps/backend/scripts/deploy-backend.sh \
             "$VPS_USER@$VPS_HOST:/tmp/"
           ssh -p "$VPS_PORT" \
             -i "$HOME/.ssh/id_ed25519" \
