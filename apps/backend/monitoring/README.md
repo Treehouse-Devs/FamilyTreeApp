@@ -1,10 +1,10 @@
 # Staging Log Monitor
 
-The monitor captures unredacted `4xx` and `5xx` request/response details from the NestJS backend. Grafana is available at:
+The monitor captures bounded `4xx` and `5xx` request/response details from the NestJS backend. Credential-bearing request and response headers (`authorization`, `cookie`, `proxy-authorization`, and `set-cookie`) are replaced with `[REDACTED]`. Grafana is available at:
 
 `${API_PUBLIC_SCHEME}://${API_PUBLIC_DOMAIN}/log/`
 
-Do not enable it in production. Passwords, tokens, cookies, authorization headers, and personal data can appear in Loki.
+Do not enable it in production. Request and response bodies remain unredacted, so passwords, tokens, and personal data can still appear in Loki.
 
 ## Enable On The VPS
 

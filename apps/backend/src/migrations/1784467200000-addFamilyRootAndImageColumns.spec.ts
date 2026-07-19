@@ -15,18 +15,21 @@ describe('AddFamilyRootAndImageColumns1784467200000', () => {
     await migration.up(queryRunner)
 
     expect(query).toHaveBeenCalledTimes(1)
-    expect(query.mock.calls[0][0]).toMatch(/ALTER TABLE "families"/)
-    expect(query.mock.calls[0][0]).toMatch(/ADD "rootId" uuid/)
-    expect(query.mock.calls[0][0]).toMatch(/ADD "familyImageUrl" character varying/)
-    expect(query.mock.calls[0][0]).not.toMatch(/NOT NULL/)
+    const [[sql]] = query.mock.calls
+    expect(sql).toMatch(/ALTER TABLE "families"/)
+    expect(sql).toMatch(/ADD "rootId" uuid/)
+    expect(sql).toMatch(/ADD "familyImageUrl" character varying/)
+    expect(sql).not.toMatch(/NOT NULL/)
   })
 
   it('removes both family columns when reverted', async () => {
     await migration.down(queryRunner)
 
     expect(query).toHaveBeenCalledTimes(1)
-    expect(query.mock.calls[0][0]).toMatch(/ALTER TABLE "families"/)
-    expect(query.mock.calls[0][0]).toMatch(/DROP COLUMN "familyImageUrl"/)
-    expect(query.mock.calls[0][0]).toMatch(/DROP COLUMN "rootId"/)
+    const [[sql]] = query.mock.calls
+    expect(sql).toMatch(/ALTER TABLE "families"/)
+    expect(sql).toMatch(/DROP COLUMN "familyImageUrl"/)
+    expect(sql).toMatch(/DROP COLUMN "rootId"/)
+    expect(sql.indexOf('DROP COLUMN "familyImageUrl"')).toBeLessThan(sql.indexOf('DROP COLUMN "rootId"'))
   })
 })
