@@ -137,6 +137,7 @@ services:
     secrets:
       - grafana_admin_password
     networks:
+      - default
       - monitoring
     mem_limit: 512m
     cpus: 0.5
