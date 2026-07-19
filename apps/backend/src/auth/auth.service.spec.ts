@@ -1,3 +1,7 @@
+jest.mock('../config/firebase.config', () => ({
+  auth: {},
+}))
+
 import { InternalServerErrorException, UnauthorizedException } from '@nestjs/common'
 import { AuthService } from './auth.service'
 import { Gender } from '@treely/dto'
