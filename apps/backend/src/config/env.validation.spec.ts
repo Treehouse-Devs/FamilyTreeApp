@@ -11,6 +11,9 @@ describe('validateEnvironment', () => {
       LOG_MONITOR_ENABLED: false,
       LOG_MONITOR_ENVIRONMENT: 'test',
       E2E_ADMIN_ENABLED: false,
+      API_PUBLIC_SCHEME: 'http',
+      API_PUBLIC_DOMAIN: 'localhost',
+      APP_URL: 'http://localhost',
     })
   })
 
@@ -28,7 +31,8 @@ describe('validateEnvironment', () => {
       SMTP_USER: 'smtp-user',
       SMTP_PASS: 'smtp-pass',
       SMTP_FROM: 'sender@example.com',
-      APP_URL: 'https://api-treely.arkaes.dev',
+      API_PUBLIC_SCHEME: 'https',
+      API_PUBLIC_DOMAIN: 'api-treely.arkaes.dev',
     }
 
     expect(validateEnvironment({
@@ -40,6 +44,7 @@ describe('validateEnvironment', () => {
       NODE_ENV: 'production',
       DEPLOYMENT_ENV: 'staging',
       E2E_ADMIN_ENABLED: true,
+      APP_URL: 'https://api-treely.arkaes.dev',
     })
   })
 
@@ -71,5 +76,40 @@ describe('validateEnvironment', () => {
       .toMatchObject({ LOG_MONITOR_ENVIRONMENT: 'staging' })
     expect(() => validateEnvironment({ NODE_ENV: 'test', LOG_MONITOR_ENVIRONMENT: 'not valid' }))
       .toThrow('LOG_MONITOR_ENVIRONMENT')
+  })
+
+  it('derives APP_URL from the public scheme and domain', () => {
+    expect(validateEnvironment({
+      NODE_ENV: 'test',
+      API_PUBLIC_SCHEME: 'https',
+      API_PUBLIC_DOMAIN: 'api.example.com:8443',
+      APP_URL: 'https://legacy.invalid',
+    })).toMatchObject({
+      API_PUBLIC_SCHEME: 'https',
+      API_PUBLIC_DOMAIN: 'api.example.com:8443',
+      APP_URL: 'https://api.example.com:8443',
+    })
+  })
+
+  it('rejects invalid public origin components', () => {
+    expect(() => validateEnvironment({
+      NODE_ENV: 'test',
+      API_PUBLIC_SCHEME: 'ftp',
+      API_PUBLIC_DOMAIN: 'api.example.com',
+    })).toThrow('API_PUBLIC_SCHEME')
+
+    for (const domain of [
+      'https://api.example.com',
+      'api.example.com/log',
+      'api.example.com?debug=true',
+      'user@api.example.com',
+      'api.example.com:70000',
+    ]) {
+      expect(() => validateEnvironment({
+        NODE_ENV: 'test',
+        API_PUBLIC_SCHEME: 'https',
+        API_PUBLIC_DOMAIN: domain,
+      })).toThrow('API_PUBLIC_DOMAIN')
+    }
   })
 })

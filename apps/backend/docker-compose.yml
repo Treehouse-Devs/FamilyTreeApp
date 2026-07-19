@@ -107,8 +107,8 @@ services:
     environment:
       GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
       GF_SECURITY_ADMIN_PASSWORD__FILE: /run/secrets/grafana_admin_password
-      GF_SERVER_DOMAIN: api-treely.arkaes.dev
-      GF_SERVER_ROOT_URL: https://api-treely.arkaes.dev/log/
+      GF_SERVER_DOMAIN: ${API_PUBLIC_DOMAIN:?API_PUBLIC_DOMAIN is required}
+      GF_SERVER_ROOT_URL: ${API_PUBLIC_SCHEME:?API_PUBLIC_SCHEME is required}://${API_PUBLIC_DOMAIN:?API_PUBLIC_DOMAIN is required}/log/
       GF_SERVER_SERVE_FROM_SUB_PATH: "false"
       GF_SERVER_ENFORCE_DOMAIN: "true"
       GF_AUTH_ANONYMOUS_ENABLED: "true"

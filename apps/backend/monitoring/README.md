@@ -1,8 +1,8 @@
 # Staging Log Monitor
 
-The monitor captures unredacted `4xx` and `5xx` request/response details from the NestJS backend and makes them available in Grafana at:
+The monitor captures unredacted `4xx` and `5xx` request/response details from the NestJS backend. Grafana is available at:
 
-`https://api-treely.arkaes.dev/log/`
+`${API_PUBLIC_SCHEME}://${API_PUBLIC_DOMAIN}/log/`
 
 Do not enable it in production. Passwords, tokens, cookies, authorization headers, and personal data can appear in Loki.
 
@@ -11,6 +11,8 @@ Do not enable it in production. Passwords, tokens, cookies, authorization header
 1. Set these values in the deployment `.env`:
 
    ```env
+   API_PUBLIC_SCHEME=https
+   API_PUBLIC_DOMAIN=api.example.com
    DEPLOYMENT_ENV=staging
    LOG_MONITOR_ENABLED=true
    LOG_MONITOR_ENVIRONMENT=staging
@@ -26,9 +28,9 @@ Do not enable it in production. Passwords, tokens, cookies, authorization header
    caddy hash-password
    ```
 
-3. Configure `LOG_MONITOR_USERNAME` and `LOG_MONITOR_PASSWORD_HASH` in Caddy's service environment. Keep the plaintext password in the team's password manager, not in this repository or the backend `.env`.
+3. Configure `API_PUBLIC_DOMAIN`, `LOG_MONITOR_USERNAME`, and `LOG_MONITOR_PASSWORD_HASH` in Caddy's service environment. Keep the plaintext password in the team's password manager, not in this repository or the backend `.env`.
 
-4. Merge [`Caddyfile.example`](./Caddyfile.example) into the existing `api-treely.arkaes.dev` site. Preserve the real backend upstream if it differs from `127.0.0.1:3001`.
+4. Merge [`Caddyfile.example`](./Caddyfile.example) into the existing public API site. Preserve the real backend upstream if it differs from `127.0.0.1:3001`.
 
 5. Validate and reload Caddy:
 
@@ -38,6 +40,44 @@ Do not enable it in production. Passwords, tokens, cookies, authorization header
    ```
 
 The backend deployment script creates the Grafana administrator password file with mode `0600` when monitoring is first enabled. Frontend developers authenticate through Caddy and receive anonymous Viewer access inside loopback-only Grafana; they do not receive the Grafana administrator credential.
+
+## Run Locally
+
+Use the explicit local override so Grafana is served directly at
+`http://localhost:3002/` without production domain enforcement:
+
+```bash
+docker build -f apps/backend/Dockerfile -t familytree/backend:local .
+test -f apps/backend/.env ||
+  cp apps/backend/.env.example apps/backend/.env
+```
+
+Replace every placeholder in `apps/backend/.env` and populate its required
+PostgreSQL, JWT, Firebase, and SMTP values. Enable log capture and set the local
+public origin:
+
+```env
+API_PUBLIC_SCHEME=http
+API_PUBLIC_DOMAIN=localhost:3001
+LOG_MONITOR_ENABLED=true
+LOG_MONITOR_ENVIRONMENT=local
+GRAFANA_ADMIN_PASSWORD_FILE=./secrets/grafana_admin_password
+```
+
+Then create the local Grafana secret and start the stack:
+
+```bash
+cd apps/backend
+install -m 0700 -d secrets
+test -s secrets/grafana_admin_password ||
+  (umask 077 && openssl rand -hex 24 > secrets/grafana_admin_password)
+BACKEND_IMAGE=familytree/backend:local docker compose \
+  -f docker-compose.yml \
+  -f docker-compose.local.yml \
+  up -d backend loki alloy grafana
+```
+
+Do not use `docker-compose.local.yml` on staging or production.
 
 ## Staging API E2E
 

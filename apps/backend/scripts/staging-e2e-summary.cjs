@@ -7,8 +7,11 @@ const path = require('node:path')
 const resultsPath = process.argv[2]
 const runId = process.env.E2E_RUN_ID
 const summaryPath = process.env.GITHUB_STEP_SUMMARY
-if (!resultsPath || !runId || !summaryPath) {
-  throw new Error('Usage: staging-e2e-summary.cjs RESULTS_JSON with E2E_RUN_ID and GITHUB_STEP_SUMMARY')
+const stagingApiUrl = process.env.STAGING_API_URL
+if (!resultsPath || !runId || !summaryPath || !stagingApiUrl) {
+  throw new Error(
+    'Usage: staging-e2e-summary.cjs RESULTS_JSON with E2E_RUN_ID, GITHUB_STEP_SUMMARY, and STAGING_API_URL',
+  )
 }
 
 const results = JSON.parse(fs.readFileSync(resultsPath, 'utf8'))
@@ -27,7 +30,8 @@ const counts = tests.reduce((acc, item) => {
   acc[item.outcome] = (acc[item.outcome] ?? 0) + 1
   return acc
 }, {})
-const grafana = `https://api-treely.arkaes.dev/log/d/backend-failures/backend-failed-requests?var-environment=staging&var-search=${encodeURIComponent(`e2e-${runId}-`)}`
+const publicApiUrl = stagingApiUrl.replace(/\/+$/, '')
+const grafana = `${publicApiUrl}/log/d/backend-failures/backend-failed-requests?var-environment=staging&var-search=${encodeURIComponent(`e2e-${runId}-`)}`
 const lines = [
   '## Staging API e2e',
   '',

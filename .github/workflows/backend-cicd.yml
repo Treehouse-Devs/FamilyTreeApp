@@ -86,6 +86,37 @@ jobs:
           cp apps/backend/.env.example apps/backend/.env
           BACKEND_IMAGE=example.invalid/familytree/backend:test \
             docker compose -f apps/backend/docker-compose.yml config --quiet
+          BACKEND_IMAGE=example.invalid/familytree/backend:test \
+            docker compose \
+              -f apps/backend/docker-compose.yml \
+              -f apps/backend/docker-compose.local.yml \
+              config --quiet
+          BACKEND_IMAGE=example.invalid/familytree/backend:test \
+            docker compose -f apps/backend/docker-compose.yml config --format json |
+            node -e '
+              let input = "";
+              process.stdin.on("data", chunk => input += chunk);
+              process.stdin.on("end", () => {
+                const config = JSON.parse(input);
+                const environment = config.services.grafana.environment;
+                if (environment.GF_SERVER_DOMAIN !== "api.example.com") process.exit(1);
+                if (environment.GF_SERVER_ROOT_URL !== "https://api.example.com/log/") process.exit(1);
+              });
+            '
+          BACKEND_IMAGE=example.invalid/familytree/backend:test \
+            docker compose \
+              -f apps/backend/docker-compose.yml \
+              -f apps/backend/docker-compose.local.yml \
+              config --format json |
+            node -e '
+              let input = "";
+              process.stdin.on("data", chunk => input += chunk);
+              process.stdin.on("end", () => {
+                const environment = JSON.parse(input).services.grafana.environment;
+                if (environment.GF_SERVER_ROOT_URL !== "http://localhost:3002/") process.exit(1);
+                if (environment.GF_SERVER_ENFORCE_DOMAIN !== "false") process.exit(1);
+              });
+            '
       - name: Validate monitoring configuration
         run: |
           node -e "JSON.parse(require('fs').readFileSync('apps/backend/monitoring/grafana/dashboards/backend-failures.json', 'utf8'))"
@@ -98,6 +129,7 @@ jobs:
             grafana/alloy:v1.16.1@sha256:51aeb9d829239345070619dad3edd6873186f913c84f45b365b74574fcb38ec0 \
             validate /etc/alloy/config.alloy
           docker run --rm \
+            -e API_PUBLIC_DOMAIN=api.example.com \
             -e LOG_MONITOR_USERNAME=ci-validation \
             -e 'LOG_MONITOR_PASSWORD_HASH=$2a$14$BvpC3CCa05TLmw4uNQ9bwOuKIlRohvgTB2pKtJ7MmzZ4/G7YgYavW' \
             -v "$PWD/apps/backend/monitoring/Caddyfile.example:/etc/caddy/Caddyfile:ro" \

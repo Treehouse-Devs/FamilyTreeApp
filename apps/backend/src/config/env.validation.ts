@@ -40,6 +40,48 @@ function parseEnvironmentLabel(value: unknown, fallback: string): string {
   return label
 }
 
+function parsePublicOrigin(
+  config: Record<string, unknown>,
+  nodeEnv: string,
+): { scheme: string, domain: string, url: string } {
+  const scheme = typeof config.API_PUBLIC_SCHEME === 'string'
+    ? config.API_PUBLIC_SCHEME
+    : nodeEnv === 'test' ? 'http' : ''
+  if (scheme !== 'http' && scheme !== 'https') {
+    throw new Error('API_PUBLIC_SCHEME must be http or https')
+  }
+
+  const domain = typeof config.API_PUBLIC_DOMAIN === 'string'
+    ? config.API_PUBLIC_DOMAIN.trim().toLowerCase()
+    : nodeEnv === 'test' ? 'localhost' : ''
+  const match = /^([^:/?#@\s]+)(?::([0-9]{1,5}))?$/.exec(domain)
+  if (!match) {
+    throw new Error('API_PUBLIC_DOMAIN must be a hostname with an optional port')
+  }
+
+  const hostname = match[1]
+  const labels = hostname.split('.')
+  if (
+    hostname.length > 253
+    || labels.some(label => !/^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/i.test(label))
+  ) {
+    throw new Error('API_PUBLIC_DOMAIN must be a valid hostname')
+  }
+
+  if (match[2]) {
+    const port = Number(match[2])
+    if (port < 1 || port > 65535) {
+      throw new Error('API_PUBLIC_DOMAIN port must be between 1 and 65535')
+    }
+  }
+
+  return {
+    scheme,
+    domain,
+    url: `${scheme}://${domain}`,
+  }
+}
+
 export function validateEnvironment(config: Record<string, unknown>): Record<string, unknown> {
   const nodeEnv = typeof config.NODE_ENV === 'string' ? config.NODE_ENV : 'development'
   if (!ENVIRONMENTS.has(nodeEnv)) {
@@ -78,7 +120,8 @@ export function validateEnvironment(config: Record<string, unknown>): Record<str
       'SMTP_USER',
       'SMTP_PASS',
       'SMTP_FROM',
-      'APP_URL',
+      'API_PUBLIC_SCHEME',
+      'API_PUBLIC_DOMAIN',
     ]
     requiredKeys.forEach(key => requireValue(config, key))
 
@@ -93,6 +136,7 @@ export function validateEnvironment(config: Record<string, unknown>): Record<str
   if (e2eAdminEnabled && deploymentEnv !== 'staging') {
     throw new Error('E2E_ADMIN_ENABLED may only be true when DEPLOYMENT_ENV=staging')
   }
+  const publicOrigin = parsePublicOrigin(config, nodeEnv)
 
   return {
     ...config,
@@ -105,5 +149,8 @@ export function validateEnvironment(config: Record<string, unknown>): Record<str
     LOG_MONITOR_ENABLED: logMonitorEnabled,
     LOG_MONITOR_ENVIRONMENT: logMonitorEnvironment,
     E2E_ADMIN_ENABLED: e2eAdminEnabled,
+    API_PUBLIC_SCHEME: publicOrigin.scheme,
+    API_PUBLIC_DOMAIN: publicOrigin.domain,
+    APP_URL: publicOrigin.url,
   }
 }

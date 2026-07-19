@@ -1,0 +1,6 @@
+services:
+  grafana:
+    environment:
+      GF_SERVER_DOMAIN: localhost
+      GF_SERVER_ROOT_URL: http://localhost:${GRAFANA_PORT:-3002}/
+      GF_SERVER_ENFORCE_DOMAIN: "false"

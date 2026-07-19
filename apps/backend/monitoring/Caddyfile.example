@@ -1,6 +1,7 @@
-# Merge these handlers into the existing api-treely.arkaes.dev site block.
+# API_PUBLIC_DOMAIN must be present in Caddy's service environment.
+# Merge these handlers into the existing public API site block.
 # Keep the /log matcher before the catch-all backend handler.
-api-treely.arkaes.dev {
+{$API_PUBLIC_DOMAIN} {
 	@logMonitorRoot path /log
 	handle @logMonitorRoot {
 		redir /log/ permanent
