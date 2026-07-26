@@ -1,0 +1,52 @@
+@import 'tailwindcss';
+
+@import '@fontsource/plus-jakarta-sans/400.css';
+@import '@fontsource/plus-jakarta-sans/500.css';
+@import '@fontsource/plus-jakarta-sans/600.css';
+@import '@fontsource/plus-jakarta-sans/700.css';
+
+@import './theme.css';
+
+/* Mirrors the `safelist` regex in the RN app's tailwind.config.js. Token classes
+ * are sometimes composed at runtime rather than written out literally, so they
+ * would otherwise be dropped as unused. */
+@source inline("{bg,border,text,stroke,fill}-{primary,secondary,tertiary,error,success,warning,info,typography,outline,background,indicator}-{0,50,{1,2,3,4,5,6,7,8,9}00,950}");
+@source inline("shadow-{hard,soft}-{1,2,3,4,5}");
+
+/* Dark mode is driven by a `.dark` class on <html>, set from the app store's
+ * `colorMode` — mirroring the RN app's GluestackUIProvider, which applies its
+ * light/dark vars the same way. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@layer base {
+  html {
+    /* Safe-area insets replace react-native-safe-area-context. Padded shells and
+     * bottom sheets read these rather than measuring at runtime. */
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+    --safe-left: env(safe-area-inset-left, 0px);
+    --safe-right: env(safe-area-inset-right, 0px);
+  }
+
+  body {
+    @apply bg-background-0 text-typography-900 font-sans antialiased;
+    /* The webview must not rubber-band; scrolling belongs to the shells. */
+    overscroll-behavior: none;
+  }
+
+  #app {
+    @apply min-h-dvh;
+  }
+}
+
+@utility pt-safe {
+  padding-top: var(--safe-top);
+}
+
+@utility pb-safe {
+  padding-bottom: var(--safe-bottom);
+}
+
+@utility min-h-screen-safe {
+  min-height: calc(100dvh - var(--safe-top) - var(--safe-bottom));
+}

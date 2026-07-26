@@ -1,0 +1,14 @@
+node_modules/
+dist/
+dist-ssr/
+*.local
+
+# Capacitor generated native projects
+android/
+ios/
+
+# local env files
+.env*.local
+
+# typescript
+*.tsbuildinfo
