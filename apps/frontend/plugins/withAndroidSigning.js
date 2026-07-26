@@ -12,9 +12,10 @@
  *   TREELY_UPLOAD_KEY_PASSWORD
  *
  * These are provided by CI (see .github/workflows/frontend-release.yml). When
- * the properties are absent (e.g. local debug builds) the release config is
- * simply left unconfigured and Gradle keeps using the debug keystore, so this
- * plugin is a no-op for everyday development.
+ * the properties are absent (e.g. a local `assembleRelease`) the release build
+ * type falls back to the debug signing config, because AGP rejects a signing
+ * config that has no `storeFile`. Local release builds therefore still work,
+ * they are just signed with the debug keystore.
  */
 const { withAppBuildGradle } = require('@expo/config-plugins');
 
@@ -32,9 +33,11 @@ function addReleaseSigningConfig(contents) {
     return contents;
   }
 
-  // Point the release build type at the (to-be-added) release signing config.
-  // Done first, while `signingConfigs` only contains `debug`, so the only
-  // `release {` block in the file is the build type we want to target.
+  // Point the release build type at the (to-be-added) release signing config,
+  // but only when CI supplied a keystore — an unconfigured signing config makes
+  // AGP fail the build with "storeFile not set". Done first, while
+  // `signingConfigs` only contains `debug`, so the only `release {` block in the
+  // file is the build type we want to target.
   const buildTypeAnchor = /release \{\n([\s\S]*?)signingConfig signingConfigs\.debug/;
   if (!buildTypeAnchor.test(contents)) {
     throw new Error(
@@ -43,7 +46,7 @@ function addReleaseSigningConfig(contents) {
   }
   contents = contents.replace(
     buildTypeAnchor,
-    'release {\n$1signingConfig signingConfigs.release',
+    "release {\n$1signingConfig project.hasProperty('TREELY_UPLOAD_STORE_FILE') ? signingConfigs.release : signingConfigs.debug",
   );
 
   // Insert a `release` signing config right after the existing `debug` one.

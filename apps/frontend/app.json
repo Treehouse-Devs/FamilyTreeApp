@@ -31,7 +31,8 @@
       "expo-localization",
       "expo-router",
       "expo-font",
-      "./plugins/withAndroidSigning.js"
+      "./plugins/withAndroidSigning.js",
+      "./plugins/withAndroidVersionCode.js"
     ]
   }
 }

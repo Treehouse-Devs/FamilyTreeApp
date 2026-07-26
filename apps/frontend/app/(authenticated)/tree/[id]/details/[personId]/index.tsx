@@ -5,7 +5,7 @@ import { useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useFamilyTree } from '@/hooks/useFamilyTree'
 import type { DetailedPerson } from '@/store/slices/tree/types'
-import { handleImageUpload } from './utils'
+import { handleImageUpload } from '@/utils/person-detail'
 import { ListItems } from '@/components/custom/list-item'
 import { BasicCard } from '@/components/custom/cards/basic-card'
 import { VStack } from '@/components/ui/vstack'
@@ -14,11 +14,12 @@ import Modal from '@/components/custom/modals/modal'
 import { ImageEditModal } from '@/components/custom/modals/image-edit-modal'
 import DUMMY_MALE from '@/assets/images/dummy-profile-male.webp'
 import DUMMY_FEMALE from '@/assets/images/dummy-profile-female.webp'
-import { usePersonDetail } from './usePersonDetail'
-import { useListItem } from './useListItem'
+import { usePersonDetail } from '@/hooks/usePersonDetail'
+import { useListItem } from '@/hooks/useListItem'
 import { useCompressImage } from '@/hooks/useCompressImage'
-import { DatePickerContent } from './dialog-content/date-picker-content'
-import { InputContent } from './dialog-content/input-content'
+import { DatePickerContent } from '@/components/custom/dialog-content/date-picker-content'
+import { InputContent } from '@/components/custom/dialog-content/input-content'
+import type { Category } from '@/utils/person-detail'
 import { Gender } from '@treely/dto'
 
 interface ModalConfig {
@@ -29,7 +30,6 @@ interface ModalConfig {
   keyboardType?: 'default' | 'numeric' | 'email-address' | 'phone-pad'
 }
 
-export type Category = 'location' | 'occupation' | 'contact'
 type PersonDetail = Pick<DetailedPerson, Category>
 
 const blankPersonDetail: PersonDetail = {
@@ -49,7 +49,7 @@ const blankPersonDetail: PersonDetail = {
 }
 
 const PersonDetailScreen = () => {
-  const { id } = useLocalSearchParams<{ id: string }>()
+  const { personId } = useLocalSearchParams<{ personId: string }>()
   const { selectedTreeId } = useFamilyTree()
   const { t } = useTranslation()
   const [isModalVisible, setIsModalVisible] = useState(false)
@@ -68,7 +68,7 @@ const PersonDetailScreen = () => {
     return
   }
 
-  const { personDetail, setPersonDetail, isLoading, sendUpdate } = usePersonDetail(id, selectedTreeId)
+  const { personDetail, setPersonDetail, isLoading, sendUpdate } = usePersonDetail(personId, selectedTreeId)
 
   const findCategoryForProp = (prop: string): Category | undefined => {
     return (Object.keys(blankPersonDetail) as Category[]).find((key) => {
@@ -153,7 +153,7 @@ const PersonDetailScreen = () => {
 
     await handleImageUpload({
       treeId: selectedTreeId,
-      personId: id,
+      personId,
       t,
       compressImage,
       onImageSelect: (uri: string) => setSelectedImageUri(uri),
@@ -173,7 +173,7 @@ const PersonDetailScreen = () => {
       },
       onUploadComplete: () => setIsUploading(false),
     })
-  }, [personDetail, selectedTreeId, id, t])
+  }, [personDetail, selectedTreeId, personId, t])
 
   const handleScroll = useCallback((event: { nativeEvent: { contentOffset: { y: number } } }) => {
     const scrollY = event.nativeEvent.contentOffset.y

@@ -65,7 +65,11 @@ jobs:
         working-directory: .
         run: yarn install --frozen-lockfile
 
+      # ANDROID_VERSION_CODE is read by ./plugins/withAndroidVersionCode.js so
+      # each build gets a distinct, increasing version code.
       - name: Generate native Android project
+        env:
+          ANDROID_VERSION_CODE: ${{ github.run_number }}
         run: yarn expo prebuild --platform android --no-install
 
       - name: Decode release keystore

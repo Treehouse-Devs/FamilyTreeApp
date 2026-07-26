@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useFamilyTree } from '@/hooks/useFamilyTree'
 import { TreeService } from '@/services/treeService'
 import type { DetailedPerson } from '@/store/slices/tree/types'
-import type { Category } from '.'
+import type { Category } from '@/utils/person-detail'
 
 export const usePersonDetail = (id: string, selectedTreeId: string) => {
   const { getPersonDetails, setPersonDetails } = useFamilyTree()
