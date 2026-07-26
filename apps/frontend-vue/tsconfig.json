@@ -1,0 +1,63 @@
+{
+  // Deliberately standalone rather than extending the root config: the root sets
+  // `jsx: react-jsx`, `moduleResolution: Node` and an `outDir`, none of which fit
+  // a Vite + Vue app. The root config excludes this directory in turn.
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "lib": [
+      "ESNext",
+      "DOM",
+      "DOM.Iterable"
+    ],
+    "jsx": "preserve",
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "isolatedModules": true,
+    "resolveJsonModule": true,
+    "useDefineForClassFields": true,
+    // Typecheck-only: `@treely/dto` re-exports NestJS classes carrying legacy
+    // class-validator decorators. Nothing in this app defines a decorator, and
+    // with `noEmit` this never affects generated code — it just lets tsc parse
+    // the DTO sources whose types we import.
+    "experimentalDecorators": true,
+    "types": [
+      "vite/client",
+      "pinia-plugin-persistedstate"
+    ],
+    "baseUrl": ".",
+    "paths": {
+      "@/*": [
+        "./src/*"
+      ],
+      // Pinned to the hoisted copy for the same reason as vite's `resolve.dedupe`:
+      // pinia-plugin-persistedstate augments the root install, so the app has to
+      // typecheck against that one for `persist` to exist on store options.
+      "pinia": [
+        "../../node_modules/pinia"
+      ],
+      "@treely/dto": [
+        "../../packages/dto/src/index.ts"
+      ],
+      "@treely/dto/*": [
+        "../../packages/dto/src/*"
+      ]
+    }
+  },
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.vue",
+    "vite.config.ts",
+    "capacitor.config.ts",
+    "env.d.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
+}

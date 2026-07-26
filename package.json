@@ -9,8 +9,8 @@
   "scripts": {
     "dev": "turbo run dev",
     "build": "turbo run build",
-    "lint": "eslint . --ext .ts,.tsx,.js,.jsx",
-    "lint:fix": "eslint . --ext .ts,.tsx,.js,.jsx --fix",
+    "lint": "eslint . --ext .ts,.tsx,.js,.jsx,.vue",
+    "lint:fix": "eslint . --ext .ts,.tsx,.js,.jsx,.vue --fix",
     "tsc": "tsc"
   },
   "license": "MIT",
@@ -28,10 +28,12 @@
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-native": "^5.0.0",
     "eslint-plugin-unused-imports": "^4.1.4",
+    "eslint-plugin-vue": "^10.10.0",
     "gpt-tokenizer": "^2.9.0",
     "openai": "^4.10.0",
     "ts-node": "^10.9.2",
-    "turbo": "^2.5.3"
+    "turbo": "^2.5.3",
+    "vue-eslint-parser": "^10.4.1"
   },
   "private": true
 }

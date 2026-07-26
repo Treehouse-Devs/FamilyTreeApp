@@ -23,6 +23,15 @@
         "isolatedModules": true,
         "outDir": "dist"
     },
+    "exclude": [
+        "node_modules",
+        "dist",
+        "build",
+        // Has its own standalone config: a Vite + Vue app needs
+        // `jsx: preserve` and `moduleResolution: bundler`, which conflict with
+        // the settings above. Typechecked by `yarn workspace frontend-vue typecheck`.
+        "apps/frontend-vue"
+    ],
     "references": [
         {
             "path": "packages/dto/tsconfig.json"
