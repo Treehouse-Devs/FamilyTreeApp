@@ -2,7 +2,7 @@ import type { DetailedPerson } from '@/store/slices/tree/types'
 import type { TFunction } from 'i18next'
 import type { ListItemType } from '@/components/custom/list-item/types'
 import { useEffect, useState } from 'react'
-import { mapPersonToListItem } from './utils'
+import { mapPersonToListItem } from '@/utils/person-detail'
 
 export type PersonDetailListItems = {
   category: string

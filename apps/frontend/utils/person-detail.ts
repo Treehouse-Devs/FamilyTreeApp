@@ -1,8 +1,11 @@
 import type { DetailedPerson } from '@/store/slices/tree/types'
 import type { TFunction } from 'i18next'
 import * as ImagePicker from 'expo-image-picker'
-import type { PersonDetailListItems } from './useListItem'
+import type { PersonDetailListItems } from '@/hooks/useListItem'
 import { Gender } from '@treely/dto'
+
+/** Groups of person properties that are edited and persisted together. */
+export type Category = 'location' | 'occupation' | 'contact'
 
 export function mapPersonToListItem(person: DetailedPerson, t: TFunction, onDetailPress: (id: string, selectedId?: string) => void): PersonDetailListItems {
   const listItems: PersonDetailListItems = []

@@ -71,7 +71,6 @@
     "@gluestack-ui/utils": "^3.0.15",
     "@types/react": "~19.1.10",
     "jscodeshift": "0.15.2",
-    "react-i18next": "^17.0.4",
     "typescript": "~5.9.2",
     "uuidv4": "^6.2.13"
   },

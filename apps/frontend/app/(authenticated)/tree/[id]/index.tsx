@@ -18,7 +18,7 @@ import { FamilyMenuActionSheet } from '@/components/custom/family-tree/action-sh
 import { MemberType } from '@/components/custom/family-tree/tooltip'
 import { PersonTooltip } from '@/components/custom/family-tree/tooltip'
 import { useZoomLevel } from '@/hooks/useZoomLevel'
-import { useAddMember } from './useAddMember'
+import { useAddMember } from '@/hooks/useAddMember'
 
 const TreeScreen = () => {
   const { id } = useLocalSearchParams<{ id: string }>()

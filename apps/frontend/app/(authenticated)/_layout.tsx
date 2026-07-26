@@ -1,7 +1,7 @@
 import { Slot, Redirect } from 'expo-router'
 import { useAuth } from '@/hooks/useAuth'
 import { useState } from 'react'
-import { useFetchUser } from './useFetchUser'
+import { useFetchUser } from '@/hooks/useFetchUser'
 import { ActivityIndicator, View } from 'react-native'
 
 export default function AppLayout() {
