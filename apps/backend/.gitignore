@@ -3,6 +3,7 @@
 /dist-migrations
 /node_modules
 /build
+/test-results
 
 # Logs
 logs
@@ -42,6 +43,7 @@ lerna-debug.log*
 .env.test.local
 .env.production.local
 .env.local
+/secrets
 
 # temp directory
 .temp

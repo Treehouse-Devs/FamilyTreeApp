@@ -25,6 +25,8 @@ docker image inspect "$release_image" >/dev/null
 
 cd "$deploy_dir"
 test -f .env
+test -f monitoring/loki-config.yml
+test -f monitoring/alloy-config.alloy
 
 previous_image=''
 if [[ -f "$state_file" ]]; then
@@ -84,4 +86,65 @@ if ! wait_for_backend; then
 fi
 
 printf '%s\n' "$release_image" > "$state_file"
+
+wait_for_service() {
+  local service=$1 container_id status
+  for _ in {1..18}; do
+    container_id=$(docker compose ps -q "$service" 2>/dev/null || true)
+    if [[ -n "$container_id" ]]; then
+      status=$(docker inspect --format '{{if .State.Health}}{{.State.Health.Status}}{{else}}{{.State.Status}}{{end}}' "$container_id" 2>/dev/null || true)
+      if [[ "$status" == healthy || "$status" == running ]]; then
+        return 0
+      fi
+      if [[ "$status" == unhealthy || "$status" == exited || "$status" == dead ]]; then
+        return 1
+      fi
+    fi
+    sleep 5
+  done
+  return 1
+}
+
+wait_for_monitoring_endpoint() {
+  local url=$1
+  for _ in {1..18}; do
+    if docker compose exec -T grafana wget -q -O - "$url" >/dev/null 2>&1; then
+      return 0
+    fi
+    sleep 5
+  done
+  return 1
+}
+
+backend_environment_value() {
+  docker compose exec -T backend node -e 'process.stdout.write(process.env[process.argv[1]] ?? "")' "$1"
+}
+
+monitoring_enabled=$(backend_environment_value LOG_MONITOR_ENABLED | tr '[:upper:]' '[:lower:]')
+if [[ "$monitoring_enabled" == true ]]; then
+  password_file=$(backend_environment_value GRAFANA_ADMIN_PASSWORD_FILE)
+  password_file=${password_file:-./secrets/grafana_admin_password}
+  if [[ "$password_file" != /* ]]; then
+    password_file="$deploy_dir/${password_file#./}"
+  fi
+  install -m 0700 -d "$(dirname "$password_file")"
+  if [[ ! -s "$password_file" ]]; then
+    umask 077
+    openssl rand -hex 24 > "$password_file"
+  fi
+
+  if ! docker compose up -d loki grafana alloy \
+    || ! wait_for_service loki \
+    || ! wait_for_service grafana \
+    || ! wait_for_service alloy \
+    || ! wait_for_monitoring_endpoint http://loki:3100/ready \
+    || ! wait_for_monitoring_endpoint http://alloy:12345/-/ready; then
+    echo 'WARNING: backend is healthy, but the optional log monitor failed to become ready' >&2
+    docker compose ps loki grafana alloy >&2 || true
+    docker compose logs --tail=100 loki grafana alloy >&2 || true
+  fi
+else
+  docker compose stop alloy grafana loki >/dev/null 2>&1 || true
+fi
+
 docker compose ps

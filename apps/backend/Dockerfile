@@ -32,10 +32,13 @@ COPY --from=production-dependencies /app/node_modules /app/node_modules
 COPY --from=production-dependencies /app/apps/backend/node_modules ./node_modules
 COPY --from=builder /app/apps/backend/dist ./dist
 COPY --from=builder /app/apps/backend/dist-migrations ./dist-migrations
+COPY --from=builder /app/apps/backend/src/mailer/templates ./src/mailer/templates
+COPY --from=builder /app/apps/backend/scripts/staging-e2e-admin.cjs ./scripts/staging-e2e-admin.cjs
 COPY apps/backend/scripts/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 
 RUN mkdir -p uploads \
   && chown -R node:node /app/apps/backend/uploads \
+  && chmod +x /app/apps/backend/scripts/staging-e2e-admin.cjs \
   && chmod +x /usr/local/bin/docker-entrypoint.sh
 
 USER node

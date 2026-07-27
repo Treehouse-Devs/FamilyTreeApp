@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common'
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common'
 import { Repository } from 'typeorm'
 import { FamilyMember } from './entities/family-member.entity'
 import { InjectRepository } from '@nestjs/typeorm'
@@ -15,13 +15,28 @@ export class MemberService {
     private storageService: StorageService,
   ) { }
 
-  async create(createFamilyMemberDto: CreateFamilyMemberDto, familyId: string, userId: string): Promise<PersonDto> {
-    const family = await this.familyService.findOne(familyId, userId)
-    if (!family) {
-      throw new ForbiddenException('This family is not belong to this user')
+  private async assertRelationshipMembersBelongToFamily(
+    familyId: string,
+    ids: Array<string | undefined>,
+  ): Promise<void> {
+    const relationshipIds = [...new Set(ids.filter((id): id is string => Boolean(id)))]
+    if (relationshipIds.length === 0) {
+      return
     }
 
+    const count = await this.memberRepository.countBy(
+      relationshipIds.map(id => ({ id, familyId })),
+    )
+    if (count !== relationshipIds.length) {
+      throw new BadRequestException('Relationship members must belong to the same tree')
+    }
+  }
+
+  async create(createFamilyMemberDto: CreateFamilyMemberDto, familyId: string, userId: string): Promise<PersonDto> {
+    await this.familyService.findOne(familyId, userId)
+
     const { name, gender, birthDate, deathDate, isBloodRelated, spouseId, fatherId, motherId } = createFamilyMemberDto
+    await this.assertRelationshipMembersBelongToFamily(familyId, [spouseId, fatherId, motherId])
 
     return await this.memberRepository.manager.transaction(async (manager) => {
       const member = manager.create(FamilyMember, {
@@ -40,7 +55,7 @@ export class MemberService {
 
       // Sync the other side of the spouse link
       if (spouseId) {
-        await manager.update(FamilyMember, { id: spouseId }, { spouseId: member.id })
+        await manager.update(FamilyMember, { id: spouseId, familyId }, { spouseId: member.id })
       }
 
       return mapMemberToPersonDto(member)
@@ -48,12 +63,9 @@ export class MemberService {
   }
 
   async findOne(treeId: string, personId: string, userId: string): Promise<FamilyMember> {
-    const family = await this.familyService.findOne(treeId, userId)
-    if (!family) {
-      throw new ForbiddenException('This family is not belong to this user')
-    }
+    await this.familyService.findOne(treeId, userId)
 
-    const member = await this.memberRepository.findOneBy({ id: personId })
+    const member = await this.memberRepository.findOneBy({ id: personId, familyId: treeId })
     if (!member) {
       throw new NotFoundException('Member not found')
     }
@@ -67,12 +79,12 @@ export class MemberService {
     await this.memberRepository.manager.transaction(async (manager) => {
       // Unlink spouse before soft delete
       if (member.spouseId) {
-        await manager.update(FamilyMember, { id: member.spouseId }, { spouseId: null })
+        await manager.update(FamilyMember, { id: member.spouseId, familyId: treeId }, { spouseId: null })
       }
 
       // Orphan children — nullify their parent references pointing to this member
-      await manager.update(FamilyMember, { fatherId: member.id }, { fatherId: null })
-      await manager.update(FamilyMember, { motherId: member.id }, { motherId: null })
+      await manager.update(FamilyMember, { fatherId: member.id, familyId: treeId }, { fatherId: null })
+      await manager.update(FamilyMember, { motherId: member.id, familyId: treeId }, { motherId: null })
 
       await manager.softDelete(FamilyMember, member.id)
     })
@@ -82,7 +94,10 @@ export class MemberService {
     const member = await this.findOne(treeId, personId, userId)
 
     const children = await this.memberRepository.find({
-      where: [{ fatherId: personId }, { motherId: personId }],
+      where: [
+        { fatherId: personId, familyId: treeId },
+        { motherId: personId, familyId: treeId },
+      ],
     })
 
     return {

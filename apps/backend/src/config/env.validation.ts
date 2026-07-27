@@ -1,4 +1,5 @@
 const ENVIRONMENTS = new Set(['development', 'production', 'test'])
+const DEPLOYMENT_ENVIRONMENTS = new Set(['development', 'staging', 'production', 'test'])
 const STORAGE_PROVIDERS = new Set(['local', 'firebase'])
 
 function requireValue(config: Record<string, unknown>, key: string): void {
@@ -16,15 +17,89 @@ function parsePort(value: unknown, fallback: number, key: string): number {
   return port
 }
 
+function parseBoolean(value: unknown, fallback: boolean, key: string): boolean {
+  if (value === undefined) {
+    return fallback
+  }
+  if (value === true || value === 'true') {
+    return true
+  }
+  if (value === false || value === 'false') {
+    return false
+  }
+
+  throw new Error(`${key} must be true or false`)
+}
+
+function parseEnvironmentLabel(value: unknown, fallback: string): string {
+  const label = typeof value === 'string' ? value : fallback
+  if (!/^[a-z0-9_-]{1,32}$/i.test(label)) {
+    throw new Error('LOG_MONITOR_ENVIRONMENT must contain only letters, numbers, underscores, or hyphens')
+  }
+
+  return label
+}
+
+function parsePublicOrigin(
+  config: Record<string, unknown>,
+  nodeEnv: string,
+): { scheme: string, domain: string, url: string } {
+  const scheme = typeof config.API_PUBLIC_SCHEME === 'string'
+    ? config.API_PUBLIC_SCHEME
+    : nodeEnv === 'test' ? 'http' : ''
+  if (scheme !== 'http' && scheme !== 'https') {
+    throw new Error('API_PUBLIC_SCHEME must be http or https')
+  }
+
+  const domain = typeof config.API_PUBLIC_DOMAIN === 'string'
+    ? config.API_PUBLIC_DOMAIN.trim().toLowerCase()
+    : nodeEnv === 'test' ? 'localhost' : ''
+  const match = /^([^:/?#@\s]+)(?::([0-9]{1,5}))?$/.exec(domain)
+  if (!match) {
+    throw new Error('API_PUBLIC_DOMAIN must be a hostname with an optional port')
+  }
+
+  const hostname = match[1]
+  const labels = hostname.split('.')
+  if (
+    hostname.length > 253
+    || labels.some(label => !/^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/i.test(label))
+  ) {
+    throw new Error('API_PUBLIC_DOMAIN must be a valid hostname')
+  }
+
+  if (match[2]) {
+    const port = Number(match[2])
+    if (port < 1 || port > 65535) {
+      throw new Error('API_PUBLIC_DOMAIN port must be between 1 and 65535')
+    }
+  }
+
+  return {
+    scheme,
+    domain,
+    url: `${scheme}://${domain}`,
+  }
+}
+
 export function validateEnvironment(config: Record<string, unknown>): Record<string, unknown> {
   const nodeEnv = typeof config.NODE_ENV === 'string' ? config.NODE_ENV : 'development'
   if (!ENVIRONMENTS.has(nodeEnv)) {
     throw new Error('NODE_ENV must be development, production, or test')
   }
+  const deploymentEnv = typeof config.DEPLOYMENT_ENV === 'string'
+    ? config.DEPLOYMENT_ENV
+    : nodeEnv
+  if (!DEPLOYMENT_ENVIRONMENTS.has(deploymentEnv)) {
+    throw new Error('DEPLOYMENT_ENV must be development, staging, production, or test')
+  }
 
   const port = parsePort(config.PORT, 3000, 'PORT')
   const databasePort = parsePort(config.DB_PORT, 5432, 'DB_PORT')
   const smtpPort = parsePort(config.SMTP_PORT, 465, 'SMTP_PORT')
+  const logMonitorEnabled = parseBoolean(config.LOG_MONITOR_ENABLED, false, 'LOG_MONITOR_ENABLED')
+  const e2eAdminEnabled = parseBoolean(config.E2E_ADMIN_ENABLED, false, 'E2E_ADMIN_ENABLED')
+  const logMonitorEnvironment = parseEnvironmentLabel(config.LOG_MONITOR_ENVIRONMENT, nodeEnv)
 
   const storageProvider = typeof config.STORAGE_PROVIDER === 'string' ? config.STORAGE_PROVIDER : 'local'
   if (!STORAGE_PROVIDERS.has(storageProvider)) {
@@ -45,7 +120,8 @@ export function validateEnvironment(config: Record<string, unknown>): Record<str
       'SMTP_USER',
       'SMTP_PASS',
       'SMTP_FROM',
-      'APP_URL',
+      'API_PUBLIC_SCHEME',
+      'API_PUBLIC_DOMAIN',
     ]
     requiredKeys.forEach(key => requireValue(config, key))
 
@@ -57,13 +133,24 @@ export function validateEnvironment(config: Record<string, unknown>): Record<str
       requireValue(config, 'FB_STORAGE_BUCKET')
     }
   }
+  if (e2eAdminEnabled && deploymentEnv !== 'staging') {
+    throw new Error('E2E_ADMIN_ENABLED may only be true when DEPLOYMENT_ENV=staging')
+  }
+  const publicOrigin = parsePublicOrigin(config, nodeEnv)
 
   return {
     ...config,
     NODE_ENV: nodeEnv,
+    DEPLOYMENT_ENV: deploymentEnv,
     PORT: port,
     DB_PORT: databasePort,
     SMTP_PORT: smtpPort,
     STORAGE_PROVIDER: storageProvider,
+    LOG_MONITOR_ENABLED: logMonitorEnabled,
+    LOG_MONITOR_ENVIRONMENT: logMonitorEnvironment,
+    E2E_ADMIN_ENABLED: e2eAdminEnabled,
+    API_PUBLIC_SCHEME: publicOrigin.scheme,
+    API_PUBLIC_DOMAIN: publicOrigin.domain,
+    APP_URL: publicOrigin.url,
   }
 }

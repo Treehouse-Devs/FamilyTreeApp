@@ -52,40 +52,36 @@ export class AuthService {
     let userRecord: UserRecord | null = null
     try {
       userRecord = await this.firebaseService.createUser({ displayName: name, email, password })
-      const profile = await this.profileService.createProfile(userRecord.uid, name, birthDate, gender)
+      const profile = await this.profileService.createProfile(userRecord.uid, email, name, birthDate, gender)
       await this.sendVerificationEmail({ email: userRecord.email || '' })
-      profile.email = userRecord.email || ''
-      profile.firebaseUid = userRecord.uid
 
       return {
         user: this.buildUserResponse(userRecord, profile),
       }
-    } catch (error) {
+    } catch (error: unknown) {
       if (userRecord?.uid) {
         try {
+          await this.profileService.deleteProfile(userRecord.uid)
+        } catch (deleteError) {
+          console.error('Profile rollback failed:', deleteError)
+        }
+        try {
           await this.firebaseService.deleteUser(userRecord.uid)
-        } catch (error: unknown) {
-          if (userRecord?.uid) {
-            try {
-              await this.firebaseService.deleteUser(userRecord.uid)
-            } catch (deleteError) {
-              console.error('Rollback failed:', deleteError)
-            }
-          }
-          if (error instanceof HttpException) {
-            throw error
-          }
-          const err = error as Error & { code?: string }
-          if (err.code === 'auth/email-already-exists') {
-            throw new ConflictException('An account with this email already exists')
-          }
-          if (err.code?.startsWith('auth/')) {
-            throw new HttpException(err.message, 400)
-          }
-          throw new InternalServerErrorException(err.message || 'Unexpected error occurred during signup')
+        } catch (deleteError) {
+          console.error('Firebase rollback failed:', deleteError)
         }
       }
-      throw error
+      if (error instanceof HttpException) {
+        throw error
+      }
+      const err = error as Error & { code?: string }
+      if (err.code === 'auth/email-already-exists') {
+        throw new ConflictException('An account with this email already exists')
+      }
+      if (err.code?.startsWith('auth/')) {
+        throw new HttpException(err.message, 400)
+      }
+      throw new InternalServerErrorException(err.message || 'Unexpected error occurred during signup')
     }
   }
 
@@ -192,11 +188,13 @@ export class AuthService {
         message: 'Google authentication successful',
       } as LoginResponseDto
     } catch (error: unknown) {
+      if (error instanceof UnauthorizedException) {
+        throw error
+      }
       if (error instanceof FirebaseError && error.code === 'auth/invalid-id-token') {
         throw new UnauthorizedException('Invalid Google ID token')
-      } else {
-        throw new InternalServerErrorException('Google authentication failed')
       }
+      throw new InternalServerErrorException('Google authentication failed')
     }
   }
 

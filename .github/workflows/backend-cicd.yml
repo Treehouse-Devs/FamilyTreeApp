@@ -12,6 +12,7 @@ on:
       - tsconfig.json
       - eslint.config.js
       - .github/workflows/backend-cicd.yml
+      - .github/workflows/staging-api-e2e.yml
   push:
     branches: [main]
     paths:
@@ -23,13 +24,14 @@ on:
       - tsconfig.json
       - eslint.config.js
       - .github/workflows/backend-cicd.yml
+      - .github/workflows/staging-api-e2e.yml
   workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: backend-${{ github.event_name == 'pull_request' && github.event.pull_request.number || 'production' }}
+  group: backend-${{ github.event_name == 'pull_request' && github.event.pull_request.number || 'staging' }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 env:
@@ -73,6 +75,8 @@ jobs:
         run: yarn tsc -p apps/backend/tsconfig.check.json
       - name: Unit tests
         run: yarn workspace backend test --runInBand
+      - name: Discover staging API tests without contacting staging
+        run: yarn workspace backend test:staging-api:list
       - name: Build application and migrations
         run: yarn workspace backend build
       - name: Apply migrations to an empty PostgreSQL database
@@ -82,15 +86,74 @@ jobs:
           cp apps/backend/.env.example apps/backend/.env
           BACKEND_IMAGE=example.invalid/familytree/backend:test \
             docker compose -f apps/backend/docker-compose.yml config --quiet
+          BACKEND_IMAGE=example.invalid/familytree/backend:test \
+            docker compose \
+              -f apps/backend/docker-compose.yml \
+              -f apps/backend/docker-compose.local.yml \
+              config --quiet
+          BACKEND_IMAGE=example.invalid/familytree/backend:test \
+            docker compose -f apps/backend/docker-compose.yml config --format json |
+            node -e '
+              let input = "";
+              process.stdin.on("data", chunk => input += chunk);
+              process.stdin.on("end", () => {
+                const config = JSON.parse(input);
+                const grafana = config.services.grafana;
+                const environment = grafana.environment;
+                if (environment.GF_SERVER_DOMAIN !== "api.example.com") process.exit(1);
+                if (environment.GF_SERVER_ROOT_URL !== "https://api.example.com/log/") process.exit(1);
+                if (environment.GF_DASHBOARDS_MIN_REFRESH_INTERVAL !== "30s") process.exit(1);
+                if (environment.GOMEMLIMIT !== "256MiB") process.exit(1);
+                if (grafana.mem_limit !== "536870912") process.exit(1);
+              });
+            '
+          BACKEND_IMAGE=example.invalid/familytree/backend:test \
+            docker compose \
+              -f apps/backend/docker-compose.yml \
+              -f apps/backend/docker-compose.local.yml \
+              config --format json |
+            node -e '
+              let input = "";
+              process.stdin.on("data", chunk => input += chunk);
+              process.stdin.on("end", () => {
+                const environment = JSON.parse(input).services.grafana.environment;
+                if (environment.GF_SERVER_ROOT_URL !== "http://localhost:3002/") process.exit(1);
+                if (environment.GF_SERVER_ENFORCE_DOMAIN !== "false") process.exit(1);
+              });
+            '
+      - name: Validate monitoring configuration
+        run: |
+          node -e "JSON.parse(require('fs').readFileSync('apps/backend/monitoring/grafana/dashboards/backend-failures.json', 'utf8'))"
+          docker run --rm \
+            -v "$PWD/apps/backend/monitoring/loki-config.yml:/etc/loki/config.yml:ro" \
+            grafana/loki:3.7.2@sha256:191d4fdfb7264f16989f0a57f320872620a5a7c2ceeec6229212c4190ec49b86 \
+            -config.file=/etc/loki/config.yml -verify-config=true
+          docker run --rm \
+            -v "$PWD/apps/backend/monitoring/alloy-config.alloy:/etc/alloy/config.alloy:ro" \
+            grafana/alloy:v1.16.1@sha256:51aeb9d829239345070619dad3edd6873186f913c84f45b365b74574fcb38ec0 \
+            validate /etc/alloy/config.alloy
+          docker run --rm \
+            -e API_PUBLIC_DOMAIN=api.example.com \
+            -e LOG_MONITOR_USERNAME=ci-validation \
+            -e 'LOG_MONITOR_PASSWORD_HASH=$2a$14$BvpC3CCa05TLmw4uNQ9bwOuKIlRohvgTB2pKtJ7MmzZ4/G7YgYavW' \
+            -v "$PWD/apps/backend/monitoring/Caddyfile.example:/etc/caddy/Caddyfile:ro" \
+            caddy:2.11.4-alpine@sha256:5f5c8640aae01df9654968d946d8f1a56c497f1dd5c5cda4cf95ab7c14d58648 \
+            caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile
       - name: Build production image
         run: docker build -f apps/backend/Dockerfile -t backend:test .
+      - name: Verify production image staging assets
+        run: |
+          docker run --rm --entrypoint sh backend:test -c \
+            'test -f src/mailer/templates/forgot-password.mjml &&
+             test -f src/mailer/templates/verify-email.mjml &&
+             test -x scripts/staging-e2e-admin.cjs'
 
   deploy:
     name: Deploy approved release
     needs: verify
     if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest
-    environment: production
+    environment: staging
     permissions:
       contents: read
     env:
@@ -126,13 +189,14 @@ jobs:
           ssh-keygen -y -f "$HOME/.ssh/id_ed25519" >/dev/null
       - name: Install reviewed deployment files
         run: |
+          tar -C apps/backend -czf monitoring-config.tar.gz monitoring
           scp -P "$VPS_PORT" \
             -i "$HOME/.ssh/id_ed25519" \
             -o BatchMode=yes \
             -o ConnectTimeout=15 \
             -o IdentitiesOnly=yes \
             -o StrictHostKeyChecking=yes \
-            backend-image.tar.gz backend-image.tar.gz.sha256 \
+            backend-image.tar.gz backend-image.tar.gz.sha256 monitoring-config.tar.gz \
             apps/backend/Caddyfile apps/backend/docker-compose.yml apps/backend/scripts/deploy-backend.sh \
             "$VPS_USER@$VPS_HOST:/tmp/"
           ssh -p "$VPS_PORT" \
@@ -149,6 +213,9 @@ jobs:
           install -m 0644 /tmp/Caddyfile "$deploy_dir/Caddyfile"
           install -m 0644 /tmp/docker-compose.yml "$deploy_dir/docker-compose.yml"
           install -m 0755 /tmp/deploy-backend.sh "$deploy_dir/scripts/deploy-backend.sh"
+          rm -rf "$deploy_dir/monitoring"
+          tar -xzf /tmp/monitoring-config.tar.gz -C "$deploy_dir"
+          rm -f /tmp/monitoring-config.tar.gz
           test -f "$deploy_dir/.env"
           REMOTE
       - name: Load image and deploy
@@ -173,3 +240,10 @@ jobs:
             --retry 5 --retry-delay 2 --retry-connrefused \
             https://api-treely.arkaes.dev/health/ready
           REMOTE
+
+  staging-api-e2e:
+    name: Verify deployed staging API
+    needs: deploy
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    uses: ./.github/workflows/staging-api-e2e.yml
+    secrets: inherit

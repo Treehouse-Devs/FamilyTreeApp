@@ -16,6 +16,7 @@ function makeUser(overrides: Partial<User> = {}): User {
     id: 'user-1',
     firebaseUid: 'firebase-uid-1',
     name: 'John Doe',
+    email: 'john@example.com',
     avatarUrl: null,
     birthDate: 0,
     gender: Gender.MALE,
@@ -45,6 +46,7 @@ describe('ProfileService', () => {
     findOneBy: jest.fn(),
     create: jest.fn(),
     save: jest.fn(),
+    delete: jest.fn(),
   }
 
   const storageService = {
@@ -113,6 +115,27 @@ describe('ProfileService', () => {
       const result = await service.getProfile(makeUserFromToken())
 
       expect(result.birthDate).toBe(0)
+    })
+  })
+
+  describe('createProfile', () => {
+    it('persists the Firebase email in the database profile', async () => {
+      const user = makeUser()
+      userRepository.create.mockReturnValue(user)
+      userRepository.save.mockResolvedValue(user)
+
+      await service.createProfile(
+        user.firebaseUid,
+        user.email,
+        user.name,
+        user.birthDate,
+        user.gender,
+      )
+
+      expect(userRepository.create).toHaveBeenCalledWith(expect.objectContaining({
+        firebaseUid: user.firebaseUid,
+        email: user.email,
+      }))
     })
   })
 
