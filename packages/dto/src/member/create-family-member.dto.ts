@@ -10,7 +10,12 @@ export class CreateFamilyMemberDto {
   gender!: Gender
 
   @IsNumber()
-  birthDate!: number
+  @IsOptional()
+  birthDate?: number
+
+  @IsNumber()
+  @IsOptional()
+  birthOrder?: number
 
   @IsNumber()
   @IsOptional()

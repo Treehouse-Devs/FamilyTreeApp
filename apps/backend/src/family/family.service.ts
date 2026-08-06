@@ -40,7 +40,7 @@ export class FamilyService {
       const defaultMember = this.familyMemberRepo.create({
         familyId: saved.id,
         fullName: profile.name,
-        birthDate: Number(profile.birthDate),
+        birthDate: profile.birthDate != null ? Number(profile.birthDate) : null,
         gender: profile.gender,
       })
       await manager.save(defaultMember)

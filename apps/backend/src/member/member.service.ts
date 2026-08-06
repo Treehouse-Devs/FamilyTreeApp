@@ -1,6 +1,7 @@
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common'
 import { Repository } from 'typeorm'
 import { FamilyMember } from './entities/family-member.entity'
+import { Family } from 'src/family/entities/family.entity'
 import { InjectRepository } from '@nestjs/typeorm'
 import { FamilyService } from 'src/family/family.service'
 import { CreateFamilyMemberDto, DetailedPersonDto, PatchFamilyMemberDto, PersonDto, UploadMemberImageResponseDto } from '@treely/dto'
@@ -21,14 +22,15 @@ export class MemberService {
       throw new ForbiddenException('This family is not belong to this user')
     }
 
-    const { name, gender, birthDate, deathDate, isBloodRelated, spouseId, fatherId, motherId } = createFamilyMemberDto
+    const { name, gender, birthDate, birthOrder, deathDate, isBloodRelated, spouseId, fatherId, motherId } = createFamilyMemberDto
 
     return await this.memberRepository.manager.transaction(async (manager) => {
       const member = manager.create(FamilyMember, {
         familyId,
         fullName: name,
         gender: gender,
-        birthDate,
+        birthDate: birthDate ?? null,
+        birthOrder: birthOrder ?? null,
         deathDate,
         isBloodRelated: isBloodRelated,
         fatherId: fatherId ?? null,
@@ -74,6 +76,10 @@ export class MemberService {
       await manager.update(FamilyMember, { fatherId: member.id }, { fatherId: null })
       await manager.update(FamilyMember, { motherId: member.id }, { motherId: null })
 
+      // If this member was the family's designated root, clear it so getTree's fallback
+      // picks a new top-level root (e.g. one of the now-orphaned children).
+      await manager.update(Family, { id: member.familyId, rootId: member.id }, { rootId: null })
+
       await manager.softDelete(FamilyMember, member.id)
     })
   }
@@ -91,7 +97,8 @@ export class MemberService {
       spouseId: member.spouseId ?? undefined,
       spouse: member.spouse ? mapMemberToPersonDto(member.spouse) : undefined,
       children: children.map(mapMemberToPersonDto),
-      birthDate: member.birthDate ? member.birthDate : 0,
+      birthDate: member.birthDate != null ? Number(member.birthDate) : undefined,
+      birthOrder: member.birthOrder ?? undefined,
       isBloodRelated: member.isBloodRelated,
       gender: member.gender,
       deathDate: member.deathDate ? member.deathDate : undefined,
@@ -131,6 +138,7 @@ export class MemberService {
       ...(dto.name && { fullName: dto.name }),
       ...(dto.gender !== undefined && { gender: dto.gender }),
       ...(dto.birthDate !== undefined && { birthDate: dto.birthDate }),
+      ...(dto.birthOrder !== undefined && { birthOrder: dto.birthOrder }),
       ...(dto.deathDate !== undefined && { deathDate: dto.deathDate }),
       ...(dto.location?.nationality !== undefined && { nationality: dto.location.nationality }),
       ...(dto.location?.hometown !== undefined && { hometown: dto.location.hometown }),

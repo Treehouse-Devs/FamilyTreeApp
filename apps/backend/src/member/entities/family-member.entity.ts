@@ -41,11 +41,14 @@ export class FamilyMember {
   @Column({ type: 'enum', enum: Gender, nullable: false })
   gender!: Gender
 
-  @Column({ type: 'bigint', nullable: false })
-  birthDate!: number
+  @Column({ type: 'bigint', nullable: true })
+  birthDate!: number | null
 
   @Column({ type: 'bigint', nullable: true })
   deathDate!: number
+
+  @Column({ type: 'int', nullable: true })
+  birthOrder!: number | null
 
   @Column({ type: 'boolean', nullable: false, default: false })
   isBloodRelated!: boolean
